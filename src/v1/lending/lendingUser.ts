@@ -70,9 +70,11 @@ export default class User {
       }
       
       // load market states
-      this.optedInMarkets.forEach(marketAppId => {
-        this.userMarketStates[marketAppId] = new UserMarketState(storageLocalStates[marketAppId], this.lendingClient.markets[marketAppId])
-      })
+      await Promise.all(
+        this.optedInMarkets.map(async (marketAppId) => {
+          this.userMarketStates[marketAppId] = new UserMarketState(storageLocalStates[marketAppId], this.lendingClient.markets[marketAppId])
+        })
+      )
       
     } else {
       this.optedInToManager = false

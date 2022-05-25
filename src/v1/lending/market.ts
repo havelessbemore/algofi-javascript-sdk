@@ -11,7 +11,7 @@ import algosdk, {
 } from "algosdk"
 
 // global
-import { FIXED_3_SCALE_FACTOR, PERMISSIONLESS_SENDER_LOGIC_SIG, TEXT_ENCODER } from "./../globals"
+import { FIXED_3_SCALE_FACTOR, FIXED_6_SCALE_FACTOR, PERMISSIONLESS_SENDER_LOGIC_SIG, TEXT_ENCODER } from "./../globals"
 import { Base64Encoder } from "./../encoder"
 import { getApplicationGlobalState, getLocalStates, getAccountBalances } from "./../stateUtils"
 import { getParams, getPaymentTxn } from "./../transactionUtils"
@@ -79,16 +79,20 @@ export default class Market {
   public borrowShareCirculation: number
   public bAssetCirculation: number
   public activeBAssetCollateral: number
+  public underlyingProtocolReserve: number // stbl only
   
   // interest
   public latestTime: number
   public borrowIndex: number
   public impliedBorrowIndex: number
   
-  // TODO rewards
+  // calculated values
+  public totalSupplied: AssetAmount
+  public totalBorrowed: AssetAmount
+  public supplyAPR: number
+  public borrowAPR: number
   
-  // stbl market
-  public underlyingProtocolReserves : "upr"
+  // TODO rewards
   
   constructor(algod: Algodv2, lendingClient: LendingClient, managerAppId: number, marketConfig: MarketConfig) {
     this.algod = algod
@@ -103,7 +107,7 @@ export default class Market {
   
   async loadState() {
     let state = await getApplicationGlobalState(this.algod, this.appId)
-
+    
     // parameters
     this.borrowFactor = state[MARKET_STRINGS.borrow_factor]
     this.collateralFactor = state[MARKET_STRINGS.collateral_factor]
@@ -136,22 +140,58 @@ export default class Market {
     this.borrowShareCirculation = state[MARKET_STRINGS.borrow_share_circulation]
     this.bAssetCirculation = state[MARKET_STRINGS.b_asset_circulation]
     this.activeBAssetCollateral = state[MARKET_STRINGS.active_b_asset_collateral]
+    this.underlyingProtocolReserve = state[MARKET_STRINGS.underlying_protocol_reserve] || 0
 
     // interest
     this.latestTime = state[MARKET_STRINGS.latest_time]
     this.borrowIndex= state[MARKET_STRINGS.borrow_index]
     this.impliedBorrowIndex = state[MARKET_STRINGS.implied_borrow_index]
     
+    // calculated values
+    this.totalSupplied = new AssetAmount(
+      this.getUnderlyingSupplied() / Math.pow(10, this.lendingClient.algofiClient.assets[this.underlyingAssetId].decimals),
+      this.convertUnderlyingToUSD(this.getUnderlyingSupplied())
+    )
+    
+    this.totalBorrowed = new AssetAmount(
+      this.underlyingBorrowed / Math.pow(10, this.lendingClient.algofiClient.assets[this.underlyingAssetId].decimals),
+      this.convertUnderlyingToUSD(this.underlyingBorrowed)
+    )
+    
+    let [supplyAPR, borrowAPR] = this.getAPRs(this.totalSupplied.underlying, this.totalBorrowed.underlying)
+    this.supplyAPR = supplyAPR
+    this.borrowAPR = borrowAPR
+    
     // TODO rewards
   }
   
   // GETTERS
   
-  getUnderlyingSupplied() {
-    return this.underlyingBorrowed + this.underlyingCash - this.underlyingReserves
+  getUnderlyingSupplied(): number { 
+    if (this.marketType == MarketType.STBL) {
+      return this.underlyingCash
+    } else {
+      return this.underlyingBorrowed + this.underlyingCash - this.underlyingReserves
+    }
   }
   
-  // CONVERSONS
+  getAPRs(totalSupplied: number, totalBorrowed: number) : [number, number] {
+    let borrowUtilization = totalBorrowed / totalSupplied || 0
+    let borrowAPR = this.baseInterestRate / FIXED_6_SCALE_FACTOR
+    borrowAPR +=  borrowUtilization * this.baseInterestSlope / FIXED_6_SCALE_FACTOR
+    if (borrowUtilization > this.targetUtilizationRatio / FIXED_6_SCALE_FACTOR) {
+      borrowAPR += (this.exponentialInterestAmplificationFactor * Math.pow(borrowUtilization - (this.targetUtilizationRatio/FIXED_6_SCALE_FACTOR), 2))
+    }
+    
+    let supplyAPR = borrowAPR * borrowUtilization * (1 - (this.reserveFactor / FIXED_3_SCALE_FACTOR))
+    return [supplyAPR, borrowAPR]
+  }
+  
+  // CONVERSIONS
+  
+  convertUnderlyingToUSD(amount: number): number {
+    return (amount * this.oracle.rawPrice) / (this.oracle.scaleFactor * FIXED_3_SCALE_FACTOR)
+  }
   
   bAssetToAssetAmount(amount: number): AssetAmount {
     if (amount == 0) {
@@ -159,7 +199,7 @@ export default class Market {
     }
     let rawUnderlyingAmount = (amount * this.getUnderlyingSupplied() / this.bAssetCirculation)
     let underlyingAmount = rawUnderlyingAmount / Math.pow(10, this.lendingClient.algofiClient.assets[this.underlyingAssetId].decimals)
-    let usdAmount = (rawUnderlyingAmount * this.oracle.rawPrice) / (this.oracle.scaleFactor * FIXED_3_SCALE_FACTOR)
+    let usdAmount = this.convertUnderlyingToUSD(rawUnderlyingAmount)
     return new AssetAmount(underlyingAmount, usdAmount)
   }
   
@@ -169,7 +209,7 @@ export default class Market {
     }
     let rawUnderlyingAmount = (amount * this.underlyingBorrowed / this.borrowShareCirculation)
     let underlyingAmount = rawUnderlyingAmount / Math.pow(10, this.lendingClient.algofiClient.assets[this.underlyingAssetId].decimals)
-    let usdAmount = (rawUnderlyingAmount * this.oracle.rawPrice) / (this.oracle.scaleFactor * FIXED_3_SCALE_FACTOR)
+    let usdAmount = this.convertUnderlyingToUSD(rawUnderlyingAmount)
     return new AssetAmount(underlyingAmount, usdAmount)
   }
   

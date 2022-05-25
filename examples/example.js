@@ -17,10 +17,11 @@ async function test() {
   await a_client.loadState()
 
   let user = await a_client.getUser(a)
-  let market = a_client.lending.markets[91636638]
+  let market = a_client.lending.markets[91636097]
   let stxns = []
   
   //console.log(user)
+  console.log(market)
   
   // OPT IN TO MANAGER
   //console.log("OPT IN")

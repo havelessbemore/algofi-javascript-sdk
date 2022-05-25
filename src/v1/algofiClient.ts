@@ -36,7 +36,7 @@ export default class AlgofiClient {
   
   async loadState() {
     // lending
-    this.lending.loadState()
+    await this.lending.loadState()
   }
   
   async getUser(address: string) : Promise<AlgofiUser> {

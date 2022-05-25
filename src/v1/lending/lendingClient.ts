@@ -43,10 +43,12 @@ export default class LendingClient {
   }
   
   async loadState() {
-    this.marketConfigs.forEach(async (config) => {
-      this.markets[config.appId] = new Market(this.algod, this, this.manager.appId, config)
-      await this.markets[config.appId].loadState()
-    })
+    await Promise.all(
+      this.marketConfigs.map(async (config) => {
+        this.markets[config.appId] = new Market(this.algod, this, this.manager.appId, config)
+        await this.markets[config.appId].loadState()
+      })
+    )
   }
   
   getUser(address: string) : LendingUser {

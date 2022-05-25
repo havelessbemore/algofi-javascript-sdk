@@ -19,13 +19,15 @@ export async function getApplicationGlobalState(algodClient: Algodv2, applicatio
   let response = await algodClient.getApplicationByID(applicationId).do()
   let results = {}
 
-  response.params["global-state"].forEach(x => {
-    if (x.value.type == 1) {
-      results[Base64Encoder.decode(x.key)] = x.value.bytes
-    } else {
-      results[Base64Encoder.decode(x.key)] = x.value.uint
-    }
-  })
+  await Promise.all(
+    response.params["global-state"].map( async (x) => {
+      if (x.value.type == 1) {
+        results[Base64Encoder.decode(x.key)] = x.value.bytes
+      } else {
+        results[Base64Encoder.decode(x.key)] = x.value.uint
+      }
+    })
+  )
   return results
 }
 
@@ -41,21 +43,25 @@ export async function getLocalStates(algodClient: Algodv2, address : string, add
   let results = {}
 
   let accountInfo = await algodClient.accountInformation(address).do()
-  accountInfo["apps-local-state"].forEach(appLocalState => {
-    if (appLocalState["key-value"]) {
-      let localState = {}
-      appLocalState["key-value"].forEach(x => {
-        let key = Base64Encoder.decode(x.key)
-        if (x.value.type == 1) {
-          localState[key] = x.value.bytes
-        } else {
-          localState[key] = x.value.uint
-        }
-      })
-      results[appLocalState.id] = localState
-    }
-  })
-  
+  await Promise.all(
+    accountInfo["apps-local-state"].map(async (appLocalState) => {
+      if (appLocalState["key-value"]) {
+        let localState = {}
+        await Promise.all(
+          appLocalState["key-value"].map(async (x) => {
+            let key = Base64Encoder.decode(x.key)
+            if (x.value.type == 1) {
+              localState[key] = x.value.bytes
+            } else {
+              localState[key] = x.value.uint
+            }
+          })
+        )
+        results[appLocalState.id] = localState
+      }
+    })
+  )
+
   return results
 }
 
@@ -71,8 +77,10 @@ export async function getAccountBalances(algodClient: Algodv2, address : string)
   let results = {}
   let accountInfo = await algodClient.accountInformation(address).do()
   results[1] = accountInfo["amount"]
-  accountInfo["assets"].forEach(x => {
-    results[x["asset-id"]] = x["amount"]
-  })
+  await Promise.all(
+    accountInfo["assets"].map(async (x) => {
+      results[x["asset-id"]] = x["amount"]
+    })
+  )
   return results
 }
