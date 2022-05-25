@@ -1,0 +1,47 @@
+{
+  "name": "@algofi-js/v1",
+  "version": "0.0.1",
+  "description": "The official JavaScript SDK for the V2 Algofi Lending Market",
+  "main": "dist/index.js",
+  "files": [
+    "dist/"
+  ],
+  "module": "dist/algofi.js",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/com/algofiorg/algofi-javascript-sdk.git"
+  },
+  "keywords": [
+    "algofi",
+    "algorand",
+    "amm"
+  ],
+  "scripts": {
+    "build": "tsdx build",
+    "start": "tsdx watch",
+    "test": "tsdx test",
+    "prepublishOnly": "tsdx build"
+  },
+  "dependencies": {
+    "algosdk": "1.16.0",
+    "tsc": "^2.0.4",
+    "typescript": "^3.9.10"
+  },
+  "devDependencies": {
+    "@types/jest": "^24.0.25",
+    "tsdx": "^0.14.1"
+  },
+  "engines": {
+    "node": ">=10"
+  },
+  "prettier": {
+    "printWidth": 120,
+    "semi": false,
+    "singleQuote": false
+  },
+  "author": "Blockchain Technologies, Inc.",
+  "license": "MIT",
+  "directories": {
+    "example": "examples"
+  }
+}
