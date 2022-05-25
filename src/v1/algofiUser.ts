@@ -51,7 +51,7 @@ export default class AlgofiUser {
     let localStates = await getLocalStates(this.algod, this.address)
 
     // update protocol user classes
-    this.lending.loadState(localStates)
+    await this.lending.loadState(localStates)
     
   }
   

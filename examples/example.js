@@ -20,8 +20,8 @@ async function test() {
   let market = a_client.lending.markets[91636097]
   let stxns = []
   
-  //console.log(user)
-  console.log(market)
+  console.log(user)
+  //console.log(market.borrowFactor)
   
   // OPT IN TO MANAGER
   //console.log("OPT IN")

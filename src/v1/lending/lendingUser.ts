@@ -9,7 +9,7 @@ import algosdk, {
 } from "algosdk"
 
 // global
-import { TEXT_ENCODER, PERMISSIONLESS_SENDER_LOGIC_SIG } from "./../globals"
+import { FIXED_3_SCALE_FACTOR, TEXT_ENCODER, PERMISSIONLESS_SENDER_LOGIC_SIG } from "./../globals"
 import { getLocalStates, getAccountBalances } from "./../stateUtils"
 import { getParams } from "./../transactionUtils"
 import { decodeBytes, parseAddressBytes } from "./../utils"
@@ -32,7 +32,15 @@ export default class User {
   
   public optedInToManager = false
   public optedInMarkets = []
-  public userMarketStates = {}
+  public userMarketStates: { [key: number]: UserMarketState } = {}
+
+  // net values
+  public netSupplied: number
+  public netScaledCollateral: number
+  public netSupplyAPR: number
+  public netBorrowed: number
+  public netScaledBorrow: number
+  public netBorrowAPR: number
   
   constructor(lendingClient: LendingClient, address: string) {
     this.lendingClient = lendingClient
@@ -75,6 +83,25 @@ export default class User {
           this.userMarketStates[marketAppId] = new UserMarketState(storageLocalStates[marketAppId], this.lendingClient.markets[marketAppId])
         })
       )
+      
+      // calc net values
+      this.netSupplied = 0
+      this.netScaledCollateral = 0
+      this.netBorrowed = 0
+      this.netScaledBorrow = 0
+      let dollarTotaledSupplyAPR = 0
+      let dollarTotaledBorrowAPR = 0
+      for (const [key, value] of Object.entries(this.userMarketStates)) {
+        let market = this.lendingClient.markets[key]
+        this.netSupplied += value.suppliedAmount.usd
+        this.netBorrowed += value.borrowedAmount.usd
+        this.netScaledCollateral += value.suppliedAmount.usd * market.collateralFactor / FIXED_3_SCALE_FACTOR
+        this.netScaledBorrow += value.borrowedAmount.usd * market.borrowFactor / FIXED_3_SCALE_FACTOR
+        dollarTotaledSupplyAPR += value.suppliedAmount.usd * market.supplyAPR
+        dollarTotaledBorrowAPR += value.borrowedAmount.usd * market.borrowAPR
+      }
+      this.netSupplyAPR = dollarTotaledSupplyAPR / this.netSupplied
+      this.netBorrowAPR = dollarTotaledBorrowAPR / this.netBorrowed
       
     } else {
       this.optedInToManager = false
