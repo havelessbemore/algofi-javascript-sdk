@@ -27,6 +27,7 @@ export const MANAGER_STRINGS = {
   user_market_close_out : "umco",
   user_market_opt_in : "umoi",
   user_opt_in : "uoi",
+  validate_storage_account_txn : "vsat",
   validate_market : "vm"
 }
 

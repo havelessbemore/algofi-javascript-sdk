@@ -248,6 +248,10 @@ export default class Market {
     user: AlgofiUser,
     underlyingAmount: number
   ) : Promise<Transaction[]> {
+    if (this.marketType == MarketType.VAULT) {
+      throw "Mint action not supported by vault market"
+    }
+    
     const params = await getParams(this.algod)
     const transactions = []
     
@@ -282,7 +286,8 @@ export default class Market {
     const [preambleTransactions, additionalFee] = await this.getPreambleTransactions(params, user, DONT_CALC_USER_POSITION)
     
     // payment
-    const txn0 = getPaymentTxn(params, user.address, this.address, this.underlyingAssetId, underlyingAmount)
+    const targetAddress = this.marketType != MarketType.VAULT ? this.address : user.lending.storageAddress
+    const txn0 = getPaymentTxn(params, user.address, targetAddress, this.underlyingAssetId, underlyingAmount)
     
     // application call
     params.fee = 1000
@@ -304,6 +309,10 @@ export default class Market {
     user: AlgofiUser,
     bAssetAmount: number
   ) : Promise<Transaction[]> {
+    if (this.marketType == MarketType.VAULT) {
+      throw "Add b asset collateral action not supported by vault market"
+    }
+    
     const params = await getParams(this.algod)
     const transactions = []
     
@@ -338,7 +347,7 @@ export default class Market {
     const [preambleTransactions, additionalFee] = await this.getPreambleTransactions(params, user, CALC_USER_POSITION)
     
     // application call
-    params.fee = 2000 + additionalFee
+    params.fee = this.marketType != MarketType.VAULT ? 2000 + additionalFee : 3000 + additionalFee
     const txn0 = algosdk.makeApplicationNoOpTxnFromObject({
       from: user.address,
       appIndex: this.appId,
@@ -357,6 +366,10 @@ export default class Market {
     user: AlgofiUser,
     bAssetAmount: number
   ) : Promise<Transaction[]> {
+    if (this.marketType == MarketType.VAULT) {
+      throw "Remove b asset collateral action not supported by vault market"
+    }
+    
     const params = await getParams(this.algod)
     const transactions = []
     
@@ -382,6 +395,10 @@ export default class Market {
     user: AlgofiUser,
     bAssetAmount: number
   ) : Promise<Transaction[]> {
+    if (this.marketType == MarketType.VAULT) {
+      throw "Burn action not supported by vault market"
+    }
+    
     const params = await getParams(this.algod)
     const transactions = []
     
@@ -410,6 +427,10 @@ export default class Market {
     user: AlgofiUser,
     underlyingAmount: number
   ) : Promise<Transaction[]> {
+    if (this.marketType == MarketType.VAULT) {
+      throw "Borrow action not supported by vault market"
+    }
+    
     const params = await getParams(this.algod)
     const transactions = []
     
@@ -435,6 +456,10 @@ export default class Market {
     user: AlgofiUser,
     underlyingAmount: number
   ) : Promise<Transaction[]> {
+    if (this.marketType == MarketType.VAULT) {
+      throw "Repay borrow action not supported by vault market"
+    }
+    
     const params = await getParams(this.algod)
     const transactions = []
     
@@ -457,6 +482,33 @@ export default class Market {
     })
     
     return assignGroupID(preambleTransactions.concat([txn0, txn1]))
+  }
+
+  // vault specific actions
+  
+  async getSyncVaultTxns(
+    user: AlgofiUser
+  ) : Promise<Transaction[]> {
+    if (this.marketType != MarketType.VAULT) {
+      throw "Sync vault action only supported by vault market"
+    }
+    
+    const params = await getParams(this.algod)
+    const transactions = []
+    
+    // application call
+    const txn0 = algosdk.makeApplicationNoOpTxnFromObject({
+      from: user.address,
+      appIndex: this.appId,
+      suggestedParams: params,
+      appArgs: [TEXT_ENCODER.encode(MARKET_STRINGS.sync_vault)],
+      accounts: [user.lending.storageAddress],
+      foreignApps: [this.managerAppId],
+      foreignAssets: [this.underlyingAssetId],
+      rekeyTo: undefined
+    })
+    
+    return assignGroupID([txn0])
   }
 
 }

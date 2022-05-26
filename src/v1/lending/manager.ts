@@ -11,7 +11,7 @@ import algosdk, {
 } from "algosdk"
 
 // global
-import { ALGO_ASSET_ID, TEXT_ENCODER } from "./../globals"
+import { ALGO_ASSET_ID, TEXT_ENCODER, PERMISSIONLESS_SENDER_LOGIC_SIG } from "./../globals"
 import { getParams, getPaymentTxn } from "./../transactionUtils"
 import { concatArrays } from "./../utils"
 import AlgofiUser from "./../algofiUser"
@@ -150,6 +150,124 @@ export default class Manager {
     })
     
     return [txn0]
+  }
+  
+  // vault
+  
+  async getGovernanceTxns(
+    user: AlgofiUser,
+    targetAddress: string,
+    note: string
+  ) : Promise<Transaction[]> {
+    const params = await getParams(this.algod)
+    
+    // validate account ownership
+    let txn0 = algosdk.makeApplicationNoOpTxnFromObject({
+      from: user.address,
+      appIndex: this.appId,
+      suggestedParams: params,
+      appArgs: [TEXT_ENCODER.encode(MANAGER_STRINGS.validate_storage_account_txn)],
+      accounts: [user.lending.storageAddress],
+      foreignApps: undefined,
+      foreignAssets: undefined,
+      rekeyTo: undefined
+    })
+    
+    // send governance txns
+    params.fee = 2000
+    let txn1 = algosdk.makeApplicationNoOpTxnFromObject({
+      from: PERMISSIONLESS_SENDER_LOGIC_SIG.lsig.address(),
+      appIndex: this.appId,
+      suggestedParams: params,
+      appArgs: [TEXT_ENCODER.encode(MANAGER_STRINGS.send_governance_txn)],
+      accounts: [user.lending.storageAddress, targetAddress],
+      foreignApps: undefined,
+      foreignAssets: undefined,
+      rekeyTo: undefined,
+      note: TEXT_ENCODER.encode(note)
+    })
+    
+    return  assignGroupID([txn0, txn1])
+  }
+ 
+  async getKeyregTxns(
+    user: AlgofiUser,
+    votePK: string,
+    selectionPK: string,
+    stateProofPK: string,
+    voteFirst: number,
+    voteLast: number,
+    voteKeyDilution: number
+  ) : Promise<Transaction[]> {
+    const params = await getParams(this.algod)
+    
+    // validate account ownership
+    let txn0 = algosdk.makeApplicationNoOpTxnFromObject({
+      from: user.address,
+      appIndex: this.appId,
+      suggestedParams: params,
+      appArgs: [TEXT_ENCODER.encode(MANAGER_STRINGS.validate_storage_account_txn)],
+      accounts: [user.lending.storageAddress],
+      foreignApps: undefined,
+      foreignAssets: undefined,
+      rekeyTo: undefined
+    })
+    
+    // opt out of market
+    params.fee = 2000
+    let txn1 = algosdk.makeApplicationNoOpTxnFromObject({
+      from: PERMISSIONLESS_SENDER_LOGIC_SIG.lsig.address(),
+      appIndex: this.appId,
+      suggestedParams: params,
+      appArgs: [
+        TEXT_ENCODER.encode(MANAGER_STRINGS.send_keyreg_txn),
+        new Uint8Array(Buffer.from(votePK, "base64")),
+        new Uint8Array(Buffer.from(selectionPK, "base64")),
+        new Uint8Array(Buffer.from(stateProofPK, "base64")),
+        encodeUint64(voteFirst),
+        encodeUint64(voteLast),
+        encodeUint64(voteKeyDilution)
+      ],
+      accounts: [user.lending.storageAddress],
+      foreignApps: undefined,
+      foreignAssets: undefined,
+      rekeyTo: undefined
+    })
+    
+    return  assignGroupID([txn0, txn1])
+  }
+  
+  async getKeyregOfflineTxns(
+    user: AlgofiUser
+  ) : Promise<Transaction[]> {
+    const params = await getParams(this.algod)
+    
+    // validate account ownership
+    let txn0 = algosdk.makeApplicationNoOpTxnFromObject({
+      from: user.address,
+      appIndex: this.appId,
+      suggestedParams: params,
+      appArgs: [TEXT_ENCODER.encode(MANAGER_STRINGS.validate_storage_account_txn)],
+      accounts: [user.lending.storageAddress],
+      foreignApps: undefined,
+      foreignAssets: undefined,
+      rekeyTo: undefined
+    })
+    
+    // opt out of market
+    params.fee = 2000
+    let txn1 = algosdk.makeApplicationNoOpTxnFromObject({
+      from: PERMISSIONLESS_SENDER_LOGIC_SIG.lsig.address(),
+      appIndex: this.appId,
+      suggestedParams: params,
+      appArgs: [TEXT_ENCODER.encode(MANAGER_STRINGS.send_keyreg_offline_txn)],
+      accounts: [user.lending.storageAddress],
+      foreignApps: undefined,
+      foreignAssets: undefined,
+      rekeyTo: undefined
+    })
+    
+    return  assignGroupID([txn0, txn1])
   }
   
 }

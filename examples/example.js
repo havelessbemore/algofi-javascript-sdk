@@ -17,10 +17,10 @@ async function test() {
   await a_client.loadState()
 
   let user = await a_client.getUser(a)
-  let market = a_client.lending.markets[91636097]
+  let market = a_client.lending.markets[91637209]
   let stxns = []
   
-  console.log(user)
+  console.log(user.lending.userMarketStates[91637209])
   //console.log(market.borrowFactor)
   
   // OPT IN TO MANAGER
@@ -175,6 +175,65 @@ async function test() {
   //console.log("SEND TXNS")
   //await client.sendRawTransaction(stxns).do()
   
+  // SYNC VAULT
+  //console.log("SYNC VAULT")
+  //let syncVaultTxns = await market.getSyncVaultTxns(user)
+  //console.log("SIGN TXNS")
+  //stxns = []
+  //for (const txn of syncVaultTxns) {
+  //  if (algofi.addressEquals(txn.from, decoded_a)) {
+  //    stxns.push(algosdk.signTransaction(txn, sk).blob)
+  //  } else {
+  //    stxns.push(algosdk.signLogicSigTransaction(txn, algofi.PERMISSIONLESS_SENDER_LOGIC_SIG.lsig).blob)
+  //  }
+  //}
+  //console.log("SEND TXNS")
+  //await client.sendRawTransaction(stxns).do()
+  
+  // SEND GOVERNANCE TXN
+  //console.log("SEND GOV TXN")
+  //let govTxns = await a_client.lending.manager.getGovernanceTxns(user, user.address, "testing")
+  //console.log("SIGN TXNS")
+  //stxns = []
+  //for (const txn of govTxns) {
+  //  if (algofi.addressEquals(txn.from, decoded_a)) {
+  //    stxns.push(algosdk.signTransaction(txn, sk).blob)
+  //  } else {
+  //    stxns.push(algosdk.signLogicSigTransaction(txn, algofi.PERMISSIONLESS_SENDER_LOGIC_SIG.lsig).blob)
+  //  }
+  //}
+  //console.log("SEND TXNS")
+  //await client.sendRawTransaction(stxns).do()
+ 
+  // SEND KEYREG
+  //console.log("SEND KEYREG TXN")
+  //let keyregTxns = await a_client.lending.manager.getKeyregTxns(user, user.address, "00000000000000000000000000000000", "00000000000000000000000000000000", "0000000000000000000000000000000000000000000000000000000000000000", 21833648, 21833648, 10000)
+  //console.log("SIGN TXNS")
+  //stxns = []
+  //for (const txn of keyregTxns) {
+  //  if (algofi.addressEquals(txn.from, decoded_a)) {
+  //    stxns.push(algosdk.signTransaction(txn, sk).blob)
+  //  } else {
+  //    stxns.push(algosdk.signLogicSigTransaction(txn, algofi.PERMISSIONLESS_SENDER_LOGIC_SIG.lsig).blob)
+  //  }
+  //}
+  //console.log("SEND TXNS")
+  //await client.sendRawTransaction(stxns).do()
+
+  // SEND KEYREG OFFLINE TXN
+  console.log("SEND KEYREG OFFLINE TXN")
+  let keyregOfflineTxns = await a_client.lending.manager.getKeyregOfflineTxns(user)
+  console.log("SIGN TXNS")
+  stxns = []
+  for (const txn of keyregOfflineTxns) {
+    if (algofi.addressEquals(txn.from, decoded_a)) {
+      stxns.push(algosdk.signTransaction(txn, sk).blob)
+    } else {
+      stxns.push(algosdk.signLogicSigTransaction(txn, algofi.PERMISSIONLESS_SENDER_LOGIC_SIG.lsig).blob)
+    }
+  }
+  console.log("SEND TXNS")
+  await client.sendRawTransaction(stxns).do()
 }
 
 test()

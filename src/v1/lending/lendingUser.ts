@@ -72,7 +72,7 @@ export default class User {
           let pageBytes = Buffer.from(managerState[pageKey], 'base64').toString('binary')
           let pageItems = Math.floor(pageBytes.length/8)
           for (var j = 0; j < pageItems; ++j) {
-            this.optedInMarkets.push(decodeUint64(decodeBytes(pageBytes.substr(j * 8, (j + 1) * 8)), "safe"))
+            this.optedInMarkets.push(decodeUint64(decodeBytes(pageBytes.substr(j * 8, 8)), "safe"))
           }
         }
       }
