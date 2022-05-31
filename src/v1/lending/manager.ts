@@ -161,22 +161,10 @@ export default class Manager {
   ) : Promise<Transaction[]> {
     const params = await getParams(this.algod)
     
-    // validate account ownership
-    let txn0 = algosdk.makeApplicationNoOpTxnFromObject({
-      from: user.address,
-      appIndex: this.appId,
-      suggestedParams: params,
-      appArgs: [TEXT_ENCODER.encode(MANAGER_STRINGS.validate_storage_account_txn)],
-      accounts: [user.lending.storageAddress],
-      foreignApps: undefined,
-      foreignAssets: undefined,
-      rekeyTo: undefined
-    })
-    
     // send governance txns
     params.fee = 2000
-    let txn1 = algosdk.makeApplicationNoOpTxnFromObject({
-      from: PERMISSIONLESS_SENDER_LOGIC_SIG.lsig.address(),
+    let txn0 = algosdk.makeApplicationNoOpTxnFromObject({
+      from: user.address,
       appIndex: this.appId,
       suggestedParams: params,
       appArgs: [TEXT_ENCODER.encode(MANAGER_STRINGS.send_governance_txn)],
@@ -187,7 +175,7 @@ export default class Manager {
       note: TEXT_ENCODER.encode(note)
     })
     
-    return  assignGroupID([txn0, txn1])
+    return  assignGroupID([txn0])
   }
  
   async getKeyregTxns(
@@ -201,22 +189,10 @@ export default class Manager {
   ) : Promise<Transaction[]> {
     const params = await getParams(this.algod)
     
-    // validate account ownership
-    let txn0 = algosdk.makeApplicationNoOpTxnFromObject({
-      from: user.address,
-      appIndex: this.appId,
-      suggestedParams: params,
-      appArgs: [TEXT_ENCODER.encode(MANAGER_STRINGS.validate_storage_account_txn)],
-      accounts: [user.lending.storageAddress],
-      foreignApps: undefined,
-      foreignAssets: undefined,
-      rekeyTo: undefined
-    })
-    
     // opt out of market
     params.fee = 2000
-    let txn1 = algosdk.makeApplicationNoOpTxnFromObject({
-      from: PERMISSIONLESS_SENDER_LOGIC_SIG.lsig.address(),
+    let txn0 = algosdk.makeApplicationNoOpTxnFromObject({
+      from: user.address,
       appIndex: this.appId,
       suggestedParams: params,
       appArgs: [
@@ -234,7 +210,7 @@ export default class Manager {
       rekeyTo: undefined
     })
     
-    return  assignGroupID([txn0, txn1])
+    return  assignGroupID([txn0])
   }
   
   async getKeyregOfflineTxns(
