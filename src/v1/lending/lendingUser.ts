@@ -108,6 +108,10 @@ export default class User {
     }
   }
   
+  isUserOptedIntoMarket(marketAppId: number) : boolean {
+    return (marketAppId in this.userMarketStates);
+  }
+
   getMarketPageOffset(marketAppId: number) : [number, number] {
     let marketIndex = this.optedInMarkets.indexOf(marketAppId)
     let page = Math.floor(marketIndex/3)
@@ -119,7 +123,7 @@ export default class User {
     let transactions: Transaction[] = []
     
     const params = await getParams(this.algod)
-    params.fee = 1000
+    params.fee = 0
     
     let pageCount = Math.ceil(this.optedInMarkets.length / 3)
     for (var page = 0; page < pageCount; ++page) {
@@ -142,6 +146,7 @@ export default class User {
         foreignAssets: undefined,
         rekeyTo: undefined
       })
+      
       transactions.push(txn)
     }
     
