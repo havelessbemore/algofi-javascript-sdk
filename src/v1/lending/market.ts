@@ -238,7 +238,9 @@ export default class Market {
     if (needsUserPosition) {
       let calcUserPositionTxns = await user.lending.getCalcUserPositionTransactions(this.appId)
       additionalFee = calcUserPositionTxns.length * 1000
-      calcUserPositionTxns.every( (txn) => { preamble.push(txn) })
+      for (const txn of calcUserPositionTxns) {
+        preamble.push(txn)
+      }
     }
     
     return [preamble, additionalFee]
