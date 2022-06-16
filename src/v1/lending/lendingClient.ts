@@ -45,8 +45,9 @@ export default class LendingClient {
   async loadState() {
     await Promise.all(
       this.marketConfigs.map(async (config) => {
-        this.markets[config.appId] = new Market(this.algod, this, this.manager.appId, config)
-        await this.markets[config.appId].loadState()
+        const newMarket = new Market(this.algod, this, this.manager.appId, config)
+        await newMarket.loadState()
+        this.markets[config.appId] = newMarket
       })
     )
   }
