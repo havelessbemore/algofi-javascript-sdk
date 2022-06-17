@@ -341,13 +341,16 @@ export default class Market {
   
   async getRemoveUnderlyingCollateralTxns(
     user: AlgofiUser,
-    bAssetAmount: number
+    underlyingAmount: number
   ) : Promise<Transaction[]> {
+    // get b asset amount to remove
+    let bAssetAmount = Math.min(this.underlyingToBAssetAmount(underlyingAmount), user.lending.userMarketStates[this.appId].b_asset_collateral)
+
     const params = await getParams(this.algod)
     const transactions = []
     
     const [preambleTransactions, additionalFee] = await this.getPreambleTransactions(params, user, CALC_USER_POSITION)
-    
+
     // application call
     params.fee = this.marketType != MarketType.VAULT ? 2000 + additionalFee : 3000 + additionalFee
     const txn0 = algosdk.makeApplicationNoOpTxnFromObject({
