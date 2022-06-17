@@ -6,7 +6,7 @@
   "files": [
     "dist/"
   ],
-  "module": "dist/algofi.js",
+  "module": "dist/index.js",
   "repository": {
     "type": "git",
     "url": "git://github.com/com/algofiorg/algofi-javascript-sdk.git"
@@ -24,7 +24,6 @@
   },
   "dependencies": {
     "algosdk": "1.16.0",
-    "tsc": "^2.0.4",
     "typescript": "^3.9.10"
   },
   "devDependencies": {
