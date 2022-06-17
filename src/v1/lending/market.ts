@@ -214,7 +214,7 @@ export default class Market {
   }
   
   underlyingToBAssetAmount(amount: number): number {
-    return amount * this.bAssetCirculation / this.getUnderlyingSupplied()
+    return Math.floor(amount * this.bAssetCirculation / this.getUnderlyingSupplied())
   }
   
   // TRANSACTIONS
