@@ -1,7 +1,7 @@
 // IMPORTS 
 
 // local
-import { STAKING_STRINGS } from "./StakingConfig"
+import { STAKING_STRINGS } from "./stakingConfig"
 
 // INTERFACE
 

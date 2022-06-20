@@ -18,8 +18,10 @@ async function test() {
   )
   console.log("TESTING")
   let a_client = new algofi.AlgofiClient(client, algofi.Network.TESTNET)
-	const staking = a_client.staking
-	console.log(staking.stakingConfigs)
+	const stakingConfigs = a_client.staking.stakingConfigs
+	const stakingContractConfig = stakingConfigs[0]
+	const stakingObject = a_client.staking.getStaking(stakingContractConfig)
+	const state = await stakingObject.loadState()
 
 
 //  await a_client.loadState()

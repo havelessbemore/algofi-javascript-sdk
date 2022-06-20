@@ -29,13 +29,14 @@ export default class StakingClient {
 		this.stakingConfigs = StakingConfigs[this.network]
   }
   
-  async loadState(): Promise<{}>{
-//		await Promise.all(
-//			const newStaking = new Staking()
-//		)
+  async loadState(): Promise<{}> {
 		return {}
 	}
-  
+
+	getStaking(stakingConfig) {
+		return new Staking(this.algod, this, 94796687, stakingConfig)
+	}
+
   getUser(address: string) : StakingUser {
     return new StakingUser(this, address)
   }
