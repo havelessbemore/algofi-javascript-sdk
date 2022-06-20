@@ -1,11 +1,15 @@
 const algosdk = require("algosdk")
 const algofi = require("../.")
 
-const m = "frame auto erosion drop weasel lecture health marine aisle stuff home harsh enough result market boost unknown carbon approve hello deputy what member abstract penalty"
-const a = "F44Y7B4O4DPUOXPZTHHJ36N7INEG7G4DC6XZ6CSDRORAQQW7YOE4KBZYPU"
+//const m = "frame auto erosion drop weasel lecture health marine aisle stuff home harsh enough result market boost unknown carbon approve hello deputy what member abstract penalty"
+//const a = "F44Y7B4O4DPUOXPZTHHJ36N7INEG7G4DC6XZ6CSDRORAQQW7YOE4KBZYPU"
+//const decoded_a = algosdk.decodeAddress(a)
+//const sk = algosdk.mnemonicToSecretKey(m).sk
+
+const m = "gauge imitate timber often cabbage system picture jacket climb helmet print shed summer learn dawn suspect dial tide muscle gloom luggage remain govern abandon abuse"
+const a = "HFQOFEYZ4GUKAQUIIQOCOXLAFDVOZYPKI4POKKGNCBGOBZ3RJZZFERCHRU"
 const decoded_a = algosdk.decodeAddress(a)
 const sk = algosdk.mnemonicToSecretKey(m).sk
-
 async function test() {
   let client = new algosdk.Algodv2(
     "",
@@ -14,13 +18,17 @@ async function test() {
   )
   console.log("TESTING")
   let a_client = new algofi.AlgofiClient(client, algofi.Network.TESTNET)
-  await a_client.loadState()
+	const staking = a_client.staking
+	console.log(staking.stakingConfigs)
 
-  let user = await a_client.getUser(a)
-  let market = a_client.lending.markets[91637209]
-  let stxns = []
-  
-  console.log(user.lending.userMarketStates[91637209])
+
+//  await a_client.loadState()
+//
+//  let user = await a_client.getUser(a)
+//  let market = a_client.lending.markets[91637209]
+//  let stxns = []
+//  
+//  console.log(user.lending.userMarketStates[91637209])
   //console.log(market.borrowFactor)
   
   // OPT IN TO MANAGER
@@ -221,19 +229,19 @@ async function test() {
   //await client.sendRawTransaction(stxns).do()
 
   // SEND KEYREG OFFLINE TXN
-  console.log("SEND KEYREG OFFLINE TXN")
-  let keyregOfflineTxns = await a_client.lending.manager.getKeyregOfflineTxns(user)
-  console.log("SIGN TXNS")
-  stxns = []
-  for (const txn of keyregOfflineTxns) {
-    if (algofi.addressEquals(txn.from, decoded_a)) {
-      stxns.push(algosdk.signTransaction(txn, sk).blob)
-    } else {
-      stxns.push(algosdk.signLogicSigTransaction(txn, algofi.PERMISSIONLESS_SENDER_LOGIC_SIG.lsig).blob)
-    }
-  }
-  console.log("SEND TXNS")
-  await client.sendRawTransaction(stxns).do()
+//  console.log("SEND KEYREG OFFLINE TXN")
+//  let keyregOfflineTxns = await a_client.lending.manager.getKeyregOfflineTxns(user)
+//  console.log("SIGN TXNS")
+//  stxns = []
+//  for (const txn of keyregOfflineTxns) {
+//    if (algofi.addressEquals(txn.from, decoded_a)) {
+//      stxns.push(algosdk.signTransaction(txn, sk).blob)
+//    } else {
+//      stxns.push(algosdk.signLogicSigTransaction(txn, algofi.PERMISSIONLESS_SENDER_LOGIC_SIG.lsig).blob)
+//    }
+//  }
+//  console.log("SEND TXNS")
+//  await client.sendRawTransaction(stxns).do()
 }
 
 test()

@@ -8,7 +8,7 @@ import { Network } from "./../globals"
 import AlgofiClient from "./../algofiClient"
 
 // local
-import StakingConfig, { StakingConfigs } from "./managerConfig"
+import StakingConfig, { StakingConfigs } from "./stakingConfig"
 import Staking from "./staking"
 import StakingUser from "./stakingUser"
 
@@ -18,12 +18,7 @@ export default class StakingClient {
   public algofiClient: AlgofiClient
   public algod: Algodv2
   public network: Network
-  
-  public managerConfig: ManagerConfig
-  public manager: Manager
-  
-  public marketConfigs: MarketConfig[]
-  public markets: { [key: number]: Market } = {}
+	public stakingConfigs: StakingConfig[]
   
   constructor(
     algofiClient: AlgofiClient
@@ -31,24 +26,18 @@ export default class StakingClient {
     this.algofiClient = algofiClient
     this.algod = this.algofiClient.algod
     this.network = this.algofiClient.network
-    this.managerConfig = ManagerConfigs[this.network]
-    this.marketConfigs = MarketConfigs[this.network]
-    
-    this.manager = new Manager(this.algod, this.managerConfig.appId)
+		this.stakingConfigs = StakingConfigs[this.network]
   }
   
-  async loadState() {
-    await Promise.all(
-      this.marketConfigs.map(async (config) => {
-        const newMarket = new Market(this.algod, this, this.manager.appId, config)
-        await newMarket.loadState()
-        this.markets[config.appId] = newMarket
-      })
-    )
-  }
+  async loadState(): Promise<{}>{
+//		await Promise.all(
+//			const newStaking = new Staking()
+//		)
+		return {}
+	}
   
-  getUser(address: string) : LendingUser {
-    return new LendingUser(this, address)
+  getUser(address: string) : StakingUser {
+    return new StakingUser(this, address)
   }
 }
 
