@@ -11,7 +11,7 @@ import AlgofiUser from "./algofiUser"
 // lending
 import LendingClient from "./lending/lendingClient"
 
-// INTERFACSE
+// INTERFACE
 
 export default class AlgofiClient {
   public algod: Algodv2
