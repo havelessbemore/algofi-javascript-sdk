@@ -17,6 +17,7 @@ export default class RewardsProgramState{
 		this.rewardsAssetId = stakingState[STAKING_STRINGS.rewards_asset_id_prefix + this.rewardsProgramIndex.toString()] || 0
 		this.rewardsPerSecond = stakingState[STAKING_STRINGS.rewards_per_second_prefix + this.rewardsProgramIndex.toString()] || 0
 		this.rewardsCoefficient = stakingState[STAKING_STRINGS.rewards_coefficient_prefix + this.rewardsProgramIndex.toString()] || 0
+
 		this.rewardsIssued = stakingState[STAKING_STRINGS.rewards_issued_prefix + this.rewardsProgramIndex.toString()] || 0
 		this.rewardsPayed = stakingState[STAKING_STRINGS.rewards_payed_prefix + this.rewardsProgramIndex.toString()] || 0
 	}
@@ -40,6 +41,5 @@ export class UserRewardsProgramState{
 		const globalCoefficient = staking.rewardsProgramStates[this.rewardsProgramIndex].rewardsCoefficient
 		const userCoefficient = this.userRewardsCoefficient
 		this.userUnrealizedRewards = (globalCoefficient - userCoefficient) * userScaledTotalStaked
-		//console.log(this.userUnrealizedRewards)
 	}
 }

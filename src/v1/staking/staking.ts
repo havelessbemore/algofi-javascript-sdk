@@ -24,7 +24,6 @@ import StakingClient from "./stakingClient"
 import StakingConfig from "./stakingConfig"
 import RewardsProgramState from "./rewardsProgramState"
 
-
 // INTERFACE
 export default class Staking {
   // static
@@ -66,6 +65,12 @@ export default class Staking {
 
 		// loading in rewards program specific state
 		const formattedState = formatPrefixState(globalState)
+		//console.log(formattedState)
+		const testing = formattedState["rc_0"]
+		console.log(testing)
+		const enc = new TextEncoder()
+		const encoded = enc.encode(testing)
+		//console.log(testing)
 
 		for (let i = 0; i < this.rewardsProgramCount; ++i) {
 			this.rewardsProgramStates[i] = new RewardsProgramState(formattedState, i)

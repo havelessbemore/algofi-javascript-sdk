@@ -56,11 +56,11 @@ export default class stakingUser {
 				// so we can get the global state
 				await staking.loadState()
 
-				// set for the key the following 
-				this.userStakingStates[appId] = new UserStakingState(value, staking)
-				
-				// first push this to the opted in staking contracts
-				this.optedInStakingContracts.push(appId)
+//				// set for the key the following 
+//				this.userStakingStates[appId] = new UserStakingState(value, staking)
+//				
+//				// first push this to the opted in staking contracts
+//				this.optedInStakingContracts.push(appId)
 			}
 		}
 	}
