@@ -12,6 +12,7 @@ import algosdk, {
 import { Base64Encoder } from "./../encoder"
 import { getApplicationGlobalState, getLocalStates, getAccountBalances } from "./../stateUtils"
 import { getParams, getPaymentTxn } from "./../transactionUtils"
+import { STAKING_STRINGS } from "./stakingConfig"
 
 
 // local
@@ -36,7 +37,7 @@ export default class Staking {
 	public scaledTotalStaked: number
 	public rewardsManagerAppId: number
 	public rewardsProgramCount: number
-	public rewardsProgramStates: { [key: number]: RewardsProgramState} = {}
+	public rewardsProgramStates: { [key: number]: RewardsProgramState}
   
   constructor(algod: Algodv2, stakingClient: StakingClient, rewardsManagerAppId: number, stakingConfig: StakingConfig) {
     this.algod = algod
@@ -66,14 +67,34 @@ export default class Staking {
 	}	
 
   async loadState() {
-    const state = await getApplicationGlobalState(this.algod, this.appId)
-		const formattedState = this.formatPrefixState(state)
-		const rewardsProgramIndex = 1
-		this.rewardsProgramStates[rewardsProgramIndex] = new RewardsProgramState(formattedState, rewardsProgramIndex)
+
+		// loading in global state staking specific
+    const globalState = await getApplicationGlobalState(this.algod, this.appId)
+
+		this.latestTime = globalState[STAKING_STRINGS.latest_time]
+		this.boostMultiplierAppId = globalState[STAKING_STRINGS.boost_multiplier_app_id]
+		this.totalStaked = globalState[STAKING_STRINGS.total_staked]
+		this.scaledTotalStaked = globalState[STAKING_STRINGS.scaled_total_staked]
+		this.rewardsManagerAppId = globalState[STAKING_STRINGS.rewards_manager_app_id]
+		this.rewardsProgramCount = globalState[STAKING_STRINGS.rewards_program_count]
+		this.rewardsProgramStates = {}
+
+		// loading in rewards program specific state
+		const formattedState = this.formatPrefixState(globalState)
+
+		for (let i = 0; i < this.rewardsProgramCount; ++i) {
+			this.rewardsProgramStates[i] = new RewardsProgramState(formattedState, i)
+		}
+
 		console.log(this.rewardsProgramStates)
 
-		console.log(state)
-		console.log(this.formatPrefixState(state))
-		return 0
+
+//		const rewardsProgramIndex = 1
+//		this.rewardsProgramStates[rewardsProgramIndex] = new RewardsProgramState(formattedState, rewardsProgramIndex)
+//		console.log(this.rewardsProgramStates)
+//
+//		console.log(state)
+//		console.log(this.formatPrefixState(state))
+//		return 0
 	}
 }
