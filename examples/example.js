@@ -6,10 +6,16 @@ const algofi = require("../.")
 //const decoded_a = algosdk.decodeAddress(a)
 //const sk = algosdk.mnemonicToSecretKey(m).sk
 
-const m = "gauge imitate timber often cabbage system picture jacket climb helmet print shed summer learn dawn suspect dial tide muscle gloom luggage remain govern abandon abuse"
-const a = "HFQOFEYZ4GUKAQUIIQOCOXLAFDVOZYPKI4POKKGNCBGOBZ3RJZZFERCHRU"
+//const m = "gauge imitate timber often cabbage system picture jacket climb helmet print shed summer learn dawn suspect dial tide muscle gloom luggage remain govern abandon abuse"
+//const a = "HFQOFEYZ4GUKAQUIIQOCOXLAFDVOZYPKI4POKKGNCBGOBZ3RJZZFERCHRU"
+//const decoded_a = algosdk.decodeAddress(a)
+//const sk = algosdk.mnemonicToSecretKey(m).sk
+
+const m = "manage jar lobster fresh fringe note candy major denial economy fat bring chat antenna pause sure intact dove false barrel roof meat shrug ability mouse"
+const a = "QHYOLZC4SLE7IX5VYQPMYGP2DNQQUNPI4SV6DIBZKCK7NH6FAOOPWOOZJQ"
 const decoded_a = algosdk.decodeAddress(a)
 const sk = algosdk.mnemonicToSecretKey(m).sk
+
 async function test() {
   let client = new algosdk.Algodv2(
     "",
@@ -18,10 +24,12 @@ async function test() {
   )
   console.log("TESTING")
   let a_client = new algofi.AlgofiClient(client, algofi.Network.TESTNET)
-	const stakingConfigs = a_client.staking.stakingConfigs
-	const stakingContractConfig = stakingConfigs[0]
-	const stakingObject = a_client.staking.getStaking(stakingContractConfig)
-	const state = await stakingObject.loadState()
+	const stakingUser = a_client.staking.getUser(a)
+	await stakingUser.loadState()
+//	const stakingConfigs = a_client.staking.stakingConfigs
+//	const stakingContractConfig = stakingConfigs[0]
+//	const stakingObject = a_client.staking.getStaking(stakingContractConfig)
+//	const state = await stakingObject.loadState()
 
 
 //  await a_client.loadState()

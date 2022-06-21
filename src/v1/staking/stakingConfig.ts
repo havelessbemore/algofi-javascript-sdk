@@ -12,7 +12,7 @@ export default class StakingConfig {
 	assetId : number,
   ) {
       this.appId = appId
-	  this.assetId = assetId
+			this.assetId = assetId
     }
 }
 
@@ -25,6 +25,11 @@ export const StakingConfigs = {
     new StakingConfig(96284474, 94796780),
     new StakingConfig(96284557, 94796780),
   ]
+}
+
+export const rewardsManagerAppId =  {
+  [Network.MAINNET] : [],
+  [Network.TESTNET] : 94796687
 }
 
 export const STAKING_STRINGS = {

@@ -17,6 +17,7 @@ import { getApplicationGlobalState, getLocalStates, getAccountBalances } from ".
 import { getParams, getPaymentTxn } from "./../transactionUtils"
 import { STAKING_STRINGS } from "./stakingConfig"
 import AlgofiUser from "./../algofiUser"
+import { formatPrefixState } from "./../utils"
 
 // local
 import StakingClient from "./stakingClient"
@@ -49,25 +50,6 @@ export default class Staking {
     this.assetId = stakingConfig.assetId
 		this.rewardsManagerAppId = rewardsManagerAppId
   }
-  
-	formatPrefixState(state: {}): {} {
-		const formattedState = {}
-		for (const [key, value] of Object.entries(state)) {
-			const indexUnderScore = key.indexOf("_")
-			// case when it is a prefix term
-			if (indexUnderScore > 0){
-				const prefix = key.substring(0, indexUnderScore + 1)
-				const hex = key.substring(indexUnderScore + 1)
-				const formatted = Uint8Array.from(hex, e => e.charCodeAt(0))
-				const number = formatted[7]
-				formattedState[prefix + number.toString()] = value
-			}
-			else {
-				formattedState[key] = value
-			}
-		}
-		return formattedState
-	}	
 
   async loadState() {
 
@@ -83,7 +65,7 @@ export default class Staking {
 		this.rewardsProgramStates = {}
 
 		// loading in rewards program specific state
-		const formattedState = this.formatPrefixState(globalState)
+		const formattedState = formatPrefixState(globalState)
 
 		for (let i = 0; i < this.rewardsProgramCount; ++i) {
 			this.rewardsProgramStates[i] = new RewardsProgramState(formattedState, i)

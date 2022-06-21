@@ -1,4 +1,5 @@
 import { STAKING_STRINGS } from "./stakingConfig"
+import Staking from "./staking"
 
 export default class RewardsProgramState{
 	rewardsProgramIndex: number
@@ -21,3 +22,24 @@ export default class RewardsProgramState{
 	}
 }
 
+export class UserRewardsProgramState{
+
+	rewardsProgramIndex: number
+	userRewardsProgramCounter: number
+	userRewardsCoefficient: number
+	userUnclaimedRewards: number
+	userUnrealizedRewards: number
+
+	constructor(formattedUserLocalState: {}, rewardsProgramIndex: number, staking: Staking, userScaledTotalStaked: number) {
+		this.rewardsProgramIndex = rewardsProgramIndex
+		this.userRewardsProgramCounter = formattedUserLocalState[STAKING_STRINGS.user_rewards_program_counter_prefix + this.rewardsProgramIndex.toString()] || 0
+		this.userRewardsCoefficient = formattedUserLocalState[STAKING_STRINGS.user_rewards_coefficient_prefix + this.rewardsProgramIndex.toString()] || 0
+		this.userUnclaimedRewards = formattedUserLocalState[STAKING_STRINGS.user_unclaimed_rewards_prefix + this.rewardsProgramIndex.toString()] || 0
+
+		// calc user unrealized rewards (global coefficient on rewards program - user rewards coefficient on rewards program) * userTotalScaledStaked
+		const globalCoefficient = staking.rewardsProgramStates[this.rewardsProgramIndex].rewardsCoefficient
+		const userCoefficient = this.userRewardsCoefficient
+		this.userUnrealizedRewards = (globalCoefficient - userCoefficient) * userScaledTotalStaked
+		//console.log(this.userUnrealizedRewards)
+	}
+}

@@ -40,7 +40,7 @@ export async function getApplicationGlobalState(algodClient: Algodv2, applicatio
  * @return  {dict<number,dict{string:any}>}  dictionary of user local states
  */
 export async function getLocalStates(algodClient: Algodv2, address : string, addressFields: string[] = []): Promise<{}> {
-  let results = {}
+	let results = {}
 
   let accountInfo = await algodClient.accountInformation(address).do()
   await Promise.all(

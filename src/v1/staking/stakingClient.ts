@@ -8,7 +8,7 @@ import { Network } from "./../globals"
 import AlgofiClient from "./../algofiClient"
 
 // local
-import StakingConfig, { StakingConfigs } from "./stakingConfig"
+import StakingConfig, { StakingConfigs, rewardsManagerAppId } from "./stakingConfig"
 import Staking from "./staking"
 import StakingUser from "./stakingUser"
 
@@ -19,6 +19,7 @@ export default class StakingClient {
   public algod: Algodv2
   public network: Network
 	public stakingConfigs: StakingConfig[]
+	public stakingContracts: { [key: number]: Staking }
   
   constructor(
     algofiClient: AlgofiClient
@@ -29,8 +30,16 @@ export default class StakingClient {
 		this.stakingConfigs = StakingConfigs[this.network]
   }
   
-  async loadState(): Promise<{}> {
-		return {}
+  async loadState() {
+
+		this.stakingContracts = {}
+    await Promise.all(
+      this.stakingConfigs.map(async (config) => {
+        const newStaking = new Staking(this.algod, this, rewardsManagerAppId[this.network], config)
+        await newStaking.loadState()
+        this.stakingContracts[config.appId] = newStaking
+      })
+    )
 	}
 
 	getStaking(stakingConfig) {
