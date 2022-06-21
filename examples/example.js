@@ -11,34 +11,74 @@ const algofi = require("../.")
 //const decoded_a = algosdk.decodeAddress(a)
 //const sk = algosdk.mnemonicToSecretKey(m).sk
 
-const m = "manage jar lobster fresh fringe note candy major denial economy fat bring chat antenna pause sure intact dove false barrel roof meat shrug ability mouse"
-const a = "QHYOLZC4SLE7IX5VYQPMYGP2DNQQUNPI4SV6DIBZKCK7NH6FAOOPWOOZJQ"
+//const m = "manage jar lobster fresh fringe note candy major denial economy fat bring chat antenna pause sure intact dove false barrel roof meat shrug ability mouse"
+//const a = "QHYOLZC4SLE7IX5VYQPMYGP2DNQQUNPI4SV6DIBZKCK7NH6FAOOPWOOZJQ"
+//const decoded_a = algosdk.decodeAddress(a)
+//const sk = algosdk.mnemonicToSecretKey(m).sk
+
+const m = "mask stick odor boil flock hidden upgrade guide topple raw soft victory repeat gas art resemble around negative buyer long bundle develop security above grocery"
+const a = "TLRK7PXYX2ROK7ZBVRXDUCUGR4QCYCEUWZZ7LRXNRUEPI7RPSZBG5BQEB4"
 const decoded_a = algosdk.decodeAddress(a)
 const sk = algosdk.mnemonicToSecretKey(m).sk
 
+//const user1Passphrase = "height guilt diagram sausage scatter struggle anxiety spot between sadness produce canvas web fitness pudding finger shuffle enough task chicken attend vital reduce able collect"
+//const user1Address = "4X5RUSIH4EA3VDBPXPUNXIVA6A4RRAPSLRDTUVQLXOPQFTVR65ZXK5I4RA"
+//const sk = algosdk.mnemonicToSecretKey(user1Passphrase).sk
+
 async function test() {
-  let client = new algosdk.Algodv2(
-    "",
-    "https://delicate-icy-brook.algorand-testnet.quiknode.pro/29f8674f6a148877a83c15e4150186fab984e175/algod/",
-    ""
-  )
-  let a_client = new algofi.AlgofiClient(client, algofi.Network.TESTNET)
-	const stakingUser = a_client.staking.getUser(a)
-	await stakingUser.loadState()
-//	const stakingConfigs = a_client.staking.stakingConfigs
-//	const stakingContractConfig = stakingConfigs[0]
-//	const stakingObject = a_client.staking.getStaking(stakingContractConfig)
-//	const state = await stakingObject.loadState()
+  let client = new algosdk.Algodv2("", "https://delicate-icy-brook.algorand-testnet.quiknode.pro/29f8674f6a148877a83c15e4150186fab984e175/algod/", "")
+	let a_client = new algofi.AlgofiClient(client, algofi.Network.TESTNET)
+	//let user = await a_client.getUser(user1Address)
+	await a_client.loadState()
+	let user = await a_client.getUser(a)
+	let staking = a_client.staking.stakingContracts[96414588]
 
 
-//  await a_client.loadState()
-//
-//  let user = await a_client.getUser(a)
-//  let market = a_client.lending.markets[91637209]
-//  let stxns = []
-//  
-//  console.log(user.lending.userMarketStates[91637209])
-  //console.log(market.borrowFactor)
+//	// OPT IN TO STAKING CONTRACT
+//	console.log("OPT IN STAKING CONTRACT")
+//	let optInTxns = await staking.getUserOptInTxns(user)
+//	console.log("SIGN TXNS")
+//	let stxn0 = algosdk.signTransaction(optInTxns[0], sk)
+//	stxns = [stxn0.blob]
+//	console.log("SEND TXNS")
+//	let srt = await client.sendRawTransaction(stxns).do()
+
+	// STAKE
+//	console.log("STAKE")
+//	let stakeTxns = await staking.getStakeTxns(user, 10000)
+//	console.log("SIGN TXNS")
+//	let stxn0 = algosdk.signTransaction(stakeTxns[0], sk)
+//	let stxn1 = algosdk.signTransaction(stakeTxns[1], sk)
+//	stxns = [stxn0.blob, stxn1.blob]
+//	console.log("SEND TXNS")
+//	let srt = await client.sendRawTransaction(stxns).do()
+
+
+	// UNSTAKE 
+	console.log("UNSTAKE")
+	let unstakeTxns = await staking.getUnstakeTxns(user, 1000)
+	console.log("SIGN TXNS")
+	let stxn0 = algosdk.signTransaction(unstakeTxns[0], sk)
+	stxns = [stxn0.blob]
+	console.log("SEND TXNS")
+	let srt = await client.sendRawTransaction(stxns).do()
+
+//	// CLAIM
+//	console.log("CLAIM")
+//	let claimTxns = await staking.getClaimTxns(user)
+//	console.log("SIGN TXNS")
+//	let stxns = []
+//	if (claimTxns.length == 0) {
+//		console.log("nothing to claim!")
+//	}
+//	else {
+//		for (let i = 0; i < claimTxns.length; ++i) {
+//			let stxn = algosdk.signTransaction(claimTxns[i], sk)
+//			stxns.push(stxn.blob)
+//		}
+//	}
+//	console.log("SEND TXNS")
+//	let srt = await client.sendRawTransaction(stxns).do()
   
   // OPT IN TO MANAGER
   //console.log("OPT IN")

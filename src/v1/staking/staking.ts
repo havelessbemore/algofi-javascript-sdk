@@ -91,15 +91,16 @@ export default class Staking {
 			revocationTarget: undefined
 		})
 
+		params.fee = 2000
 		// stake transaction
 		const stakeTxn = makeApplicationNoOpTxnFromObject({
 			from: user.address,
-			appIndex: this.address,
+			appIndex: this.appId,
 			appArgs: [enc.encode(STAKING_STRINGS.stake)],
 			suggestedParams: params,
+			foreignApps: [this.boostMultiplierAppId],
 			accounts: undefined,
 			foreignAssets: undefined,
-			foreignApps: undefined,
 			rekeyTo: undefined
 		})
 
@@ -115,6 +116,7 @@ export default class Staking {
     const params = await getParams(this.algod)
 		const enc = new TextEncoder()
 
+		params.fee = 3000
 		// unstake transaction
 		const unstakeTxn = algosdk.makeApplicationNoOpTxnFromObject({
 			from: user.address,
@@ -122,7 +124,7 @@ export default class Staking {
 			appArgs: [enc.encode(STAKING_STRINGS.unstake), encodeUint64(amount)],
 			foreignAssets: [this.assetId],
 			suggestedParams: params,
-			foreignApps: undefined,
+			foreignApps: [this.boostMultiplierAppId],
 			accounts: undefined,
 			rekeyTo: undefined
 		})
@@ -138,7 +140,8 @@ export default class Staking {
 
 		// create a new staking user and loading state
 		const stakingUser = this.stakingClient.getUser(user.address)
-		await stakingUser.loadState()
+    const localStates = await getLocalStates(this.algod, user.address)
+		await stakingUser.loadState(localStates)
 		const userStakingState = stakingUser.userStakingStates[this.appId]
 
 		const txns = []
@@ -164,7 +167,6 @@ export default class Staking {
 				txns.push(claimTxn)
 			}
 		}
-
 		if (txns.length == 0) {
 			return 0
 		}

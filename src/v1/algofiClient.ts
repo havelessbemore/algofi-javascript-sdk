@@ -36,7 +36,7 @@ export default class AlgofiClient {
     this.network = network
     this.assets = AssetConfigs[this.network]
     
-    // lending
+		// lending
     this.lending = new LendingClient(this)
 
 		// staking
@@ -46,6 +46,8 @@ export default class AlgofiClient {
   async loadState() {
     // lending
     await this.lending.loadState()
+
+		// staking
 		await this.staking.loadState()
   }
   

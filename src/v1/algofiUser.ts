@@ -21,6 +21,9 @@ import AlgofiClient from "./algofiClient"
 // lending
 import LendingUser from "./lending/lendingUser"
 
+// staking
+import StakingUser from "./staking/stakingUser"
+
 // INTERFACE
 
 export default class AlgofiUser {
@@ -33,6 +36,8 @@ export default class AlgofiUser {
   
   // protcol users
   public lending: LendingUser
+
+	public staking: StakingUser
   
   constructor(algofiClient: AlgofiClient, address: string) {
     this.algofiClient = algofiClient
@@ -41,6 +46,9 @@ export default class AlgofiUser {
     
     // lending
     this.lending = this.algofiClient.lending.getUser(this.address)
+
+		// staking
+		this.staking = this.algofiClient.staking.getUser(this.address)
   }
   
   async loadState() {
@@ -52,7 +60,9 @@ export default class AlgofiUser {
 
     // update protocol user classes
     await this.lending.loadState(localStates)
-    
+
+		// update user staking state
+		await this.staking.loadState(localStates)
   }
   
   isOptedInToAsset(assetId: number) : boolean {
@@ -62,5 +72,4 @@ export default class AlgofiUser {
       return false
     }
   }
-  
 }

@@ -36,8 +36,7 @@ export default class stakingUser {
   }
 
 	// get opted in staking contracts
-	async loadState() { 
-		const userLocalStates = await getLocalStates(this.algod, this.address)
+	async loadState(userLocalStates: {}) { 
 		const allStakingContracts = StakingConfigs[this.stakingClient.network].map((stakingConfig) => stakingConfig.appId)
 
 		// getting the opted in staking contracts

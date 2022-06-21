@@ -31,7 +31,6 @@ export default class StakingClient {
   }
   
   async loadState() {
-
 		this.stakingContracts = {}
     await Promise.all(
       this.stakingConfigs.map(async (config) => {
@@ -40,10 +39,6 @@ export default class StakingClient {
         this.stakingContracts[config.appId] = newStaking
       })
     )
-	}
-
-	getStaking(stakingConfig) {
-		return new Staking(this.algod, this, 94796687, stakingConfig)
 	}
 
   getUser(address: string) : StakingUser {

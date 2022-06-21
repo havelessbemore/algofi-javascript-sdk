@@ -18,12 +18,13 @@ export default class StakingConfig {
 
 export const StakingConfigs = {
   // TODO launch mainnet contracts
-  [Network.MAINNET] : [],
+  [Network.MAINNET] : [
+		new StakingConfig(123, 123),
+		new StakingConfig(123, 123)
+	],
   [Network.TESTNET] : [
-    new StakingConfig(96265422, 94796780),
-    new StakingConfig(96284372, 94796780),
-    new StakingConfig(96284474, 94796780),
-    new StakingConfig(96284557, 94796780),
+    new StakingConfig(96414588, 96410661),
+    new StakingConfig(96418091, 96410672)
   ]
 }
 
@@ -31,6 +32,7 @@ export const rewardsManagerAppId =  {
   [Network.MAINNET] : [],
   [Network.TESTNET] : 94796687
 }
+
 
 export const STAKING_STRINGS = {
   admin : "a",
