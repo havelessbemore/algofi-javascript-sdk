@@ -5,7 +5,10 @@ import algosdk, {
   getApplicationAddress,
   encodeUint64,
   SuggestedParams,
-  assignGroupID
+  assignGroupID,
+	makeAssetTransferTxnWithSuggestedParamsFromObject,
+	makeApplicationNoOpTxnFromObject
+
 } from "algosdk"
 
 // global
@@ -13,7 +16,7 @@ import { Base64Encoder } from "./../encoder"
 import { getApplicationGlobalState, getLocalStates, getAccountBalances } from "./../stateUtils"
 import { getParams, getPaymentTxn } from "./../transactionUtils"
 import { STAKING_STRINGS } from "./stakingConfig"
-
+import AlgofiUser from "./../algofiUser"
 
 // local
 import StakingClient from "./stakingClient"
@@ -22,7 +25,6 @@ import RewardsProgramState from "./rewardsProgramState"
 
 
 // INTERFACE
-
 export default class Staking {
   // static
   public algod: Algodv2
@@ -30,8 +32,8 @@ export default class Staking {
   public appId: number
   public address: string
 	public assetId: number
-
 	public latestTime: number
+
 	public boostMultiplierAppId: number
 	public totalStaked: number
 	public scaledTotalStaked: number
@@ -85,16 +87,82 @@ export default class Staking {
 		for (let i = 0; i < this.rewardsProgramCount; ++i) {
 			this.rewardsProgramStates[i] = new RewardsProgramState(formattedState, i)
 		}
-
-		console.log(this.rewardsProgramStates)
-
-
-//		const rewardsProgramIndex = 1
-//		this.rewardsProgramStates[rewardsProgramIndex] = new RewardsProgramState(formattedState, rewardsProgramIndex)
-//		console.log(this.rewardsProgramStates)
-//
-//		console.log(state)
-//		console.log(this.formatPrefixState(state))
-//		return 0
 	}
+
+	async getStakeTxns(
+		user: AlgofiUser,
+		amount: number
+	) : Promise<Transaction[]> {
+    const params = await getParams(this.algod)
+    const txns = []
+		const enc = new TextEncoder()
+
+		// sending staking asset
+		const stakeAssetTransferTxn = makeAssetTransferTxnWithSuggestedParamsFromObject({
+			from: user.address,
+			to: this.address,
+			assetIndex: this.assetId,
+			amount: amount,
+			suggestedParams: params,
+			rekeyTo: undefined,
+			revocationTarget: undefined
+		})
+
+		// stake transaction
+		const stakeTxn = makeApplicationNoOpTxnFromObject({
+			from: user.address,
+			appIndex: this.address,
+			appArgs: [enc.encode(STAKING_STRINGS.stake)],
+			suggestedParams: params,
+			accounts: undefined,
+			foreignAssets: undefined,
+			foreignApps: undefined,
+			rekeyTo: undefined
+		})
+
+		txns.push(stakeAssetTransferTxn, stakeTxn)
+
+		return assignGroupID(txns)
+	}
+
+	async getUnstakeTxns(
+		user: AlgofiUser,
+		amount: number
+	) : Promise<Transaction[]> {
+    const params = await getParams(this.algod)
+		const enc = new TextEncoder()
+
+		// unstake transaction
+		const unstakeTxn = algosdk.makeApplicationNoOpTxnFromObject({
+			from: user.address,
+			appIndex: this.appId,
+			appArgs: [enc.encode(STAKING_STRINGS.unstake), encodeUint64(amount)],
+			foreignAssets: [this.assetId],
+			suggestedParams: params,
+			foreignApps: undefined,
+			accounts: undefined,
+			rekeyTo: undefined
+		})
+
+		return [unstakeTxn]
+	}
+
+//	// TODO
+//	async getClaimTxn(sender: string, rewardsProgramIndex: number): Promise<Transaction> {
+//		const params = await getParams(this.algod)
+//		const enc = new TextEncoder()
+//		const stakingAssetId = await this.getAssetId()
+//
+//		// claim transaction
+//		const claimTxn = makeApplicationNoOpTxnFromObject({
+//			from: sender,
+//			appIndex: this.stakingAppId,
+//			appArgs: [enc.encode(STAKING_STRINGS.claim_rewards), encodeUint64(rewardsProgramIndex)],
+//			foreignAssets: [formattedState[STAKING_STRINGS.rewards_asset_id_prefix + rewardsProgramIndex.toString()]],
+//			suggestedParams: params
+//		})
+//
+//		return claimTxn
+//	}
+
 }
