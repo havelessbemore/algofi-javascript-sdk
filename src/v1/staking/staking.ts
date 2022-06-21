@@ -47,6 +47,7 @@ export default class Staking {
     this.appId = stakingConfig.appId
     this.address = getApplicationAddress(this.appId)
     this.assetId = stakingConfig.assetId
+		this.rewardsManagerAppId = rewardsManagerAppId
   }
   
 	formatPrefixState(state: {}): {} {
@@ -165,4 +166,24 @@ export default class Staking {
 //		return claimTxn
 //	}
 
+	async getUserOptInTxns(
+		user: AlgofiUser
+	) : Promise<Transaction[]> {
+    const params = await getParams(this.algod)
+		const enc = new TextEncoder()
+
+		// unstake transaction
+    const optInTxn = algosdk.makeApplicationOptInTxnFromObject({
+      from: user.address,
+      appIndex: this.appId,
+      suggestedParams: params,
+      appArgs: undefined,
+			accounts: undefined,
+      foreignApps: undefined,
+      foreignAssets: undefined,
+      rekeyTo: undefined
+    })
+
+		return [optInTxn]
+	}
 }
