@@ -7,8 +7,9 @@ import algosdk, {
   SuggestedParams,
   assignGroupID,
 	makeAssetTransferTxnWithSuggestedParamsFromObject,
-	makeApplicationNoOpTxnFromObject
-
+	makeApplicationNoOpTxnFromObject,
+	bytesToBigInt,
+	bigIntToBytes
 } from "algosdk"
 
 // global
@@ -65,12 +66,6 @@ export default class Staking {
 
 		// loading in rewards program specific state
 		const formattedState = formatPrefixState(globalState)
-		//console.log(formattedState)
-		const testing = formattedState["rc_0"]
-		console.log(testing)
-		const enc = new TextEncoder()
-		const encoded = enc.encode(testing)
-		//console.log(testing)
 
 		for (let i = 0; i < this.rewardsProgramCount; ++i) {
 			this.rewardsProgramStates[i] = new RewardsProgramState(formattedState, i)
@@ -140,6 +135,11 @@ export default class Staking {
 //		const params = await getParams(this.algod)
 //		const enc = new TextEncoder()
 //		const stakingAssetId = await this.getAssetId()
+//		const unrealizedRewardsPrograms = []
+//
+//		// create a new staking user
+//		const stakingUser = this.stakingClient.getUser(sender)
+//		await stakingUser.loadState()
 //
 //		// claim transaction
 //		const claimTxn = makeApplicationNoOpTxnFromObject({

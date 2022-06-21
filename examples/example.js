@@ -22,7 +22,6 @@ async function test() {
     "https://delicate-icy-brook.algorand-testnet.quiknode.pro/29f8674f6a148877a83c15e4150186fab984e175/algod/",
     ""
   )
-  console.log("TESTING")
   let a_client = new algofi.AlgofiClient(client, algofi.Network.TESTNET)
 	const stakingUser = a_client.staking.getUser(a)
 	await stakingUser.loadState()
