@@ -53,32 +53,34 @@ async function test() {
 //	console.log("SEND TXNS")
 //	let srt = await client.sendRawTransaction(stxns).do()
 
-
 	// UNSTAKE 
-	console.log("UNSTAKE")
-	let unstakeTxns = await staking.getUnstakeTxns(user, 1000)
-	console.log("SIGN TXNS")
-	let stxn0 = algosdk.signTransaction(unstakeTxns[0], sk)
-	stxns = [stxn0.blob]
-	console.log("SEND TXNS")
-	let srt = await client.sendRawTransaction(stxns).do()
-
-//	// CLAIM
-//	console.log("CLAIM")
-//	let claimTxns = await staking.getClaimTxns(user)
+//	console.log("UNSTAKE")
+//	let unstakeTxns = await staking.getUnstakeTxns(user, 1000)
 //	console.log("SIGN TXNS")
-//	let stxns = []
-//	if (claimTxns.length == 0) {
-//		console.log("nothing to claim!")
-//	}
-//	else {
-//		for (let i = 0; i < claimTxns.length; ++i) {
-//			let stxn = algosdk.signTransaction(claimTxns[i], sk)
-//			stxns.push(stxn.blob)
-//		}
-//	}
+//	let stxn0 = algosdk.signTransaction(unstakeTxns[0], sk)
+//	stxns = [stxn0.blob]
 //	console.log("SEND TXNS")
 //	let srt = await client.sendRawTransaction(stxns).do()
+
+	// CLAIM
+	console.log("CLAIM")
+	let claimTxns = await staking.getClaimTxns(user)
+	console.log("SIGN TXNS")
+	let stxns = []
+	if (claimTxns.length == 0) {
+		console.log("nothing to claim!")
+	}
+	else {
+		for (let i = 0; i < claimTxns.length; ++i) {
+			let stxn = algosdk.signTransaction(claimTxns[i], sk)
+			stxns.push(stxn.blob)
+		}
+		console.log("SEND TXNS")
+		let srt = await client.sendRawTransaction(stxns).do()
+	}
+
+	await user.loadState()
+	console.log(user.staking.userStakingStates[96414588].userRewardsProgramStates)
   
   // OPT IN TO MANAGER
   //console.log("OPT IN")

@@ -151,6 +151,7 @@ export default class Staking {
 			const userRewardsProgramState = userStakingState.userRewardsProgramStates[i]
 			const userUnrealizedRewards = userRewardsProgramState.userUnrealizedRewards
 
+			params.fee = 3000
 			//  the case when the user actually has something to redeem
 			if (userUnrealizedRewards > 0) {
 				// claim transaction
@@ -161,14 +162,14 @@ export default class Staking {
 					foreignAssets: [this.rewardsProgramStates[i].rewardsAssetId],
 					accounts: undefined,
 					rekeyTo: undefined,
-					foreignApps: undefined,
+					foreignApps: [this.boostMultiplierAppId],
 					suggestedParams: params
 				})
 				txns.push(claimTxn)
 			}
 		}
 		if (txns.length == 0) {
-			return 0
+			return []
 		}
 		else if (txns.length == 1) {
 			return txns
