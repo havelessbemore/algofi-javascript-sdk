@@ -13,7 +13,7 @@ export default class UserStakingState {
 	scaledTotalStaked: number
 	boostMultiplier: number
 	userRewardsProgramStates: { [key: number]:  UserRewardsProgramState }
-  constructor(userLocalState: {}, staking: Staking) {
+	constructor(userLocalState: {}, staking: Staking) {
 		this.totalStaked = userLocalState[STAKING_STRINGS.user_total_staked] || 0
 		this.scaledTotalStaked = userLocalState[STAKING_STRINGS.scaled_total_staked] || 0
 		this.boostMultiplier = userLocalState[STAKING_STRINGS.boost_multiplier] || 0

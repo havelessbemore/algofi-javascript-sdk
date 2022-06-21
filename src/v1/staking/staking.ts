@@ -130,28 +130,51 @@ export default class Staking {
 		return [unstakeTxn]
 	}
 
-//	// TODO
-//	async getClaimTxn(sender: string, rewardsProgramIndex: number): Promise<Transaction> {
-//		const params = await getParams(this.algod)
-//		const enc = new TextEncoder()
-//		const stakingAssetId = await this.getAssetId()
-//		const unrealizedRewardsPrograms = []
-//
-//		// create a new staking user
-//		const stakingUser = this.stakingClient.getUser(sender)
-//		await stakingUser.loadState()
-//
-//		// claim transaction
-//		const claimTxn = makeApplicationNoOpTxnFromObject({
-//			from: sender,
-//			appIndex: this.stakingAppId,
-//			appArgs: [enc.encode(STAKING_STRINGS.claim_rewards), encodeUint64(rewardsProgramIndex)],
-//			foreignAssets: [formattedState[STAKING_STRINGS.rewards_asset_id_prefix + rewardsProgramIndex.toString()]],
-//			suggestedParams: params
-//		})
-//
-//		return claimTxn
-//	}
+	async getClaimTxns(
+		user: AlgofiUser
+	): Promise<any> {
+		const params = await getParams(this.algod)
+		const enc = new TextEncoder()
+
+		// create a new staking user and loading state
+		const stakingUser = this.stakingClient.getUser(user.address)
+		await stakingUser.loadState()
+		const userStakingState = stakingUser.userStakingStates[this.appId]
+
+		const txns = []
+
+		// loop through all of the rewards programs and see which ones the user has unrealized rewards in 
+		for (let i = 0; i < this.rewardsProgramCount; ++i) {
+			const userRewardsProgramState = userStakingState.userRewardsProgramStates[i]
+			const userUnrealizedRewards = userRewardsProgramState.userUnrealizedRewards
+
+			//  the case when the user actually has something to redeem
+			if (userUnrealizedRewards > 0) {
+				// claim transaction
+				const claimTxn = makeApplicationNoOpTxnFromObject({
+					from: user.address,
+					appIndex: this.appId,
+					appArgs: [enc.encode(STAKING_STRINGS.claim_rewards), encodeUint64(i)],
+					foreignAssets: [this.rewardsProgramStates[i].rewardsAssetId],
+					accounts: undefined,
+					rekeyTo: undefined,
+					foreignApps: undefined,
+					suggestedParams: params
+				})
+				txns.push(claimTxn)
+			}
+		}
+
+		if (txns.length == 0) {
+			return 0
+		}
+		else if (txns.length == 1) {
+			return txns
+		}
+		else {
+			return assignGroupID(txns)
+		}
+	}
 
 	async getUserOptInTxns(
 		user: AlgofiUser
