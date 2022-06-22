@@ -45,7 +45,7 @@ export default class AlgofiClient {
   
   async loadState() {
     // lending
-    //await this.lending.loadState()
+    await this.lending.loadState()
 
 		// staking
 		await this.staking.loadState()

@@ -17,7 +17,7 @@ export default class StakingConfig {
 }
 
 export const StakingConfigs = {
-  [Network.MAINNET] : [
+  [Network.MAINNET_CLONE] : [
 		new StakingConfig(785597550, 785578010),
 		new StakingConfig(785599248, 785579619)
 	],
@@ -28,7 +28,7 @@ export const StakingConfigs = {
 }
 
 export const rewardsManagerAppId =  {
-  [Network.MAINNET] : 785584132,
+  [Network.MAINNET_CLONE] : 785584132,
   [Network.TESTNET] : 94796687
 }
 

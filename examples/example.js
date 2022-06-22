@@ -33,7 +33,7 @@ const user2sk = algosdk.mnemonicToSecretKey(user2Passphrase).sk
 
 async function test() {
   let client = new algosdk.Algodv2("", "https://node.algoexplorerapi.io", "")
-	let a_client = new algofi.AlgofiClient(client, algofi.Network.MAINNET)
+	let a_client = new algofi.AlgofiClient(client, algofi.Network.MAINNET_CLONE)
 	await a_client.loadState()
 
 	let user = await a_client.getUser(user1Address)
@@ -69,21 +69,21 @@ async function test() {
 //	let srt = await client.sendRawTransaction(stxns).do()
 
 	// CLAIM
-//	console.log("CLAIM")
-//	let claimTxns = await staking.getClaimTxns(user)
-//	console.log("SIGN TXNS")
-//	let stxns = []
-//	if (claimTxns.length == 0) {
-//		console.log("nothing to claim!")
-//	}
-//	else {
-//		for (let i = 0; i < claimTxns.length; ++i) {
-//			let stxn = algosdk.signTransaction(claimTxns[i], user1sk)
-//			stxns.push(stxn.blob)
-//		}
-//		console.log("SEND TXNS")
-//		let srt = await client.sendRawTransaction(stxns).do()
-//	}
+	console.log("CLAIM")
+	let claimTxns = await staking.getClaimTxns(user)
+	console.log("SIGN TXNS")
+	let stxns = []
+	if (claimTxns.length == 0) {
+		console.log("nothing to claim!")
+	}
+	else {
+		for (let i = 0; i < claimTxns.length; ++i) {
+			let stxn = algosdk.signTransaction(claimTxns[i], user1sk)
+			stxns.push(stxn.blob)
+		}
+		console.log("SEND TXNS")
+		let srt = await client.sendRawTransaction(stxns).do()
+	}
   
   // OPT IN TO MANAGER
   //console.log("OPT IN")
