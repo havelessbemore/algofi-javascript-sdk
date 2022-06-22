@@ -16,29 +16,35 @@ const algofi = require("../.")
 //const decoded_a = algosdk.decodeAddress(a)
 //const sk = algosdk.mnemonicToSecretKey(m).sk
 
-const m = "mask stick odor boil flock hidden upgrade guide topple raw soft victory repeat gas art resemble around negative buyer long bundle develop security above grocery"
-const a = "TLRK7PXYX2ROK7ZBVRXDUCUGR4QCYCEUWZZ7LRXNRUEPI7RPSZBG5BQEB4"
-const decoded_a = algosdk.decodeAddress(a)
-const sk = algosdk.mnemonicToSecretKey(m).sk
+//const m = "mask stick odor boil flock hidden upgrade guide topple raw soft victory repeat gas art resemble around negative buyer long bundle develop security above grocery"
+//const a = "TLRK7PXYX2ROK7ZBVRXDUCUGR4QCYCEUWZZ7LRXNRUEPI7RPSZBG5BQEB4"
+//const decoded_a = algosdk.decodeAddress(a)
+//const sk = algosdk.mnemonicToSecretKey(m).sk
 
-//const user1Passphrase = "height guilt diagram sausage scatter struggle anxiety spot between sadness produce canvas web fitness pudding finger shuffle enough task chicken attend vital reduce able collect"
-//const user1Address = "4X5RUSIH4EA3VDBPXPUNXIVA6A4RRAPSLRDTUVQLXOPQFTVR65ZXK5I4RA"
-//const sk = algosdk.mnemonicToSecretKey(user1Passphrase).sk
+const user1Passphrase = "pause speak gaze term indoor length rifle valid slow property smooth goddess guess globe note seat excuse blur until dry city repeat dream absent today"
+const user1Address = "CZGVJLFMYYIE43VZ4WBQYSZRXHK2XBAVGROLWD7Q26RRBJHFNXQ5IQBVFI"
+const decodedAddress1 = algosdk.decodeAddress(user1Address)
+const user1sk = algosdk.mnemonicToSecretKey(user1Passphrase).sk
+
+const user2Passphrase = "wait rice future small castle argue job ranch budget normal dry jungle canvas velvet inflict coach become maze tail dizzy dinner fence virtual about gather"
+const user2Address = "OSMXTEDET334KWYKHRX3WQMJQPNEPDSP7NXOU4AOYHVTEUQBREASNQILCY"
+const decodedAddress2 = algosdk.decodeAddress(user2Address)
+const user2sk = algosdk.mnemonicToSecretKey(user2Passphrase).sk
 
 async function test() {
-  let client = new algosdk.Algodv2("", "https://delicate-icy-brook.algorand-testnet.quiknode.pro/29f8674f6a148877a83c15e4150186fab984e175/algod/", "")
-	let a_client = new algofi.AlgofiClient(client, algofi.Network.TESTNET)
-	//let user = await a_client.getUser(user1Address)
+  let client = new algosdk.Algodv2("", "https://node.algoexplorerapi.io", "")
+	let a_client = new algofi.AlgofiClient(client, algofi.Network.MAINNET)
 	await a_client.loadState()
-	let user = await a_client.getUser(a)
-	let staking = a_client.staking.stakingContracts[96414588]
+
+	let user = await a_client.getUser(user1Address)
+	let staking = a_client.staking.stakingContracts[785597550]
 
 
-//	// OPT IN TO STAKING CONTRACT
+	// OPT IN TO STAKING CONTRACT
 //	console.log("OPT IN STAKING CONTRACT")
 //	let optInTxns = await staking.getUserOptInTxns(user)
 //	console.log("SIGN TXNS")
-//	let stxn0 = algosdk.signTransaction(optInTxns[0], sk)
+//	let stxn0 = algosdk.signTransaction(optInTxns[0], user1sk)
 //	stxns = [stxn0.blob]
 //	console.log("SEND TXNS")
 //	let srt = await client.sendRawTransaction(stxns).do()
@@ -47,8 +53,8 @@ async function test() {
 //	console.log("STAKE")
 //	let stakeTxns = await staking.getStakeTxns(user, 10000)
 //	console.log("SIGN TXNS")
-//	let stxn0 = algosdk.signTransaction(stakeTxns[0], sk)
-//	let stxn1 = algosdk.signTransaction(stakeTxns[1], sk)
+//	let stxn0 = algosdk.signTransaction(stakeTxns[0], user1sk)
+//	let stxn1 = algosdk.signTransaction(stakeTxns[1], user1sk)
 //	stxns = [stxn0.blob, stxn1.blob]
 //	console.log("SEND TXNS")
 //	let srt = await client.sendRawTransaction(stxns).do()
@@ -57,7 +63,7 @@ async function test() {
 //	console.log("UNSTAKE")
 //	let unstakeTxns = await staking.getUnstakeTxns(user, 1000)
 //	console.log("SIGN TXNS")
-//	let stxn0 = algosdk.signTransaction(unstakeTxns[0], sk)
+//	let stxn0 = algosdk.signTransaction(unstakeTxns[0], user1sk)
 //	stxns = [stxn0.blob]
 //	console.log("SEND TXNS")
 //	let srt = await client.sendRawTransaction(stxns).do()
@@ -72,15 +78,12 @@ async function test() {
 	}
 	else {
 		for (let i = 0; i < claimTxns.length; ++i) {
-			let stxn = algosdk.signTransaction(claimTxns[i], sk)
+			let stxn = algosdk.signTransaction(claimTxns[i], user1sk)
 			stxns.push(stxn.blob)
 		}
 		console.log("SEND TXNS")
 		let srt = await client.sendRawTransaction(stxns).do()
 	}
-
-	await user.loadState()
-	console.log(user.staking.userStakingStates[96414588].userRewardsProgramStates)
   
   // OPT IN TO MANAGER
   //console.log("OPT IN")

@@ -17,7 +17,6 @@ export default class StakingConfig {
 }
 
 export const StakingConfigs = {
-  // TODO launch mainnet contracts
   [Network.MAINNET] : [
 		new StakingConfig(785597550, 785578010),
 		new StakingConfig(785599248, 785579619)
