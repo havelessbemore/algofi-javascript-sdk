@@ -9,7 +9,7 @@ export default class StakingConfig {
   
   constructor(
     appId : number,
-	assetId : number,
+		assetId : number,
   ) {
       this.appId = appId
 			this.assetId = assetId
@@ -19,8 +19,8 @@ export default class StakingConfig {
 export const StakingConfigs = {
   // TODO launch mainnet contracts
   [Network.MAINNET] : [
-		new StakingConfig(123, 123),
-		new StakingConfig(123, 123)
+		new StakingConfig(785597550, 785578010),
+		new StakingConfig(785599248, 785579619)
 	],
   [Network.TESTNET] : [
     new StakingConfig(96414588, 96410661),
@@ -29,10 +29,9 @@ export const StakingConfigs = {
 }
 
 export const rewardsManagerAppId =  {
-  [Network.MAINNET] : [],
+  [Network.MAINNET] : 785584132,
   [Network.TESTNET] : 94796687
 }
-
 
 export const STAKING_STRINGS = {
   admin : "a",
