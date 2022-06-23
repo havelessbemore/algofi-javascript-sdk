@@ -348,7 +348,10 @@ export default class Market {
     return assignGroupID(preambleTransactions.concat([txn0, txn1]))
   }
 
-  async getRemoveUnderlyingCollateralTxns(user: AlgofiUser, bAssetAmount: number): Promise<Transaction[]> {
+  async getRemoveUnderlyingCollateralTxns(user: AlgofiUser, underlyingAmount: number) : Promise<Transaction[]> {
+    // get b asset amount to remove
+    let bAssetAmount = Math.min(this.underlyingToBAssetAmount(underlyingAmount), user.lending.userMarketStates[this.appId].b_asset_collateral)
+
     const params = await getParams(this.algod)
     const transactions = []
 
