@@ -1,5 +1,5 @@
 // IMPORTS
-
+import { Base64Encoder } from "./encoder"
 // local
 import { Network, PERMISSIONLESS_SENDER_LOGIC_SIG } from "./globals"
 import { addressEquals } from "./utils"
@@ -22,5 +22,6 @@ export {
   AssetConfig,
   AlgofiUser,
   // lending
-  lending
+  lending,
+  Base64Encoder
 }
