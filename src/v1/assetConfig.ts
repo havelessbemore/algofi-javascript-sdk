@@ -22,6 +22,10 @@ export const AssetConfigs = {
   },
   [Network.MAINNET_CLONE]: {
     1: new AssetConfig("ALGO", 1, 6),
+    785578010: new AssetConfig("m0", 785578010, 0),
+    785579415: new AssetConfig("m1", 785579415, 0),
+    785579619: new AssetConfig("m2", 785579619, 0),
+    785580502: new AssetConfig("m3", 785580502, 0),
     753117075: new AssetConfig("AF-BANK-ALGO-STANDARD", 753117075, 6),
     753101315: new AssetConfig("USDC", 753101315, 6),
     753119272: new AssetConfig("AF-BANK-USDC-STANDARD", 753119272, 6),
