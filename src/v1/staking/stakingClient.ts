@@ -1,15 +1,15 @@
 // IMPORTS
 
 // external
-import algosdk, { Algodv2 } from "algosdk"
+import { Algodv2 } from "algosdk"
 
 // global
-import { Network } from "./../globals"
 import AlgofiClient from "./../algofiClient"
+import { Network } from "./../globals"
 
 // local
-import StakingConfig, { StakingConfigs, rewardsManagerAppId } from "./stakingConfig"
 import Staking from "./staking"
+import StakingConfig, { rewardsManagerAppId, StakingConfigs } from "./stakingConfig"
 import StakingUser from "./stakingUser"
 
 // INTERFACE
@@ -18,35 +18,31 @@ export default class StakingClient {
   public algofiClient: AlgofiClient
   public algod: Algodv2
   public network: Network
-	public stakingConfigs: StakingConfig[]
-	public stakingContracts: { [key: number]: Staking }
-  
-  constructor(
-    algofiClient: AlgofiClient
-  ) {
+  public stakingConfigs: StakingConfig[]
+  public stakingContracts: { [key: number]: Staking }
+
+  constructor(algofiClient: AlgofiClient) {
     this.algofiClient = algofiClient
     this.algod = this.algofiClient.algod
     this.network = this.algofiClient.network
-		this.stakingConfigs = StakingConfigs[this.network]
+    this.stakingConfigs = StakingConfigs[this.network]
   }
-  
+
   async loadState() {
-		this.stakingContracts = {}
-    await Promise.all(
-      this.stakingConfigs.map(async (config) => {
+    const newStakingContracts = await Promise.all(
+      this.stakingConfigs.map(async config => {
         const newStaking = new Staking(this.algod, this, rewardsManagerAppId[this.network], config)
         await newStaking.loadState()
-        this.stakingContracts[config.appId] = newStaking
+        return { [config.appId]: newStaking }
       })
     )
-	}
+    this.stakingContracts = newStakingContracts.reduce((acc, value) => {
+      acc = { ...acc, ...value }
+      return acc
+    }, {})
+  }
 
-  getUser(address: string) : StakingUser {
+  getUser(address: string): StakingUser {
     return new StakingUser(this, address)
   }
 }
-
-
-
-
-
