@@ -1,13 +1,13 @@
 export const Base64Encoder = {
   _keyStr: "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=",
-  
+
   /**
    * Function to encode an arbitrary string
-   * 
+   *
    * @param   string  e   String to be encoded
    * @return  string  t   Encoded string e
    */
-  encode: function (e:string):string {
+  encode: function(e: string): string {
     var t = ""
     var n, r, i, s, o, u, a
     var f = 0
@@ -32,11 +32,11 @@ export const Base64Encoder = {
 
   /**
    * Function to decode a string encoded by Base64Encoder.encode
-   * 
+   *
    * @param   string  e   String to be decoded
    * @return  string  t   Decoded string e
    */
-  decode: function (e:string):string {
+  decode: function(e: string): string {
     var t = ""
     var n, r, i
     var s, o, u, a
@@ -64,11 +64,11 @@ export const Base64Encoder = {
 
   /**
    * Function to perfom utf8 encoding on an arbitrary string
-   * 
+   *
    * @param   string  e   String to be utf8 encoded
    * @return  string  t   Encoded string e
    */
-  _utf8_encode: function (e:string):string {
+  _utf8_encode: function(e: string): string {
     e = e.replace(/\r\n/g, "\n")
     var t = ""
     for (var n = 0; n < e.length; n++) {
@@ -89,11 +89,11 @@ export const Base64Encoder = {
 
   /**
    * Function to decode a string encoded by Base64Encoder._utf8_encode
-   * 
+   *
    * @param   string  e   String to be utf8 decoded
    * @return  string  t   Decoded string e
    */
-  _utf8_decode: function (e:string):string {
+  _utf8_decode: function(e: string): string {
     var t = ""
     var n = 0
     var r = 0
@@ -117,6 +117,5 @@ export const Base64Encoder = {
       }
     }
     return t
-  },
-
+  }
 }

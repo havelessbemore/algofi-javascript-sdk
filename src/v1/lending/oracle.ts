@@ -17,7 +17,7 @@ export default class Oracle {
 
   // state
   public rawPrice: number
-  
+
   constructor(algod: Algodv2, appId: number, priceFieldName: string, scaleFactor: number) {
     this.algod = algod
     this.appId = appId
@@ -29,5 +29,4 @@ export default class Oracle {
     let state = await getApplicationGlobalState(this.algod, this.appId)
     this.rawPrice = state[this.priceFieldName]
   }
-  
 }

@@ -1,21 +1,13 @@
 // IMPORTS
 
 // external
-import algosdk, {
-  Algodv2,
-  Account,
-  Transaction,
-  getApplicationAddress,
-  encodeUint64,
-  assignGroupID
-} from "algosdk"
+import algosdk, { Algodv2, Account, Transaction, getApplicationAddress, encodeUint64, assignGroupID } from "algosdk"
 
 // global
 import { ALGO_ASSET_ID, TEXT_ENCODER, PERMISSIONLESS_SENDER_LOGIC_SIG } from "./../globals"
 import { getParams, getPaymentTxn } from "./../transactionUtils"
 import { concatArrays } from "./../utils"
 import AlgofiUser from "./../algofiUser"
-
 
 // local
 import { MANAGER_STRINGS } from "./lendingConfig"
@@ -27,22 +19,19 @@ export default class Manager {
   public algod: Algodv2
   public appId: number
   public address: string
-  
+
   constructor(algod: Algodv2, appId: number) {
     this.algod = algod
     this.appId = appId
     this.address = getApplicationAddress(this.appId)
   }
-  
-  async getOptInTxns(
-    user: AlgofiUser,
-    storageAccount: Account
-  ) : Promise<Transaction[]> {
+
+  async getOptInTxns(user: AlgofiUser, storageAccount: Account): Promise<Transaction[]> {
     const params = await getParams(this.algod)
-    
+
     // fund storage account
     let txn0 = getPaymentTxn(params, user.address, storageAccount.addr, ALGO_ASSET_ID, 1000000) // TODO get the right number for this
-    
+
     // storage account opt in and rekey
     const txn1 = algosdk.makeApplicationOptInTxnFromObject({
       from: storageAccount.addr,
@@ -54,7 +43,7 @@ export default class Manager {
       foreignAssets: undefined,
       rekeyTo: this.address
     })
-    
+
     // user opt in
     const txn2 = algosdk.makeApplicationOptInTxnFromObject({
       from: user.address,
@@ -66,15 +55,13 @@ export default class Manager {
       foreignAssets: undefined,
       rekeyTo: undefined
     })
-    
+
     return assignGroupID([txn0, txn1, txn2])
   }
-  
-  async getOptOutTxns(
-    user: AlgofiUser
-  ) : Promise<Transaction[]> {
+
+  async getOptOutTxns(user: AlgofiUser): Promise<Transaction[]> {
     const params = await getParams(this.algod)
-    
+
     // close out
     params.fee = 2000
     const txn0 = algosdk.makeApplicationCloseOutTxnFromObject({
@@ -87,19 +74,16 @@ export default class Manager {
       foreignAssets: undefined,
       rekeyTo: undefined
     })
-    
+
     return [txn0]
   }
-  
-  async getMarketOptInTxns(
-    user: AlgofiUser,
-    market: Market
-  ) : Promise<Transaction[]> {
+
+  async getMarketOptInTxns(user: AlgofiUser, market: Market): Promise<Transaction[]> {
     const params = await getParams(this.algod)
-    
+
     // fund storage account
     let txn0 = getPaymentTxn(params, user.address, user.lending.storageAddress, ALGO_ASSET_ID, market.localMinBalance)
-    
+
     // validate market
     let txn1 = algosdk.makeApplicationNoOpTxnFromObject({
       from: user.address,
@@ -111,7 +95,7 @@ export default class Manager {
       foreignAssets: undefined,
       rekeyTo: undefined
     })
-    
+
     // opt into market
     params.fee = 2000
     let txn2 = algosdk.makeApplicationNoOpTxnFromObject({
@@ -124,43 +108,39 @@ export default class Manager {
       foreignAssets: undefined,
       rekeyTo: undefined
     })
-    
+
     return assignGroupID([txn0, txn1, txn2])
   }
-  
-  async getMarketOptOutTxns(
-    user: AlgofiUser,
-    market: Market
-  ) : Promise<Transaction[]> {
+
+  async getMarketOptOutTxns(user: AlgofiUser, market: Market): Promise<Transaction[]> {
     const params = await getParams(this.algod)
-    
+
     let [page, offset] = user.lending.getMarketPageOffset(market.appId)
-    
+
     // opt out of market
     params.fee = 3000
     let txn0 = algosdk.makeApplicationNoOpTxnFromObject({
       from: user.address,
       appIndex: this.appId,
       suggestedParams: params,
-      appArgs: [TEXT_ENCODER.encode(MANAGER_STRINGS.user_market_close_out), concatArrays([encodeUint64(page), encodeUint64(offset)])],
+      appArgs: [
+        TEXT_ENCODER.encode(MANAGER_STRINGS.user_market_close_out),
+        concatArrays([encodeUint64(page), encodeUint64(offset)])
+      ],
       accounts: [user.lending.storageAddress],
       foreignApps: [market.appId],
       foreignAssets: undefined,
       rekeyTo: undefined
     })
-    
+
     return [txn0]
   }
-  
+
   // vault
-  
-  async getGovernanceTxns(
-    user: AlgofiUser,
-    targetAddress: string,
-    note: string
-  ) : Promise<Transaction[]> {
+
+  async getGovernanceTxns(user: AlgofiUser, targetAddress: string, note: string): Promise<Transaction[]> {
     const params = await getParams(this.algod)
-    
+
     // send governance txns
     params.fee = 2000
     let txn0 = algosdk.makeApplicationNoOpTxnFromObject({
@@ -174,10 +154,10 @@ export default class Manager {
       rekeyTo: undefined,
       note: TEXT_ENCODER.encode(note)
     })
-    
-    return  assignGroupID([txn0])
+
+    return assignGroupID([txn0])
   }
- 
+
   async getKeyregTxns(
     user: AlgofiUser,
     votePK: string,
@@ -186,9 +166,9 @@ export default class Manager {
     voteFirst: number,
     voteLast: number,
     voteKeyDilution: number
-  ) : Promise<Transaction[]> {
+  ): Promise<Transaction[]> {
     const params = await getParams(this.algod)
-    
+
     // opt out of market
     params.fee = 2000
     let txn0 = algosdk.makeApplicationNoOpTxnFromObject({
@@ -209,15 +189,13 @@ export default class Manager {
       foreignAssets: undefined,
       rekeyTo: undefined
     })
-    
-    return  assignGroupID([txn0])
+
+    return assignGroupID([txn0])
   }
-  
-  async getKeyregOfflineTxns(
-    user: AlgofiUser
-  ) : Promise<Transaction[]> {
+
+  async getKeyregOfflineTxns(user: AlgofiUser): Promise<Transaction[]> {
     const params = await getParams(this.algod)
-    
+
     // validate account ownership
     let txn0 = algosdk.makeApplicationNoOpTxnFromObject({
       from: user.address,
@@ -229,7 +207,7 @@ export default class Manager {
       foreignAssets: undefined,
       rekeyTo: undefined
     })
-    
+
     // opt out of market
     params.fee = 2000
     let txn1 = algosdk.makeApplicationNoOpTxnFromObject({
@@ -242,8 +220,7 @@ export default class Manager {
       foreignAssets: undefined,
       rekeyTo: undefined
     })
-    
-    return  assignGroupID([txn0, txn1])
+
+    return assignGroupID([txn0, txn1])
   }
-  
 }

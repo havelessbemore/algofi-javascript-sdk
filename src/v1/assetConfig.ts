@@ -18,7 +18,7 @@ export default class AssetConfig {
 
 export const AssetConfigs = {
   [Network.MAINNET]: {
-    1: new AssetConfig("ALGO", 1, 6),
+    1: new AssetConfig("ALGO", 1, 6)
   },
   [Network.MAINNET_CLONE]: {
     1: new AssetConfig("ALGO", 1, 6),
@@ -45,7 +45,7 @@ export const AssetConfigs = {
     753101784: new AssetConfig("STBL", 753101784, 6),
     753120193: new AssetConfig("AF-BANK-STBL-STBL", 753120193, 6),
     753104718: new AssetConfig("BANK", 753104718, 6),
-    753122293: new AssetConfig("AF-BANK-BANK-STANDARD", 753122293, 6),
+    753122293: new AssetConfig("AF-BANK-BANK-STANDARD", 753122293, 6)
   },
   [Network.TESTNET]: {
     1: new AssetConfig("ALGO", 1, 6),
@@ -68,6 +68,6 @@ export const AssetConfigs = {
     91634578: new AssetConfig("STBL", 91634578, 6),
     91638952: new AssetConfig("AF-BANK-STBL-STBL", 91638952, 6),
     91634736: new AssetConfig("BANK", 91634736, 6),
-    91639074: new AssetConfig("AF-BANK-BANK-STANDARD", 91639074, 6),
-  },
+    91639074: new AssetConfig("AF-BANK-BANK-STANDARD", 91639074, 6)
+  }
 }
