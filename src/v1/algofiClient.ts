@@ -11,7 +11,10 @@ import AlgofiUser from "./algofiUser"
 // lending
 import LendingClient from "./lending/lendingClient"
 
-// INTERFACSE
+// staking
+import StakingClient from "./staking/stakingClient"
+
+// INTERFACE
 
 export default class AlgofiClient {
   public algod: Algodv2
@@ -21,6 +24,9 @@ export default class AlgofiClient {
   
   // lending
   public lending: LendingClient
+
+	// staking
+	public staking: StakingClient
   
   constructor(
     algod : Algodv2,
@@ -30,13 +36,19 @@ export default class AlgofiClient {
     this.network = network
     this.assets = AssetConfigs[this.network]
     
-    // lending
+		// lending
     this.lending = new LendingClient(this)
+
+		// staking
+		this.staking = new StakingClient(this)
   }
   
   async loadState() {
     // lending
     await this.lending.loadState()
+
+		// staking
+		await this.staking.loadState()
   }
   
   async getUser(address: string) : Promise<AlgofiUser> {
