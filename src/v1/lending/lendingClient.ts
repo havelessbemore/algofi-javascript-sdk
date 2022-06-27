@@ -23,36 +23,34 @@ export default class LendingClient {
   public algofiClient: AlgofiClient
   public algod: Algodv2
   public network: Network
-  
+
   public managerConfig: ManagerConfig
   public manager: Manager
-  
+
   public marketConfigs: MarketConfig[]
   public markets: { [key: number]: Market } = {}
-  
-  constructor(
-    algofiClient: AlgofiClient
-  ) {
+
+  constructor(algofiClient: AlgofiClient) {
     this.algofiClient = algofiClient
     this.algod = this.algofiClient.algod
     this.network = this.algofiClient.network
     this.managerConfig = ManagerConfigs[this.network]
     this.marketConfigs = MarketConfigs[this.network]
-    
+
     this.manager = new Manager(this.algod, this.managerConfig.appId)
   }
-  
+
   async loadState() {
     await Promise.all(
-      this.marketConfigs.map(async (config) => {
+      this.marketConfigs.map(async config => {
         const newMarket = new Market(this.algod, this, this.manager.appId, config)
         await newMarket.loadState()
         this.markets[config.appId] = newMarket
       })
     )
   }
-  
-  getUser(address: string) : LendingUser {
+
+  getUser(address: string): LendingUser {
     return new LendingUser(this, address)
   }
 }
