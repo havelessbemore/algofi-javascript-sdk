@@ -469,9 +469,9 @@ export default class Market {
     let repayAmount = underlyingAmount
     if (repayMax) {
       if (this.underlyingAssetId == ALGO_ASSET_ID) {
-        repayAmount = Math.min(Math.ceil(repayAmount * 1.01), user.balances[ALGO_ASSET_ID] - user.minBalance - 100000)
+        repayAmount = Math.min(Math.ceil(repayAmount * 1.001), user.balances[ALGO_ASSET_ID] - user.minBalance - 100000)
       } else {
-        repayAmount = Math.min(Math.ceil(repayAmount * 1.01), user.balances[this.underlyingAssetId])
+        repayAmount = Math.min(Math.ceil(repayAmount * 1.001), user.balances[this.underlyingAssetId])
       }
     }
 
