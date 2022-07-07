@@ -11,7 +11,7 @@ import algosdk, {
 } from "algosdk"
 
 // global
-import { FIXED_3_SCALE_FACTOR, FIXED_6_SCALE_FACTOR, PERMISSIONLESS_SENDER_LOGIC_SIG, TEXT_ENCODER } from "./../globals"
+import { FIXED_3_SCALE_FACTOR, FIXED_6_SCALE_FACTOR, ALGO_ASSET_ID, PERMISSIONLESS_SENDER_LOGIC_SIG, TEXT_ENCODER } from "./../globals"
 import { Base64Encoder } from "./../encoder"
 import { getApplicationGlobalState, getLocalStates, getAccountBalances } from "./../stateUtils"
 import { getParams, getPaymentTxn } from "./../transactionUtils"
@@ -461,9 +461,18 @@ export default class Market {
     return assignGroupID(preambleTransactions.concat([txn0]))
   }
 
-  async getRepayBorrowTxns(user: AlgofiUser, underlyingAmount: number): Promise<Transaction[]> {
+  async getRepayBorrowTxns(user: AlgofiUser, underlyingAmount: number, repayMax: boolean = false): Promise<Transaction[]> {
     if (this.marketType == MarketType.VAULT) {
       throw "Repay borrow action not supported by vault market"
+    }
+
+    let repayAmount = underlyingAmount
+    if (repayMax) {
+      if (this.underlyingAssetId == ALGO_ASSET_ID) {
+        repayAmount = Math.min(Math.ceil(repayAmount * 1.01), user.balances[ALGO_ASSET_ID] - user.minBalance - 100000)
+      } else {
+        repayAmount = Math.min(Math.ceil(repayAmount * 1.01), user.balances[this.underlyingAssetId])
+      }
     }
 
     const params = await getParams(this.algod)
@@ -476,7 +485,7 @@ export default class Market {
     )
 
     // payment
-    const txn0 = getPaymentTxn(params, user.address, this.address, this.underlyingAssetId, underlyingAmount)
+    const txn0 = getPaymentTxn(params, user.address, this.address, this.underlyingAssetId, repayAmount)
 
     // application call
     params.fee = 2000
