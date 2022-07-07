@@ -15,7 +15,7 @@ import algosdk, {
 } from "algosdk"
 
 // local
-import { getLocalStates, getAccountBalances } from "./stateUtils"
+import { getLocalStates, getAccountBalances, getAccountMinBalance } from "./stateUtils"
 import AlgofiClient from "./algofiClient"
 
 // lending
@@ -33,6 +33,7 @@ export default class AlgofiUser {
 
   // state
   public balances = {}
+  public minBalance: number
 
   // protcol users
   public lending: LendingUser
@@ -54,6 +55,7 @@ export default class AlgofiUser {
   async loadState() {
     // load balance state
     this.balances = await getAccountBalances(this.algod, this.address)
+    this.minBalance = await getAccountMinBalance(this.algod, this.address)
 
     // load local states
     let localStates = await getLocalStates(this.algod, this.address)

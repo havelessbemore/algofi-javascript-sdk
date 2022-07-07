@@ -84,3 +84,16 @@ export async function getAccountBalances(algodClient: Algodv2, address: string):
   )
   return results
 }
+
+/**
+ * Function to get min balance for an account
+ *
+ * @param   {Algodv2}           algodClient
+ * @param   {string}            address
+ *
+ * @return  {number}  min algo balance for an account
+ */
+export async function getAccountMinBalance(algodClient: Algodv2, address: string): Promise<number> {
+  let accountInfo = await algodClient.accountInformation(address).do()
+  return accountInfo["min-balance"]
+}

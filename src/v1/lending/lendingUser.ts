@@ -5,7 +5,7 @@ import algosdk, { Algodv2, Transaction, encodeUint64, decodeUint64 } from "algos
 
 // global
 import { FIXED_3_SCALE_FACTOR, TEXT_ENCODER, PERMISSIONLESS_SENDER_LOGIC_SIG } from "./../globals"
-import { getLocalStates, getAccountBalances } from "./../stateUtils"
+import { getLocalStates, getAccountBalances, getAccountMinBalance } from "./../stateUtils"
 import { getParams } from "./../transactionUtils"
 import { decodeBytes, parseAddressBytes } from "./../utils"
 
@@ -24,6 +24,7 @@ export default class User {
   public lendingClient: LendingClient
 
   public storageBalances = {}
+  public storageMinBalance: number
 
   public optedInToManager = false
   public optedInMarkets = []
@@ -57,6 +58,7 @@ export default class User {
 
       // load storage balances
       this.storageBalances = await getAccountBalances(this.algod, this.storageAddress)
+      this.storageMinBalance = await getAccountMinBalance(this.algod, this.storageAddress)
 
       // load storage state
       let storageLocalStates = await getLocalStates(this.algod, this.storageAddress)
