@@ -16,6 +16,9 @@ import Market from "./market"
 // interface
 
 export default class Manager {
+  // constatns
+  public localMinBalance: number = 614000
+  
   public algod: Algodv2
   public appId: number
   public address: string
@@ -30,7 +33,7 @@ export default class Manager {
     const params = await getParams(this.algod)
 
     // fund storage account
-    let txn0 = getPaymentTxn(params, user.address, storageAccount.addr, ALGO_ASSET_ID, 1000000) // TODO get the right number for this
+    let txn0 = getPaymentTxn(params, user.address, storageAccount.addr, ALGO_ASSET_ID, this.localMinBalance)
 
     // storage account opt in and rekey
     const txn1 = algosdk.makeApplicationOptInTxnFromObject({
