@@ -33,7 +33,7 @@ export default class Manager {
     const params = await getParams(this.algod)
 
     // fund storage account
-    let txn0 = getPaymentTxn(params, user.address, storageAccount.addr, ALGO_ASSET_ID, this.localMinBalance)
+    let txn0 = getPaymentTxn(params, user.address, storageAccount.addr, ALGO_ASSET_ID, this.localMinBalance + 101000)
 
     // storage account opt in and rekey
     const txn1 = algosdk.makeApplicationOptInTxnFromObject({

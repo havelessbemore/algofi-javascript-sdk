@@ -6,13 +6,16 @@ import algosdk, {
   Transaction,
   getApplicationAddress,
   encodeUint64,
+  decodeUint64,
   SuggestedParams,
-  assignGroupID
+  assignGroupID,
+  bytesToBigInt
 } from "algosdk"
 
 // global
 import { FIXED_3_SCALE_FACTOR, FIXED_6_SCALE_FACTOR, ALGO_ASSET_ID, PERMISSIONLESS_SENDER_LOGIC_SIG, TEXT_ENCODER } from "./../globals"
 import { Base64Encoder } from "./../encoder"
+import { decodeBytes, parseAddressBytes } from "./../utils"
 import { getApplicationGlobalState, getLocalStates, getAccountBalances } from "./../stateUtils"
 import { getParams, getPaymentTxn } from "./../transactionUtils"
 import AssetAmount from "./../assetAmount"
@@ -28,6 +31,31 @@ import Oracle from "./oracle"
 
 const CALC_USER_POSITION = true
 const DONT_CALC_USER_POSITION = false
+
+// HELPER CLASSES
+
+export class MarketRewardsProgram {
+
+  // state
+  public programNumber: number
+  public rewardsPerSecond: number
+  public assetID: number
+  public issued: number
+  public claimed: number
+  public index: bigint
+
+  constructor(state: {}, programIndex: number) {
+      let rewardsStateBytes = Buffer.from(state[MARKET_STRINGS.rewards_program_state_prefix + String.fromCharCode.apply(null, encodeUint64(programIndex))], "base64").toString("binary")
+      this.programNumber = decodeUint64(decodeBytes(rewardsStateBytes.substr(0, 8)), "safe")
+      this.rewardsPerSecond = decodeUint64(decodeBytes(rewardsStateBytes.substr(8, 8)), "safe")
+      this.assetID = decodeUint64(decodeBytes(rewardsStateBytes.substr(16, 8)), "safe")
+      this.issued = decodeUint64(decodeBytes(rewardsStateBytes.substr(24, 8)), "safe")
+      this.claimed = decodeUint64(decodeBytes(rewardsStateBytes.substr(32, 8)), "safe")
+
+      let rawRewardsIndexBytes = new Uint8Array(Buffer.from(state[MARKET_STRINGS.rewards_index_prefix + String.fromCharCode.apply(null, encodeUint64(programIndex))], "base64"))
+      this.index = bytesToBigInt(rawRewardsIndexBytes)
+  }
+}
 
 // INTERFACE
 
@@ -91,7 +119,8 @@ export default class Market {
   public supplyAPR: number
   public borrowAPR: number
 
-  // TODO rewards
+  public rewardsPrograms = []
+  public rewardsEscrowAccount: string
 
   constructor(algod: Algodv2, lendingClient: LendingClient, managerAppId: number, marketConfig: MarketConfig) {
     this.algod = algod
@@ -164,7 +193,11 @@ export default class Market {
     this.supplyAPR = supplyAPR
     this.borrowAPR = borrowAPR
 
-    // TODO rewards
+    // rewards
+    this.rewardsPrograms = []
+    this.rewardsPrograms.push(new MarketRewardsProgram(state, 0))
+    this.rewardsPrograms.push(new MarketRewardsProgram(state, 1))
+    this.rewardsEscrowAccount = parseAddressBytes(state[MARKET_STRINGS.rewards_escrow_account])
   }
 
   // GETTERS
@@ -270,7 +303,7 @@ export default class Market {
     const txn0 = getPaymentTxn(params, user.address, this.address, this.underlyingAssetId, underlyingAmount)
 
     // application call
-    params.fee = 2000
+    params.fee = 3000
     const txn1 = algosdk.makeApplicationNoOpTxnFromObject({
       from: user.address,
       appIndex: this.appId,
@@ -300,7 +333,7 @@ export default class Market {
     const txn0 = getPaymentTxn(params, user.address, targetAddress, this.underlyingAssetId, underlyingAmount)
 
     // application call
-    params.fee = 1000
+    params.fee = 2000
     const txn1 = algosdk.makeApplicationNoOpTxnFromObject({
       from: user.address,
       appIndex: this.appId,
@@ -333,7 +366,7 @@ export default class Market {
     const txn0 = getPaymentTxn(params, user.address, this.address, this.bAssetId, bAssetAmount)
 
     // application call
-    params.fee = 1000
+    params.fee = 2000
     const txn1 = algosdk.makeApplicationNoOpTxnFromObject({
       from: user.address,
       appIndex: this.appId,
@@ -365,7 +398,7 @@ export default class Market {
     const [preambleTransactions, additionalFee] = await this.getPreambleTransactions(params, user, CALC_USER_POSITION)
 
     // application call
-    params.fee = this.marketType != MarketType.VAULT ? 2000 + additionalFee : 3000 + additionalFee
+    params.fee = this.marketType != MarketType.VAULT ? 3000 + additionalFee : 4000 + additionalFee
     const txn0 = algosdk.makeApplicationNoOpTxnFromObject({
       from: user.address,
       appIndex: this.appId,
@@ -391,7 +424,7 @@ export default class Market {
     const [preambleTransactions, additionalFee] = await this.getPreambleTransactions(params, user, CALC_USER_POSITION)
 
     // application call
-    params.fee = 2000 + additionalFee
+    params.fee = 3000 + additionalFee
     const txn0 = algosdk.makeApplicationNoOpTxnFromObject({
       from: user.address,
       appIndex: this.appId,
@@ -424,7 +457,7 @@ export default class Market {
     const txn0 = getPaymentTxn(params, user.address, this.address, this.bAssetId, bAssetAmount)
 
     // application call
-    params.fee = 2000
+    params.fee = 3000
     const txn1 = algosdk.makeApplicationNoOpTxnFromObject({
       from: user.address,
       appIndex: this.appId,
@@ -450,7 +483,7 @@ export default class Market {
     const [preambleTransactions, additionalFee] = await this.getPreambleTransactions(params, user, CALC_USER_POSITION)
 
     // application call
-    params.fee = 2000 + additionalFee
+    params.fee = 3000 + additionalFee
     const txn0 = algosdk.makeApplicationNoOpTxnFromObject({
       from: user.address,
       appIndex: this.appId,
@@ -492,7 +525,7 @@ export default class Market {
     const txn0 = getPaymentTxn(params, user.address, this.address, this.underlyingAssetId, repayAmount)
 
     // application call
-    params.fee = 2000
+    params.fee = 3000
     const txn1 = algosdk.makeApplicationNoOpTxnFromObject({
       from: user.address,
       appIndex: this.appId,
@@ -505,6 +538,41 @@ export default class Market {
     })
 
     return assignGroupID(preambleTransactions.concat([txn0, txn1]))
+  }
+  
+  // claim rewards
+  async getClaimRewardsTxns(user: AlgofiUser): Promise<Transaction[]> {
+    console.log("getting txns")
+    
+    const params = await getParams(this.algod)
+    const transactions = []
+
+    for (var i = 0; i < 2; ++i) {
+      if (user.lending.userMarketStates[this.appId].rewardsProgramStates[i].realUnclaimed > 0) {
+        let rewardsAssetID = this.rewardsPrograms[i].assetID
+        if (rewardsAssetID > 1) {
+          if (!user.isOptedInToAsset(rewardsAssetID)) {
+            params.fee = 1000
+            transactions.push(getPaymentTxn(params, user.address, user.address, rewardsAssetID, 0))
+          }
+        }
+        
+        params.fee = 3000
+        const txn = algosdk.makeApplicationNoOpTxnFromObject({
+          from: user.address,
+          appIndex: this.appId,
+          suggestedParams: params,
+          appArgs: [TEXT_ENCODER.encode(MARKET_STRINGS.claim_rewards), encodeUint64(i)],
+          accounts: [user.lending.storageAddress, this.rewardsEscrowAccount],
+          foreignApps: [this.managerAppId],
+          foreignAssets: [rewardsAssetID],
+          rekeyTo: undefined
+        })
+        transactions.push(txn)
+      }
+    }
+
+    return transactions
   }
 
   // vault specific actions
