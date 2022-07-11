@@ -39,6 +39,14 @@ export const MarketConfigs = {
     new MarketConfig(753111740, 753104718, 753122293, MarketType.STANDARD), // BANK
     new MarketConfig(753112308, 1, 753122631, MarketType.VAULT) // vALGO
   ],
+  [Network.MAINNET_CLONE2]: [
+    new MarketConfig(802880734, 1, 802887010, MarketType.STANDARD), // ALGO
+    new MarketConfig(802881530, 802871797, 802887476, MarketType.STANDARD), // USDC
+    new MarketConfig(802882874, 802872834, 802887973, MarketType.STBL), // STBL2
+    new MarketConfig(802881983, 802873705, 802888469, MarketType.STANDARD), // GOBTC
+    new MarketConfig(802882365, 802874445, 802888853, MarketType.STANDARD), // GOETH
+    new MarketConfig(802883364, 1, 802889344, MarketType.VAULT) // vALGO
+  ],
   [Network.TESTNET]: [
     new MarketConfig(91635808, 1, 91638233, MarketType.STANDARD),
     new MarketConfig(91636097, 91634316, 91638306, MarketType.STANDARD),

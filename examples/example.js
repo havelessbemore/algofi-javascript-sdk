@@ -3,87 +3,34 @@ const algofi = require("../.")
 
 //const m = "frame auto erosion drop weasel lecture health marine aisle stuff home harsh enough result market boost unknown carbon approve hello deputy what member abstract penalty"
 //const a = "F44Y7B4O4DPUOXPZTHHJ36N7INEG7G4DC6XZ6CSDRORAQQW7YOE4KBZYPU"
-//const decoded_a = algosdk.decodeAddress(a)
-//const sk = algosdk.mnemonicToSecretKey(m).sk
-
-//const m = "gauge imitate timber often cabbage system picture jacket climb helmet print shed summer learn dawn suspect dial tide muscle gloom luggage remain govern abandon abuse"
-//const a = "HFQOFEYZ4GUKAQUIIQOCOXLAFDVOZYPKI4POKKGNCBGOBZ3RJZZFERCHRU"
-//const decoded_a = algosdk.decodeAddress(a)
-//const sk = algosdk.mnemonicToSecretKey(m).sk
-
-//const m = "manage jar lobster fresh fringe note candy major denial economy fat bring chat antenna pause sure intact dove false barrel roof meat shrug ability mouse"
-//const a = "QHYOLZC4SLE7IX5VYQPMYGP2DNQQUNPI4SV6DIBZKCK7NH6FAOOPWOOZJQ"
-//const decoded_a = algosdk.decodeAddress(a)
-//const sk = algosdk.mnemonicToSecretKey(m).sk
-
-//const m = "mask stick odor boil flock hidden upgrade guide topple raw soft victory repeat gas art resemble around negative buyer long bundle develop security above grocery"
-//const a = "TLRK7PXYX2ROK7ZBVRXDUCUGR4QCYCEUWZZ7LRXNRUEPI7RPSZBG5BQEB4"
-//const decoded_a = algosdk.decodeAddress(a)
-//const sk = algosdk.mnemonicToSecretKey(m).sk
-
-const user1Passphrase = "pause speak gaze term indoor length rifle valid slow property smooth goddess guess globe note seat excuse blur until dry city repeat dream absent today"
-const user1Address = "CZGVJLFMYYIE43VZ4WBQYSZRXHK2XBAVGROLWD7Q26RRBJHFNXQ5IQBVFI"
-const decodedAddress1 = algosdk.decodeAddress(user1Address)
-const user1sk = algosdk.mnemonicToSecretKey(user1Passphrase).sk
-
-const user2Passphrase = "wait rice future small castle argue job ranch budget normal dry jungle canvas velvet inflict coach become maze tail dizzy dinner fence virtual about gather"
-const user2Address = "OSMXTEDET334KWYKHRX3WQMJQPNEPDSP7NXOU4AOYHVTEUQBREASNQILCY"
-const decodedAddress2 = algosdk.decodeAddress(user2Address)
-const user2sk = algosdk.mnemonicToSecretKey(user2Passphrase).sk
+//const a = "WO7ZA3GTZZTWEIU427ZZZ674RPYUUN5LOQJF5TBY2YYFBTTNOR33X45RYI"
+const m = "chicken myth waste moral chuckle boil gossip cash gaze wreck devote give inhale because mango asthma relief grain power castle february level hazard about wish"
+const a = "2NJEG3XKJZQ4PDSFXGIHOSTTY7Q7MBFZ76JQPMWNWV7O3LIB3T3JJYWLPE"
+const decoded_a = algosdk.decodeAddress(a)
+const sk = algosdk.mnemonicToSecretKey(m).sk
 
 async function test() {
-  let client = new algosdk.Algodv2("", "https://node.algoexplorerapi.io", "")
-	let a_client = new algofi.AlgofiClient(client, algofi.Network.MAINNET_CLONE)
-	await a_client.loadState()
+  let client = new algosdk.Algodv2(
+    "",
+    //"https://delicate-icy-brook.algorand-testnet.quiknode.pro/29f8674f6a148877a83c15e4150186fab984e175/algod/", // TESTNET
+    "https://crimson-icy-meadow.algorand-mainnet.quiknode.pro/366f073317e2f6d87f525b328393e587ffb3628d/algod", // MAINNET
+    ""
+  )
+  console.log("TESTING")
+  let a_client = new algofi.AlgofiClient(client, algofi.Network.MAINNET_CLONE2)
+  await a_client.loadState()
 
-	let user = await a_client.getUser(user1Address)
-	let staking = a_client.staking.stakingContracts[785597550]
-
-
-	// OPT IN TO STAKING CONTRACT
-//	console.log("OPT IN STAKING CONTRACT")
-//	let optInTxns = await staking.getUserOptInTxns(user)
-//	console.log("SIGN TXNS")
-//	let stxn0 = algosdk.signTransaction(optInTxns[0], user1sk)
-//	stxns = [stxn0.blob]
-//	console.log("SEND TXNS")
-//	let srt = await client.sendRawTransaction(stxns).do()
-
-	// STAKE
-//	console.log("STAKE")
-//	let stakeTxns = await staking.getStakeTxns(user, 10000)
-//	console.log("SIGN TXNS")
-//	let stxn0 = algosdk.signTransaction(stakeTxns[0], user1sk)
-//	let stxn1 = algosdk.signTransaction(stakeTxns[1], user1sk)
-//	stxns = [stxn0.blob, stxn1.blob]
-//	console.log("SEND TXNS")
-//	let srt = await client.sendRawTransaction(stxns).do()
-
-	// UNSTAKE 
-//	console.log("UNSTAKE")
-//	let unstakeTxns = await staking.getUnstakeTxns(user, 1000)
-//	console.log("SIGN TXNS")
-//	let stxn0 = algosdk.signTransaction(unstakeTxns[0], user1sk)
-//	stxns = [stxn0.blob]
-//	console.log("SEND TXNS")
-//	let srt = await client.sendRawTransaction(stxns).do()
-
-	// CLAIM
-	console.log("CLAIM")
-	let claimTxns = await staking.getClaimTxns(user)
-	console.log("SIGN TXNS")
-	let stxns = []
-	if (claimTxns.length == 0) {
-		console.log("nothing to claim!")
-	}
-	else {
-		for (let i = 0; i < claimTxns.length; ++i) {
-			let stxn = algosdk.signTransaction(claimTxns[i], user1sk)
-			stxns.push(stxn.blob)
-		}
-		console.log("SEND TXNS")
-		let srt = await client.sendRawTransaction(stxns).do()
-	}
+  let user = await a_client.getUser(a)
+  let market = a_client.lending.markets[802881530]
+  let stxns = []
+  
+  console.log(user.lending)
+  
+  //console.log(user.lending.userMarketStates[753108247])
+  //console.log(user)
+  
+  //console.log(user.lending.userMarketStates[91637209])
+  //console.log(market.borrowFactor)
   
   // OPT IN TO MANAGER
   //console.log("OPT IN")
@@ -164,10 +111,11 @@ async function test() {
   
   // REMOVE UNDERLYING COLLATERAL
   //console.log("REMOVE UNDERLYING COLLATERAL")
-  //let removeUnderlyingCollateralTxns = await market.getRemoveUnderlyingCollateralTxns(user, 100000000)
-  //console.log("SIGN TXNS")
+  //let removeUnderlyingCollateralTxns = await market.getRemoveUnderlyingCollateralTxns(user, 21000000)
   //stxns = []
+  //console.log("SIGN TXNS")
   //for (const txn of removeUnderlyingCollateralTxns) {
+  //  console.log(txn)
   //  if (algofi.addressEquals(txn.from, decoded_a)) {
   //    stxns.push(algosdk.signTransaction(txn, sk).blob)
   //  } else {
@@ -209,7 +157,7 @@ async function test() {
   
   // BORROW
   //console.log("BORROW")
-  //let borrowTxns = await market.getBorrowTxns(user, 100000000)
+  //let borrowTxns = await market.getBorrowTxns(user, 1000000)
   //console.log("SIGN TXNS")
   //stxns = []
   //for (const txn of borrowTxns) {
@@ -224,10 +172,26 @@ async function test() {
   
   // REPAY BORROW
   //console.log("REPAY BORROW")
-  //let repayBorrowTxns = await market.getRepayBorrowTxns(user, 100000000)
+  //let repayBorrowTxns = await market.getRepayBorrowTxns(user, 110000000, true)
   //console.log("SIGN TXNS")
   //stxns = []
   //for (const txn of repayBorrowTxns) {
+  //  console.log(txn)
+  //  if (algofi.addressEquals(txn.from, decoded_a)) {
+  //    stxns.push(algosdk.signTransaction(txn, sk).blob)
+  //  } else {
+  //    stxns.push(algosdk.signLogicSigTransaction(txn, algofi.PERMISSIONLESS_SENDER_LOGIC_SIG.lsig).blob)
+  //  }
+  //}
+  //console.log("SEND TXNS")
+  //await client.sendRawTransaction(stxns).do()
+  
+  // CLAIM REWARDS
+  //console.log("CLAIM REWARDS")
+  //let claimRewardsTxns = await a_client.lending.getClaimRewardsTxns(user)
+  //console.log("SIGN TXNS")
+  //stxns = []
+  //for (const txn of claimRewardsTxns) {
   //  if (algofi.addressEquals(txn.from, decoded_a)) {
   //    stxns.push(algosdk.signTransaction(txn, sk).blob)
   //  } else {
