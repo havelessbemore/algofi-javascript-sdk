@@ -77,9 +77,10 @@ export const MARKET_STRINGS = {
 
   // rewards
   rewards_admin_prefix: "ra_",
-  rewards_per_second_prefix: "rps_",
+  rewards_program_state_prefix: "rps_",
   rewards_index_prefix: "ri_",
-
+  rewards_escrow_account: "rea",
+  
   // stbl market
   underlying_protocol_reserve: "upr",
 
@@ -89,9 +90,10 @@ export const MARKET_STRINGS = {
   // USER STATE
   user_active_b_asset_collateral: "ubac",
   user_borrow_shares: "ubs",
+  user_rewards_program_number_prefix: "urpn_",
   user_latest_rewards_index_prefix: "ulri_",
-  user_cumulative_rewards_prefix: "ucr_",
-
+  user_unclaimed_rewards_prefix: "uur_",
+  
   // APPLICATION CALLS
   farm_ops: "fo",
   flash_loan: "fl",
@@ -105,6 +107,7 @@ export const MARKET_STRINGS = {
   repay_borrow: "rb",
   liquidate: "l",
   seize_collateral: "sc",
+  claim_rewards: "cr",
 
   // vault market
   sync_vault: "sv"

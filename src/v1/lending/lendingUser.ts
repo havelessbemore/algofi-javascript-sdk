@@ -37,6 +37,8 @@ export default class User {
   public netBorrowed: number
   public netScaledBorrow: number
   public netBorrowAPR: number
+  public netUnclaimedRewards = {}
+  public netRewardsPerYear = {}
 
   constructor(lendingClient: LendingClient, address: string) {
     this.lendingClient = lendingClient
@@ -91,6 +93,8 @@ export default class User {
       this.netScaledCollateral = 0
       this.netBorrowed = 0
       this.netScaledBorrow = 0
+      this.netUnclaimedRewards = {}
+      this.netRewardsPerYear = {}
       let dollarTotaledSupplyAPR = 0
       let dollarTotaledBorrowAPR = 0
       for (const [key, value] of Object.entries(this.userMarketStates)) {
@@ -101,6 +105,13 @@ export default class User {
         this.netScaledBorrow += (value.borrowedAmount.usd * market.borrowFactor) / FIXED_3_SCALE_FACTOR
         dollarTotaledSupplyAPR += value.suppliedAmount.usd * market.supplyAPR
         dollarTotaledBorrowAPR += value.borrowedAmount.usd * market.borrowAPR
+        
+        // rewards
+        for (var i = 0; i < 2; i++) {
+          let assetId = value.rewardsProgramStates[i].assetID
+          this.netUnclaimedRewards[assetId] = value.rewardsProgramStates[i].realUnclaimed + (this.netUnclaimedRewards[assetId] || 0)
+          this.netRewardsPerYear[assetId] = value.rewardsProgramStates[i].rewardsPerYear + (this.netRewardsPerYear[assetId] || 0)
+        }
       }
       this.netSupplyAPR = dollarTotaledSupplyAPR / this.netSupplied
       this.netBorrowAPR = dollarTotaledBorrowAPR / this.netBorrowed
@@ -157,4 +168,5 @@ export default class User {
 
     return transactions
   }
+  
 }

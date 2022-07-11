@@ -47,6 +47,18 @@ export const AssetConfigs = {
     753104718: new AssetConfig("BANK", 753104718, 6),
     753122293: new AssetConfig("AF-BANK-BANK-STANDARD", 753122293, 6)
   },
+  [Network.MAINNET_CLONE2]: {
+    1: new AssetConfig("ALGO", 1, 6),
+    802887010: new AssetConfig("AF-BANK-ALGO-STANDARD", 802887010, 6),
+    802871797: new AssetConfig("USDC", 802871797, 6),
+    802887476: new AssetConfig("AF-BANK-USDC-STANDARD", 802887476, 6),
+    802873705: new AssetConfig("goBTC", 802873705, 8),
+    802888469: new AssetConfig("AF-BANK-GOBTC-STANDARD", 802888469, 6),
+    802874445: new AssetConfig("goETH", 802874445, 8),
+    802888853: new AssetConfig("AF-BANK-GOETH-STANDARD", 802888853, 6),
+    802872834: new AssetConfig("STBL2", 802872834, 6),
+    802887973: new AssetConfig("AF-BANK-STBL-STBL2", 802887973, 6)
+  },
   [Network.TESTNET]: {
     1: new AssetConfig("ALGO", 1, 6),
     91638233: new AssetConfig("AF-BANK-ALGO-STANDARD", 91638233, 6),
