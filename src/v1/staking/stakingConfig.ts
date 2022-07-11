@@ -44,6 +44,7 @@ export const STAKING_STRINGS = {
   total_staked: "ts",
   scaled_total_staked: "sts",
   latest_time: "lt",
+  rewards_escrow_account: "rea",
   rewards_program_counter_prefix: "rpc_",
   rewards_asset_id_prefix: "rai_",
   rewards_per_second_prefix: "rps_",

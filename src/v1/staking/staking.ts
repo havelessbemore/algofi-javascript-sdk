@@ -18,7 +18,7 @@ import { getApplicationGlobalState, getLocalStates, getAccountBalances } from ".
 import { getParams, getPaymentTxn } from "./../transactionUtils"
 import { STAKING_STRINGS } from "./stakingConfig"
 import AlgofiUser from "./../algofiUser"
-import { formatPrefixState } from "./../utils"
+import { decodeBytes, parseAddressBytes, formatPrefixState } from "./../utils"
 
 // local
 import StakingClient from "./stakingClient"
@@ -35,6 +35,7 @@ export default class Staking {
   public assetId: number
   public latestTime: number
 
+  public rewardsEscrowAccount: string
   public boostMultiplierAppId: number
   public totalStaked: number
   public scaledTotalStaked: number
@@ -56,6 +57,7 @@ export default class Staking {
     const globalState = await getApplicationGlobalState(this.algod, this.appId)
 
     this.latestTime = globalState[STAKING_STRINGS.latest_time]
+    this.rewardsEscrowAccount = parseAddressBytes(globalState[STAKING_STRINGS.rewards_escrow_account])
     this.boostMultiplierAppId = globalState[STAKING_STRINGS.boost_multiplier_app_id]
     this.totalStaked = globalState[STAKING_STRINGS.total_staked]
     this.scaledTotalStaked = globalState[STAKING_STRINGS.scaled_total_staked]
@@ -151,7 +153,7 @@ export default class Staking {
           appIndex: this.appId,
           appArgs: [enc.encode(STAKING_STRINGS.claim_rewards), encodeUint64(i)],
           foreignAssets: [this.rewardsProgramStates[i].rewardsAssetId],
-          accounts: undefined,
+          accounts: [this.rewardsEscrowAccount],
           rekeyTo: undefined,
           foreignApps: [this.boostMultiplierAppId],
           suggestedParams: params
