@@ -26,7 +26,7 @@ export default class RewardsProgramState {
     const nonFormattedRewardsCoefficient =
       stakingState[STAKING_STRINGS.rewards_coefficient_prefix + this.rewardsProgramIndex.toString()] || 0
     if (nonFormattedRewardsCoefficient === 0) {
-      this.rewardsCoefficient = 0n
+      this.rewardsCoefficient = BigInt(0)
     } else {
       const bytesVer = new Uint8Array(Buffer.from(nonFormattedRewardsCoefficient, "base64"))
       const bigInt = bytesToBigInt(bytesVer)
@@ -57,11 +57,10 @@ export class UserRewardsProgramState {
       formattedUserLocalState[STAKING_STRINGS.user_unclaimed_rewards_prefix + this.rewardsProgramIndex.toString()] || 0
 
     const nonFormattedRewardsCoefficient =
-      formattedUserLocalState[STAKING_STRINGS.user_rewards_coefficient_prefix + this.rewardsProgramIndex.toString()] ||
-      0
+      formattedUserLocalState[STAKING_STRINGS.user_rewards_coefficient_prefix + this.rewardsProgramIndex.toString()] || 0
 
     if (nonFormattedRewardsCoefficient === 0) {
-      this.userRewardsCoefficient = 0n
+      this.userRewardsCoefficient = BigInt(0)
     } else {
       const bytesVer = new Uint8Array(Buffer.from(nonFormattedRewardsCoefficient, "base64"))
       const bigInt = bytesToBigInt(bytesVer)
