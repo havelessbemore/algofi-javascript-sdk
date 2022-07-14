@@ -3,20 +3,38 @@ import { Network } from "./../globals"
 
 // INTERFACE
 
+export enum StakingType {
+  V1 = 0,
+  V2 = 1,
+  BASSET = 2
+}
+
 export default class StakingConfig {
   public appId: number
   public assetId: number
+  public type: StakingType
 
-  constructor(appId: number, assetId: number) {
+  constructor(appId: number, assetId: number, type: StakingType) {
     this.appId = appId
     this.assetId = assetId
+    this.type = type
   }
 }
 
 export const StakingConfigs = {
-  [Network.MAINNET_CLONE]: [new StakingConfig(785597550, 785578010), new StakingConfig(785599248, 785579619)],
-  [Network.MAINNET_CLONE2]: [new StakingConfig(805980186, 802871797), new StakingConfig(805982398, 802872834), new StakingConfig(807135066, 802887476)],
-  [Network.TESTNET]: [new StakingConfig(96414588, 96410661), new StakingConfig(96418091, 96410672)]
+  [Network.MAINNET_CLONE]: [
+    new StakingConfig(785597550, 785578010, StakingType.V2),
+    new StakingConfig(785599248, 785579619, StakingType.V2)
+  ],
+  [Network.MAINNET_CLONE2]: [
+    new StakingConfig(805980186, 802871797, StakingType.V2),
+    new StakingConfig(805982398, 802872834, StakingType.V2),
+    new StakingConfig(807135066, 802887476, StakingType.BASSET)
+  ],
+  [Network.TESTNET]: [
+    new StakingConfig(96414588, 96410661, StakingType.V2),
+    new StakingConfig(96418091, 96410672, StakingType.V2)
+  ]
 }
 
 export const rewardsManagerAppId = {
