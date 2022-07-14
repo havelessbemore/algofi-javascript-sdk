@@ -1,7 +1,12 @@
 // IMPORTS
 
 // external
-import algosdk, { Address, encodeAddress } from "algosdk"
+import algosdk, {
+  Address,
+  Transaction,
+  encodeAddress,
+  assignGroupID
+} from "algosdk"
 
 // FUNCTIONS
 
@@ -61,4 +66,20 @@ export function addressEquals(a: Address, b: Address): boolean {
     a.checksum.length == b.checksum.length &&
     a.checksum.every((val, index) => val == b.checksum[index])
   )
+}
+
+export function composeTransactions(txnsToCompose: Transaction[][]): Transaction[] {
+  let txns = []
+
+  for (const txnGroup of txnsToCompose) {
+    for (const txn of txnGroup) {
+      txns.push(txn)
+    }
+  }
+
+  for (const txn of txns) {
+    txn.group = undefined
+  }
+
+  return assignGroupID(txns)
 }

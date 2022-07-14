@@ -2,7 +2,7 @@
 import { Base64Encoder } from "./encoder"
 // local
 import { Network, PERMISSIONLESS_SENDER_LOGIC_SIG } from "./globals"
-import { addressEquals } from "./utils"
+import { addressEquals, composeTransactions } from "./utils"
 
 import AlgofiClient from "./algofiClient"
 import AssetConfig from "./assetConfig"
@@ -18,6 +18,7 @@ export {
   Network,
   PERMISSIONLESS_SENDER_LOGIC_SIG,
   addressEquals,
+  composeTransactions,
   AlgofiClient,
   AssetConfig,
   AlgofiUser,
