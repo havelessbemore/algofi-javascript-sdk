@@ -14,6 +14,9 @@ import LendingClient from "./lending/lendingClient"
 // staking
 import StakingClient from "./staking/stakingClient"
 
+// v1 staking
+import V1StakingClient from "./v1_staking/v1_stakingClient"
+
 // INTERFACE
 
 export default class AlgofiClient {
@@ -28,6 +31,9 @@ export default class AlgofiClient {
   // staking
   public staking: StakingClient
 
+  // v1 staking
+  public v1Staking: V1StakingClient
+
   constructor(algod: Algodv2, network: Network) {
     this.algod = algod
     this.network = network
@@ -38,6 +44,9 @@ export default class AlgofiClient {
 
     // staking
     this.staking = new StakingClient(this)
+    
+    // v1 staking
+    this.v1Staking = new V1StakingClient(this)
   }
 
   async loadState() {
@@ -46,6 +55,9 @@ export default class AlgofiClient {
 
     // staking
     await this.staking.loadState()
+    
+    // v1 staking
+    await this.v1Staking.loadState()
   }
 
   async getUser(address: string): Promise<AlgofiUser> {

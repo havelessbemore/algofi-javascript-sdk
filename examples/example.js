@@ -20,17 +20,62 @@ async function test() {
   let a_client = new algofi.AlgofiClient(client, algofi.Network.MAINNET_CLONE2)
   await a_client.loadState()
 
+  console.log("STATE LOADED")
   let user = await a_client.getUser(a)
-  let market = a_client.lending.markets[802881530]
+  //let market = a_client.lending.markets[802881530]
   let stxns = []
   
-  console.log(user.lending)
+  //console.log(user.lending)
+  let staking = a_client.v1Staking.stakingContracts[482625868]
+  //console.log(staking)
   
-  //console.log(user.lending.userMarketStates[753108247])
-  //console.log(user)
   
-  //console.log(user.lending.userMarketStates[91637209])
-  //console.log(market.borrowFactor)
+  // OPT IN TO STAKING CONTRACT
+  //console.log("OPT IN")
+  //let storageAccount = algosdk.generateAccount()
+  //let optInTxns = await staking.getOptInTxns(user, storageAccount)
+  //console.log("SIGN TXNS")
+  //let stxn0 = algosdk.signTransaction(optInTxns[0], sk)
+  //let stxn1 = algosdk.signTransaction(optInTxns[1], storageAccount.sk)
+  //let stxn2 = algosdk.signTransaction(optInTxns[2], sk)
+  //let stxn3 = algosdk.signTransaction(optInTxns[3], storageAccount.sk)
+  //stxns = [stxn0.blob, stxn1.blob, stxn2.blob, stxn3.blob]
+
+  //console.log("SEND TXNS")
+  //let srt = await client.sendRawTransaction(stxns).do()
+  
+  // STAKE
+  //console.log("STAKE")
+  //let stakeTxns = await staking.getStakeTxns(user, 10000)
+  //console.log("SIGN TXNS")
+  //stxns = []
+  //for (const txn of stakeTxns) {
+  //  stxns.push(algosdk.signTransaction(txn, sk).blob)
+  //}
+  //console.log("SEND TXNS")
+  //await client.sendRawTransaction(stxns).do()
+  
+  // UNSTAKE
+  //console.log("UNSTAKE")
+  //let unstakeTxns = await staking.getUnstakeTxns(user, 10000)
+  //console.log("SIGN TXNS")
+  //stxns = []
+  //for (const txn of unstakeTxns) {
+  //  stxns.push(algosdk.signTransaction(txn, sk).blob)
+  //}
+  //console.log("SEND TXNS")
+  //await client.sendRawTransaction(stxns).do()
+
+  // CLAIM
+  console.log("CLAIM")
+  let claimTxns = await staking.getClaimTxns(user)
+  console.log("SIGN TXNS")
+  stxns = []
+  for (const txn of claimTxns) {
+    stxns.push(algosdk.signTransaction(txn, sk).blob)
+  }
+  console.log("SEND TXNS")
+  await client.sendRawTransaction(stxns).do()
   
   // OPT IN TO MANAGER
   //console.log("OPT IN")
