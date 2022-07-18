@@ -1,6 +1,6 @@
 {
   "name": "@algofi/v1",
-  "version": "0.2.1",
+  "version": "0.2.3",
   "description": "The official JavaScript SDK for the V2 Algofi Lending Market",
   "main": "dist/index.js",
   "files": [
