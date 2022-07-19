@@ -34,13 +34,18 @@ export default class stakingUser {
   async loadState(userLocalStates: {}) {
     this.optedInStakingContracts = []
     this.userStakingStates = {}
-    
+
     for (const [formattedAppId, userLocalState] of Object.entries(userLocalStates)) {
       const appId = parseInt(formattedAppId)
       if (appId in this.stakingClient.stakingContracts) {
         this.optedInStakingContracts.push(appId)
         let storageAddress = parseAddressBytes(userLocalState[V1_STAKING_STRINGS.user_storage_address])
-        this.userStakingStates[appId] = new V1UserStakingState(this.algod, this.stakingClient.stakingContracts[appId], storageAddress)
+        this.userStakingStates[appId] = new V1UserStakingState(
+          this.algod,
+          this.stakingClient.stakingContracts[appId],
+          storageAddress
+        )
+        await this.userStakingStates[appId].loadState()
       }
     }
   }
