@@ -6,7 +6,7 @@ import { getApplicationGlobalState, getLocalStates } from "../stateUtils"
 
 // local
 import GovernanceClient from "./governanceClient"
-import GovernanceConfig, { ProposalConfig } from "./governanceConfig"
+import GovernanceConfig, { ADMIN_STRINGS, ProposalConfig } from "./governanceConfig"
 import { PROPOSAL_STRINGS } from "./governanceConfig"
 
 export default class Proposal {
@@ -29,10 +29,17 @@ export default class Proposal {
   }
 
   async loadState() {
-    // Proposal should only be opted into the admin contract
-    const proposalLocalStates = getLocalStates(this.algod, this.address)
-    // TODO, from here we should just need to access the votes for and against fields on the proposal's local state with the admin contract
-    const globalState = getApplicationGlobalState(this.algod, this.appId)
+    // Set proposal local state
+    const proposalLocalStates: { [key: string]: {} } = await getLocalStates(this.algod, this.address)
+    for (const [key, value] of Object.entries(proposalLocalStates)) {
+      const appId = parseInt(key)
+      if (appId == this.govClient.admin.adminAppId) {
+        this.votesFor = value[ADMIN_STRINGS.votes_for]
+        this.votesAgainst = value[ADMIN_STRINGS.votes_against]
+      }
+    }
+    // Set proposal global state
+    const globalState = await getApplicationGlobalState(this.algod, this.appId)
     this.title = globalState[PROPOSAL_STRINGS.title]
     this.link = globalState[PROPOSAL_STRINGS.link]
   }

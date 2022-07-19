@@ -5,19 +5,26 @@ export default class GovernanceConfig {
   public adminAppId: number
   public votingEscrowAppId: number
   public proposalFactoryAppId: number
-  constructor(adminAppId: number, votingEscrowAppId: number, proposalFactoryAppId: number) {
+  public rewardsManagerAppId: number
+  constructor(
+    adminAppId: number,
+    votingEscrowAppId: number,
+    proposalFactoryAppId: number,
+    rewardsManagerAppId: number
+  ) {
     this.adminAppId = adminAppId
     this.votingEscrowAppId = votingEscrowAppId
     this.proposalFactoryAppId = proposalFactoryAppId
+    this.rewardsManagerAppId = rewardsManagerAppId
   }
 }
 
 export const GovernanceConfigs = {
   // TODO launch contracts
-  [Network.MAINNET]: new GovernanceConfig(0, 0, 0),
-  [Network.MAINNET_CLONE]: new GovernanceConfig(0, 0, 0),
-  [Network.MAINNET_CLONE2]: new GovernanceConfig(0, 0, 0),
-  [Network.TESTNET]: new GovernanceConfig(0, 0, 0)
+  [Network.MAINNET]: new GovernanceConfig(0, 0, 0, 0),
+  [Network.MAINNET_CLONE]: new GovernanceConfig(0, 0, 0, 0),
+  [Network.MAINNET_CLONE2]: new GovernanceConfig(0, 0, 0, 0),
+  [Network.TESTNET]: new GovernanceConfig(0, 0, 0, 0)
 }
 
 export class ProposalConfig {

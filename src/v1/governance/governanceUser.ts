@@ -14,7 +14,7 @@ export default class governanceUser {
   public userAdminState: UserAdminState
   public userRewardsManagerState: UserRewardsManagerState
 
-  constructor(governanceClient: GovernanceClient, address) {
+  constructor(governanceClient: GovernanceClient, address: string) {
     this.governanceClient = governanceClient
     this.algod = this.governanceClient.algod
     this.address = address

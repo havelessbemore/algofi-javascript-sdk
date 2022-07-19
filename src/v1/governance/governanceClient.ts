@@ -43,4 +43,6 @@ export default class GovernanceClient {
     const newRewardsManager = new RewardsManager()
     this.rewardsManager = newRewardsManager
   }
+
+  async getOptInTxns() {}
 }
