@@ -230,6 +230,10 @@ export default class Market {
   convertUnderlyingToUSD(amount: number): number {
     return (amount * this.oracle.rawPrice) / (this.oracle.scaleFactor * FIXED_3_SCALE_FACTOR)
   }
+  
+  convertUSDToUnderlying(amount: number): number {
+    return (amount * this.oracle.scaleFactor * FIXED_3_SCALE_FACTOR) / (this.oracle.rawPrice)
+  }
 
   bAssetToAssetAmount(amount: number): AssetAmount {
     if (amount == 0) {
@@ -255,6 +259,22 @@ export default class Market {
 
   underlyingToBAssetAmount(amount: number): number {
     return Math.floor((amount * this.bAssetCirculation) / this.getUnderlyingSupplied())
+  }
+
+  // QUOTES
+  
+  getMaximumWithdrawAmount(user: AlgofiUser, borrowUtilLimit: number=0.9): AssetAmount {
+    let userExcessScalledCollateral = user.lending.netScaledCollateral - user.lending.netScaledBorrow / borrowUtilLimit
+    let maximumWithdrawUSD = userExcessScalledCollateral * FIXED_3_SCALE_FACTOR / this.collateralFactor
+    let maximumWithdrawUnderlying = Math.floor(this.convertUSDToUnderlying(maximumWithdrawUSD))
+    return new AssetAmount(maximumWithdrawUnderlying, maximumWithdrawUSD)
+  }
+
+  getMaximumBorrowAmount(user: AlgofiUser, borrowUtilLimit: number=0.9): AssetAmount {
+    let userExcessScalledCollateral = user.lending.netScaledCollateral - user.lending.netScaledBorrow / borrowUtilLimit
+    let maximumBorrowUSD = userExcessScalledCollateral * this.borrowFactor / FIXED_3_SCALE_FACTOR
+    let maximumBorrowUnderlying = Math.floor(this.convertUSDToUnderlying(maximumBorrowUSD))
+    return new AssetAmount(maximumBorrowUnderlying, maximumBorrowUSD)
   }
 
   // TRANSACTIONS
