@@ -34,11 +34,11 @@ export default class Admin {
   public minimumVeBankToPropose: number
   public proposals: { [key: number]: Proposal }
 
-  constructor(governanceClient: GovernanceClient, governanceConfig: GovernanceConfig) {
+  constructor(governanceClient: GovernanceClient) {
     this.governanceClient = governanceClient
     this.algod = this.governanceClient.algod
-    this.adminAppId = governanceConfig.votingEscrowAppId
-    this.proposalFactoryAppId = governanceConfig.proposalFactoryAppId
+    this.adminAppId = governanceClient.governanceConfig.votingEscrowAppId
+    this.proposalFactoryAppId = governanceClient.governanceConfig.proposalFactoryAppId
     this.proposalFactoryAddress = getApplicationAddress(this.proposalFactoryAppId)
   }
 
@@ -63,7 +63,6 @@ export default class Admin {
     // TODO get add them to the dictionary for proposals
   }
 
-  // TODO implement this
   async getUpdateVeBankDataTxns() {}
   async getVoteTxns() {}
   async getDelegateTxns() {}

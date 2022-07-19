@@ -13,14 +13,15 @@ export default class VotingEscrow {
   public totalLocked: number
   public totalVebank: number
   public assetId: number
+  public votingEscrowMaxTimeLockSeconds: number
+  public votingEscrowMinTimeLockSeconds: number
 
-  // TODO use config from client
-  // Put max lock time and min lock time in governance config
-  // put them in this object as well
-  constructor(governanceClient: GovernanceClient, governanceConfig: GovernanceConfig) {
+  constructor(governanceClient: GovernanceClient) {
     this.governanceClient = governanceClient
     this.algod = this.governanceClient.algod
-    this.appId = governanceConfig.votingEscrowAppId
+    this.appId = governanceClient.governanceConfig.votingEscrowAppId
+    this.votingEscrowMaxTimeLockSeconds = governanceClient.governanceConfig.votingEscrowMaxTimeLockSeconds
+    this.votingEscrowMinTimeLockSeconds = governanceClient.governanceConfig.votingEscrowMinTimeLockSeconds
   }
 
   async loadState() {

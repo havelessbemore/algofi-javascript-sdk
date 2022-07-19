@@ -31,22 +31,15 @@ export default class governanceUser {
         this.storageAddress = userStorageAddress
         // Get storage account local states
         const userStorageLocalStates = await getLocalStates(this.algod, userStorageAddress)
-        // Get list of proposals to get state for
-        // TODO do construction in UserAdminState
-        const proposals = Object.keys(this.governanceClient.admin.proposals)
-        this.userAdminState = new UserAdminState(
-          this.storageAddress,
-          userStorageLocalStates,
-          proposals,
-          this.governanceClient.admin.adminAppId
-        )
+        this.userAdminState = new UserAdminState(this.storageAddress, userStorageLocalStates, this.governanceClient)
       }
       // Case when we have the local state of the user with the voting escrow contract
       if (appId == this.governanceClient.votingEscrow.appId) {
         this.userVotingEscrowState = new UserVotingEscrowState(value)
       }
+      if (appId == this.governanceClient.rewardsManager.appId) {
+        this.userRewardsManagerState = new UserRewardsManagerState()
+      }
     }
-    // TODO put this into the for loop
-    this.userRewardsManagerState = new UserRewardsManagerState()
   }
 }

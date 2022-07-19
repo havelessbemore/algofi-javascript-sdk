@@ -20,13 +20,11 @@ export default class Proposal {
   public link: string
   // To get local state for votes for and against
   public adminAppId: number
-  // TODO Make proposal config just an appid
-  // TODO get governance config from govclient (admin too)
-  constructor(govClient: GovernanceClient, proposalConfig: ProposalConfig, governanceConfig: GovernanceConfig) {
+  constructor(govClient: GovernanceClient, proposalAppId) {
     this.govClient = govClient
     this.algod = this.govClient.algod
-    this.appId = proposalConfig.appId
-    this.adminAppId = governanceConfig.adminAppId
+    this.appId = proposalAppId
+    this.adminAppId = govClient.governanceConfig.adminAppId
     this.address = getApplicationAddress(this.appId)
   }
 

@@ -6,6 +6,8 @@ export default class GovernanceConfig {
   public votingEscrowAppId: number
   public proposalFactoryAppId: number
   public rewardsManagerAppId: number
+  public votingEscrowMaxTimeLockSeconds: number
+  public votingEscrowMinTimeLockSeconds: number
   constructor(
     adminAppId: number,
     votingEscrowAppId: number,
@@ -16,6 +18,10 @@ export default class GovernanceConfig {
     this.votingEscrowAppId = votingEscrowAppId
     this.proposalFactoryAppId = proposalFactoryAppId
     this.rewardsManagerAppId = rewardsManagerAppId
+    // 4 years
+    this.votingEscrowMaxTimeLockSeconds = 60 * 60 * 24 * 365 * 4
+    // 1 week
+    this.votingEscrowMinTimeLockSeconds = 60 * 60 * 24 * 7
   }
 }
 

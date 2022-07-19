@@ -21,26 +21,26 @@ export default class GovernanceClient {
   public admin: Admin
   public votingEscrow: VotingEscrow
   public rewardsManager: RewardsManager
-  public govConfig: GovernanceConfig
+  public governanceConfig: GovernanceConfig
 
   constructor(algofiClient: AlgofiClient) {
     this.algofiClient = algofiClient
     this.algod = this.algofiClient.algod
     this.network = this.algofiClient.network
-    this.govConfig = GovernanceConfigs[this.network]
+    this.governanceConfig = GovernanceConfigs[this.network]
   }
 
   async loadState() {
     // Creating new Admin + Proposal Factory and filling in state
-    this.admin = new Admin(this, this.govConfig)
+    this.admin = new Admin(this)
     this.admin.loadState()
 
     // Creating new Voting Escrow and filling in state
-    this.votingEscrow = new VotingEscrow(this, this.govConfig)
+    this.votingEscrow = new VotingEscrow(this)
     this.votingEscrow.loadState()
 
     // Put in empty load state function
-    this.rewardsManager= new RewardsManager()
+    this.rewardsManager= new RewardsManager(this, this.governanceConfig)
   }
 
   getUser(address: string): GovernanceUser {
