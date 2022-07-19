@@ -12,6 +12,7 @@ import RewardsManager from "./rewardsManager"
 // local
 import GovernanceConfig, { GovernanceConfigs } from "./governanceConfig"
 import VotingEscrow from "./votingEscrow"
+import GovernanceUser from "./governanceUser"
 
 export default class GovernanceClient {
   public algofiClient: AlgofiClient
@@ -31,18 +32,19 @@ export default class GovernanceClient {
 
   async loadState() {
     // Creating new Admin + Proposal Factory and filling in state
-    const newAdmin = new Admin(this, this.govConfig)
-    newAdmin.loadState()
-    this.admin = newAdmin
+    this.admin = new Admin(this, this.govConfig)
+    this.admin.loadState()
 
     // Creating new Voting Escrow and filling in state
-    const newVotingEscrow = new VotingEscrow(this, this.govConfig)
-    newVotingEscrow.loadState()
-    this.votingEscrow = newVotingEscrow
+    this.votingEscrow = new VotingEscrow(this, this.govConfig)
+    this.votingEscrow.loadState()
 
-    const newRewardsManager = new RewardsManager()
-    this.rewardsManager = newRewardsManager
+    // Put in empty load state function
+    this.rewardsManager= new RewardsManager()
   }
 
+  getUser(address: string): GovernanceUser {
+    return new 
+  }
   async getOptInTxns() {}
 }

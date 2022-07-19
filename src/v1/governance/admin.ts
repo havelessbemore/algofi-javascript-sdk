@@ -1,10 +1,12 @@
 // IMPORTS
 
 // external
-import { Algodv2, getApplicationAddress } from "algosdk"
+import { Algodv2, getApplicationAddress, makeApplicationNoOpTxnFromObject, Transaction } from "algosdk"
+import AlgofiUser from "../algofiUser"
 
 // global
 import { getApplicationGlobalState } from "../stateUtils"
+import { getParams } from "../transactionUtils"
 
 // local
 import GovernanceClient from "./governanceClient"
@@ -12,15 +14,18 @@ import GovernanceConfig, { GovernanceConfigs, ADMIN_STRINGS, PROPOSAL_FACTORY_ST
 import Proposal from "./proposal"
 
 export default class Admin {
+
   // General
   public governanceClient: GovernanceClient
   public algod: Algodv2
+
   // Admin specific
   public adminAppId: number
   public quorumValue: number
   public superMajority: number
   public proposalDuration: number
   public proposalExecutionDelay: number
+
   // Proposal factory specific
   public proposalFactoryAppId: number
   public proposalFactoryAddress: string
@@ -38,6 +43,7 @@ export default class Admin {
   }
 
   async loadState() {
+
     // Setting state for admin
     const globalStateAdmin = await getApplicationGlobalState(this.algod, this.adminAppId)
     this.quorumValue = globalStateAdmin[ADMIN_STRINGS.quorum_value]
@@ -47,6 +53,7 @@ export default class Admin {
 
     // Setting state for proposal factory
     const globalStateProposalFactory = await getApplicationGlobalState(this.algod, this.proposalFactoryAppId)
+    // Put this in config (fixed)
     this.govToken = globalStateProposalFactory[PROPOSAL_FACTORY_STRINGS.gov_token]
     this.proposalTemplateId = globalStateProposalFactory[PROPOSAL_FACTORY_STRINGS.proposal_template]
     this.minimumVeBankToPropose = globalStateProposalFactory[PROPOSAL_FACTORY_STRINGS.minimum_ve_bank_to_propose]
@@ -58,16 +65,28 @@ export default class Admin {
 
   // TODO implement this
   async getUpdateVeBankDataTxns() {}
-  // TODO implement this
-  async getLockTxns() {}
-  // TODO implement this
-  async getExtendLockTxns() {}
-  // TODO implement this
-  async getIncreaseLockAmountTxns() {}
-  // TODO implement this
-  async getClaimTxns() {}
-  // TODO implement this
-  async getCreateProposalTxns() {}
-  // TODO implement this
-  async canUserPropose() {}
+  async getVoteTxns() {}
+  async getDelegateTxns() {}
+  async getValidateTxns() {}
+  async getUndelegateTxns() {}
+  async getDelegatedVoteTxns() {}
+  async getCloseOutFromProposalTxns() {}
+  async getSetOpenToDelegationTxns(user: AlgofiUser): Promise<Transaction[]> {
+    const params = await getParams(this.algod)
+    const txns = []
+    const enc = new TextEncoder()
+    const openToDelegationTxn = makeApplicationNoOpTxnFromObject({
+      from:user.address,
+      appIndex:this.adminAppId,
+      appArgs:[enc.encode(ADMIN_STRINGS.set_open_to_delegation)],
+      foreignApps:undefined,
+      suggestedParams:params,
+      accounts:[user],
+      foreignAssets:,
+      rekeyTo:
+    })
+    txns.push(openToDelegationTxn)
+    return txns
+  }
+  async getSetNotOpenToDelegationTxns() {}
 }

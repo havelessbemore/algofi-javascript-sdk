@@ -17,6 +17,9 @@ import StakingClient from "./staking/stakingClient"
 // v1 staking
 import V1StakingClient from "./v1_staking/v1_stakingClient"
 
+// governance
+import GovernanceClient from "./governance/governanceClient"
+
 // INTERFACE
 
 export default class AlgofiClient {
@@ -34,6 +37,9 @@ export default class AlgofiClient {
   // v1 staking
   public v1Staking: V1StakingClient
 
+  // governance
+  public governance: GovernanceClient
+
   constructor(algod: Algodv2, network: Network) {
     this.algod = algod
     this.network = network
@@ -47,6 +53,9 @@ export default class AlgofiClient {
 
     // v1 staking
     this.v1Staking = new V1StakingClient(this)
+
+    // governance
+    this.governance = new GovernanceClient(this)
   }
 
   async loadState() {

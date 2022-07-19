@@ -17,6 +17,7 @@ export class UserVotingEscrowState {
   }
 }
 
+// Make each kind of state their own file
 export class UserAdminState {
   public storageAddress: string
   public openToDelegation: number
@@ -29,6 +30,8 @@ export class UserAdminState {
     proposalList: string[],
     adminAppId: number
   ) {
+    // TODO Fix name
+    // pass in governance client instead of proposal list
     const proposalListNumbers = proposalList.map(proposal => parseInt(proposal))
     this.storageAddress = storageAddress
     // Loop through to get storage account's local state on admin

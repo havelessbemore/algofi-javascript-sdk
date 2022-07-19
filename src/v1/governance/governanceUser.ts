@@ -32,6 +32,7 @@ export default class governanceUser {
         // Get storage account local states
         const userStorageLocalStates = await getLocalStates(this.algod, userStorageAddress)
         // Get list of proposals to get state for
+        // TODO do construction in UserAdminState
         const proposals = Object.keys(this.governanceClient.admin.proposals)
         this.userAdminState = new UserAdminState(
           this.storageAddress,
@@ -45,6 +46,7 @@ export default class governanceUser {
         this.userVotingEscrowState = new UserVotingEscrowState(value)
       }
     }
+    // TODO put this into the for loop
     this.userRewardsManagerState = new UserRewardsManagerState()
   }
 }
