@@ -21,6 +21,7 @@ export default class Admin {
 
   // Admin specific
   public adminAppId: number
+  public adminAddress: string
   public quorumValue: number
   public superMajority: number
   public proposalDuration: number
@@ -40,6 +41,7 @@ export default class Admin {
     this.adminAppId = governanceClient.governanceConfig.votingEscrowAppId
     this.proposalFactoryAppId = governanceClient.governanceConfig.proposalFactoryAppId
     this.proposalFactoryAddress = getApplicationAddress(this.proposalFactoryAppId)
+    this.adminAddress = getApplicationAddress(this.adminAppId)
   }
 
   async loadState() {
