@@ -159,7 +159,8 @@ export default class Market {
       this.algod,
       state[MARKET_STRINGS.oracle_app_id],
       Base64Encoder.decode(state[MARKET_STRINGS.oracle_price_field_name]),
-      state[MARKET_STRINGS.oracle_price_scale_factor]
+      state[MARKET_STRINGS.oracle_price_scale_factor],
+      Math.pow(10, this.lendingClient.algofiClient.assets[this.underlyingAssetId].decimals)
     )
     await this.oracle.loadPrice()
 
