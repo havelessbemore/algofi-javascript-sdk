@@ -4,7 +4,8 @@ const algofi = require("../.")
 //const m = "frame auto erosion drop weasel lecture health marine aisle stuff home harsh enough result market boost unknown carbon approve hello deputy what member abstract penalty"
 //const a = "F44Y7B4O4DPUOXPZTHHJ36N7INEG7G4DC6XZ6CSDRORAQQW7YOE4KBZYPU"
 //const a = "WO7ZA3GTZZTWEIU427ZZZ674RPYUUN5LOQJF5TBY2YYFBTTNOR33X45RYI"
-const m = "chicken myth waste moral chuckle boil gossip cash gaze wreck devote give inhale because mango asthma relief grain power castle february level hazard about wish"
+const m =
+  "chicken myth waste moral chuckle boil gossip cash gaze wreck devote give inhale because mango asthma relief grain power castle february level hazard about wish"
 const a = "2NJEG3XKJZQ4PDSFXGIHOSTTY7Q7MBFZ76JQPMWNWV7O3LIB3T3JJYWLPE"
 const decoded_a = algosdk.decodeAddress(a)
 const sk = algosdk.mnemonicToSecretKey(m).sk
@@ -19,17 +20,13 @@ async function test() {
   console.log("TESTING")
   let a_client = new algofi.AlgofiClient(client, algofi.Network.MAINNET_CLONE2)
   await a_client.loadState()
-
   console.log("STATE LOADED")
   let user = await a_client.getUser(a)
-  //let market = a_client.lending.markets[802881530]
-  let stxns = []
-  
-  //console.log(user.lending)
-  let staking = a_client.v1Staking.stakingContracts[482625868]
-  //console.log(staking)
-  
-  
+  let market = a_client.lending.markets[802881530]
+  // let stxns = []
+  // //console.log(user.lending)
+  // let staking = a_client.v1Staking.stakingContracts[482625868]
+  // //console.log(staking)
   // OPT IN TO STAKING CONTRACT
   //console.log("OPT IN")
   //let storageAccount = algosdk.generateAccount()
@@ -40,10 +37,8 @@ async function test() {
   //let stxn2 = algosdk.signTransaction(optInTxns[2], sk)
   //let stxn3 = algosdk.signTransaction(optInTxns[3], storageAccount.sk)
   //stxns = [stxn0.blob, stxn1.blob, stxn2.blob, stxn3.blob]
-
   //console.log("SEND TXNS")
   //let srt = await client.sendRawTransaction(stxns).do()
-  
   // STAKE
   //console.log("STAKE")
   //let stakeTxns = await staking.getStakeTxns(user, 10000)
@@ -54,7 +49,6 @@ async function test() {
   //}
   //console.log("SEND TXNS")
   //await client.sendRawTransaction(stxns).do()
-  
   // UNSTAKE
   //console.log("UNSTAKE")
   //let unstakeTxns = await staking.getUnstakeTxns(user, 10000)
@@ -65,18 +59,16 @@ async function test() {
   //}
   //console.log("SEND TXNS")
   //await client.sendRawTransaction(stxns).do()
-
-  // CLAIM
-  console.log("CLAIM")
-  let claimTxns = await staking.getClaimTxns(user)
-  console.log("SIGN TXNS")
-  stxns = []
-  for (const txn of claimTxns) {
-    stxns.push(algosdk.signTransaction(txn, sk).blob)
-  }
-  console.log("SEND TXNS")
-  await client.sendRawTransaction(stxns).do()
-  
+  // // CLAIM
+  // console.log("CLAIM")
+  // let claimTxns = await staking.getClaimTxns(user)
+  // console.log("SIGN TXNS")
+  // stxns = []
+  // for (const txn of claimTxns) {
+  //   stxns.push(algosdk.signTransaction(txn, sk).blob)
+  // }
+  // console.log("SEND TXNS")
+  // await client.sendRawTransaction(stxns).do()
   // OPT IN TO MANAGER
   //console.log("OPT IN")
   //let storageAccount = algosdk.generateAccount()
@@ -88,7 +80,6 @@ async function test() {
   //stxns = [stxn0.blob, stxn1.blob, stxn2.blob]
   //console.log("SEND TXNS")
   //let srt = await client.sendRawTransaction(stxns).do()
-  
   // OPT IN TO MARKET
   //console.log("MARKET OPT IN")
   //let optInTxns = await a_client.lending.manager.getMarketOptInTxns(user, market)
@@ -99,7 +90,6 @@ async function test() {
   //stxns = [stxn0.blob, stxn1.blob, stxn2.blob]
   //console.log("SEND TXNS")
   //let srt = await client.sendRawTransaction(stxns).do()
-  
   // OPT OUT OF MARKET
   //console.log("MARKET OPT OUT")
   //let optOutTxns = await a_client.lending.manager.getMarketOptOutTxns(user, market)
@@ -108,7 +98,6 @@ async function test() {
   //stxns = [stxn0.blob]
   //console.log("SEND TXNS")
   //let srt = await client.sendRawTransaction(stxns).do()
-  
   // MINT B ASSET
   //console.log("MINT")
   //let mintTxns = await market.getMintTxns(user, 100000000)
@@ -123,7 +112,6 @@ async function test() {
   //}
   //console.log("SEND TXNS")
   //await client.sendRawTransaction(stxns).do()
-  
   // ADD B ASSET COLLATERAL
   //console.log("ADD B ASSET COLLATERAL")
   //let addBAssetCollateralTxns = await market.getAddBAssetCollateralTxns(user, 100000000)
@@ -138,7 +126,6 @@ async function test() {
   //}
   //console.log("SEND TXNS")
   //await client.sendRawTransaction(stxns).do()
-  
   // ADD UNDERLYING COLLATERAL
   //console.log("ADD UNDERLYING COLLATERAL")
   //let addUnderlyingCollateralTxns = await market.getAddUnderlyingCollateralTxns(user, 100000000)
@@ -153,7 +140,6 @@ async function test() {
   //}
   //console.log("SEND TXNS")
   //await client.sendRawTransaction(stxns).do()
-  
   // REMOVE UNDERLYING COLLATERAL
   //console.log("REMOVE UNDERLYING COLLATERAL")
   //let removeUnderlyingCollateralTxns = await market.getRemoveUnderlyingCollateralTxns(user, 21000000)
@@ -169,7 +155,6 @@ async function test() {
   //}
   //console.log("SEND TXNS")
   //await client.sendRawTransaction(stxns).do()
-  
   // REMOVE B ASSET COLLATERAL
   //console.log("REMOVE B ASSET COLLATERAL")
   //let removeBAssetCollateralTxns = await market.getRemoveBAssetCollateralTxns(user, 100000000)
@@ -184,7 +169,6 @@ async function test() {
   //}
   //console.log("SEND TXNS")
   //await client.sendRawTransaction(stxns).do()
-  
   // BURN B ASSET
   //console.log("BURN B ASSET")
   //let burnTxns = await market.getBurnTxns(user, 100000000)
@@ -199,7 +183,6 @@ async function test() {
   //}
   //console.log("SEND TXNS")
   //await client.sendRawTransaction(stxns).do()
-  
   // BORROW
   //console.log("BORROW")
   //let borrowTxns = await market.getBorrowTxns(user, 1000000)
@@ -214,7 +197,6 @@ async function test() {
   //}
   //console.log("SEND TXNS")
   //await client.sendRawTransaction(stxns).do()
-  
   // REPAY BORROW
   //console.log("REPAY BORROW")
   //let repayBorrowTxns = await market.getRepayBorrowTxns(user, 110000000, true)
@@ -230,7 +212,6 @@ async function test() {
   //}
   //console.log("SEND TXNS")
   //await client.sendRawTransaction(stxns).do()
-  
   // CLAIM REWARDS
   //console.log("CLAIM REWARDS")
   //let claimRewardsTxns = await a_client.lending.getClaimRewardsTxns(user)
@@ -245,7 +226,6 @@ async function test() {
   //}
   //console.log("SEND TXNS")
   //await client.sendRawTransaction(stxns).do()
-  
   // SYNC VAULT
   //console.log("SYNC VAULT")
   //let syncVaultTxns = await market.getSyncVaultTxns(user)
@@ -260,7 +240,6 @@ async function test() {
   //}
   //console.log("SEND TXNS")
   //await client.sendRawTransaction(stxns).do()
-  
   // SEND GOVERNANCE TXN
   //console.log("SEND GOV TXN")
   //let govTxns = await a_client.lending.manager.getGovernanceTxns(user, user.address, "testing")
@@ -275,7 +254,6 @@ async function test() {
   //}
   //console.log("SEND TXNS")
   //await client.sendRawTransaction(stxns).do()
- 
   // SEND KEYREG
   //console.log("SEND KEYREG TXN")
   //let keyregTxns = await a_client.lending.manager.getKeyregTxns(user, user.address, "00000000000000000000000000000000", "00000000000000000000000000000000", "0000000000000000000000000000000000000000000000000000000000000000", 21833648, 21833648, 10000)
@@ -290,21 +268,20 @@ async function test() {
   //}
   //console.log("SEND TXNS")
   //await client.sendRawTransaction(stxns).do()
-
   // SEND KEYREG OFFLINE TXN
-//  console.log("SEND KEYREG OFFLINE TXN")
-//  let keyregOfflineTxns = await a_client.lending.manager.getKeyregOfflineTxns(user)
-//  console.log("SIGN TXNS")
-//  stxns = []
-//  for (const txn of keyregOfflineTxns) {
-//    if (algofi.addressEquals(txn.from, decoded_a)) {
-//      stxns.push(algosdk.signTransaction(txn, sk).blob)
-//    } else {
-//      stxns.push(algosdk.signLogicSigTransaction(txn, algofi.PERMISSIONLESS_SENDER_LOGIC_SIG.lsig).blob)
-//    }
-//  }
-//  console.log("SEND TXNS")
-//  await client.sendRawTransaction(stxns).do()
+  //  console.log("SEND KEYREG OFFLINE TXN")
+  //  let keyregOfflineTxns = await a_client.lending.manager.getKeyregOfflineTxns(user)
+  //  console.log("SIGN TXNS")
+  //  stxns = []
+  //  for (const txn of keyregOfflineTxns) {
+  //    if (algofi.addressEquals(txn.from, decoded_a)) {
+  //      stxns.push(algosdk.signTransaction(txn, sk).blob)
+  //    } else {
+  //      stxns.push(algosdk.signLogicSigTransaction(txn, algofi.PERMISSIONLESS_SENDER_LOGIC_SIG.lsig).blob)
+  //    }
+  //  }
+  //  console.log("SEND TXNS")
+  //  await client.sendRawTransaction(stxns).do()
 }
 
 test()

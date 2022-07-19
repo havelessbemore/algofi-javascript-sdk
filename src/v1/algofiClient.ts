@@ -44,7 +44,7 @@ export default class AlgofiClient {
 
     // staking
     this.staking = new StakingClient(this)
-    
+
     // v1 staking
     this.v1Staking = new V1StakingClient(this)
   }
@@ -55,7 +55,7 @@ export default class AlgofiClient {
 
     // staking
     await this.staking.loadState()
-    
+
     // v1 staking
     await this.v1Staking.loadState()
   }
