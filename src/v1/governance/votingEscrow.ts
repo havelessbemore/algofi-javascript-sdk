@@ -1,10 +1,19 @@
 // IMPORTS
 
-import { Algod, Algodv2 } from "algosdk"
+import {
+  Algod,
+  Algodv2,
+  getApplicationAddress,
+  makeApplicationNoOpTxnFromObject,
+  makeAssetTransferTxnWithSuggestedParamsFromObject,
+  Transaction
+} from "algosdk"
 import GovernanceClient from "./governanceClient"
 import GovernanceConfig from "./governanceConfig"
 import { getApplicationGlobalState } from "../stateUtils"
 import { VOTING_ESCROW_STRINGS } from "./governanceConfig"
+import AlgofiUser from "../algofiUser"
+import { getParams } from "../transactionUtils"
 
 export default class VotingEscrow {
   public governanceClient: GovernanceClient
@@ -33,9 +42,40 @@ export default class VotingEscrow {
   }
 
   // TODO implement this
-  async getUpdateVeBankDataTxns() {}
-  // TODO implement this
-  async getLockTxns() {}
+  async getUpdateVeBankDataTxns(userCalling: AlgofiUser, userUpdating: AlgofiUser): Promise<Transaction[]> {
+    const params = await getParams(this.algod)
+    const enc = new TextEncoder()
+
+    const updateUserVebankDataTxn = makeApplicationNoOpTxnFromObject({
+      from: userCalling.address,
+      appIndex: this.appId,
+      appArgs: [enc.encode(VOTING_ESCROW_STRINGS.update_vebank_data)],
+      suggestedParams: params,
+      accounts: [userUpdating.address],
+      foreignAssets: undefined,
+      foreignApps: undefined,
+      rekeyTo: undefined
+    })
+
+    return [updateUserVebankDataTxn]
+  }
+
+  async getLockTxns(user: AlgofiUser, amount: number): Promise<Transaction[]> {
+    const params = await getParams(this.algod)
+    const enc = new TextEncoder()
+
+    const govTokenTxn = await makeAssetTransferTxnWithSuggestedParamsFromObject({
+      from: user.address,
+      to: getApplicationAddress(this.appId),
+      assetIndex: this.governanceClient.governanceConfig.governanceToken,
+      amount: amount,
+      suggestedParams: params,
+      rekeyTo: undefined,
+      revocationTarget: undefined
+    })
+
+    return [govTokenTxn]
+  }
   // TODO implement this
   async getExtendLockTxns() {}
   // TODO implement this

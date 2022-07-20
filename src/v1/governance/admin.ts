@@ -4,6 +4,7 @@
 import {
   Algodv2,
   assignGroupID,
+  encodeUint64,
   getApplicationAddress,
   makeApplicationCloseOutTxnFromObject,
   makeApplicationNoOpTxnFromObject,
@@ -102,7 +103,7 @@ export default class Admin {
 
     return [updateUserVebankDataTxn]
   }
-  async getVoteTxns(user: AlgofiUser, proposal: Proposal): Promise<Transaction[]> {
+  async getVoteTxns(user: AlgofiUser, proposal: Proposal, forOrAgainst: number): Promise<Transaction[]> {
     const params = await getParams(this.algod)
     const enc = new TextEncoder()
     const txns = []
@@ -112,7 +113,7 @@ export default class Admin {
     const voteTxn = makeApplicationNoOpTxnFromObject({
       from: user.address,
       appIndex: this.adminAppId,
-      appArgs: [enc.encode(ADMIN_STRINGS.vote)],
+      appArgs: [enc.encode(ADMIN_STRINGS.vote), encodeUint64(forOrAgainst)],
       foreignApps: [proposal.appId],
       suggestedParams: params,
       accounts: [user.governance.userAdminState.storageAddress, getApplicationAddress(proposal.appId)],

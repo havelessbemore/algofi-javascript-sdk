@@ -8,16 +8,19 @@ export default class GovernanceConfig {
   public rewardsManagerAppId: number
   public votingEscrowMaxTimeLockSeconds: number
   public votingEscrowMinTimeLockSeconds: number
+  public governanceToken: number
   constructor(
     adminAppId: number,
     votingEscrowAppId: number,
     proposalFactoryAppId: number,
-    rewardsManagerAppId: number
+    rewardsManagerAppId: number,
+    governanceToken: number
   ) {
     this.adminAppId = adminAppId
     this.votingEscrowAppId = votingEscrowAppId
     this.proposalFactoryAppId = proposalFactoryAppId
     this.rewardsManagerAppId = rewardsManagerAppId
+    this.governanceToken = governanceToke
     // 4 years
     this.votingEscrowMaxTimeLockSeconds = 60 * 60 * 24 * 365 * 4
     // 1 week
@@ -27,10 +30,11 @@ export default class GovernanceConfig {
 
 export const GovernanceConfigs = {
   // Mainnet clone is launched
-  [Network.MAINNET]: new GovernanceConfig(0, 0, 0, 0),
-  [Network.MAINNET_CLONE]: new GovernanceConfig(812978999, 812971587, 812995964, 812966548),
-  [Network.MAINNET_CLONE2]: new GovernanceConfig(0, 0, 0, 0),
-  [Network.TESTNET]: new GovernanceConfig(0, 0, 0, 0)
+  [Network.MAINNET]: new GovernanceConfig(0, 0, 0, 0, 0),
+  // TODO GET GOV TOKEN
+  [Network.MAINNET_CLONE]: new GovernanceConfig(812978999, 812971587, 812995964, 812966548, 0),
+  [Network.MAINNET_CLONE2]: new GovernanceConfig(0, 0, 0, 0, 0),
+  [Network.TESTNET]: new GovernanceConfig(0, 0, 0, 0, 0)
 }
 
 export class ProposalConfig {
