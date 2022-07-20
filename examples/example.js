@@ -13,7 +13,16 @@ const algofi = require("../.")
 const userMnemonic =
   "estate stem promote spend deer crush carry album grid tail pilot mad ocean tilt quantum leisure hammer arctic swamp slush traffic trial entire abandon mutual"
 const govUser = algosdk.mnemonicToSecretKey(userMnemonic)
-const governanceStorgeAccountAddress = "FS3PC2SUWZ5JEPHXLOGWBDNIQVP6PDDYE3WIACPYOJMXZAYD26PWU3B5HY"
+const governanceStorgeAccountAddress = "M3Q7BMHSQWTJR4S4WHX2ZOYWXVYUSSNS4MSSVS3KOM4ZH6JQYZKUYF4N54"
+
+async function executeTransactions(transactions, client) {
+  let stxns = []
+  for (const txn of transactions) {
+    stxns.push(algosdk.signTransaction(txn, govUser.sk).blob)
+  }
+  console.log("SEND TXNS")
+  await client.sendRawTransaction(stxns).do()
+}
 
 async function test() {
   let client = new algosdk.Algodv2(
@@ -26,26 +35,60 @@ async function test() {
   let a_client = new algofi.AlgofiClient(client, algofi.Network.MAINNET_CLONE2)
   await a_client.loadState()
   console.log("STATE LOADED")
-  // Generate user object
+  // Generate user object and load state
   let algofiUser = await a_client.getUser(govUser.addr)
-  // Generate a storage account for the user
-  const governanceStorageAccount = algosdk.generateAccount()
-  // Get opt in txns
-  const optInTxns = await a_client.governance.getOptInTxns(algofiUser, governanceStorageAccount)
-  // Fund storage account
-  let stxn0 = algosdk.signTransaction(optInTxns[0], govUser.sk)
-  // Storage account opt into admin
-  let stxn1 = algosdk.signTransaction(optInTxns[1], governanceStorageAccount.sk)
-  // Primary account opt into admin
-  let stxn2 = algosdk.signTransaction(optInTxns[2], govUser.sk)
-  // Primary account into voting escrow
-  let stxn3 = algosdk.signTransaction(optInTxns[3], govUser.sk)
-  // Primary account into rewards manager
-  let stxn4 = algosdk.signTransaction(optInTxns[4], govUser.sk)
-  const stxns = [stxn0.blob, stxn1.blob, stxn2.blob, stxn3.blob, stxn4.blob]
-  console.log(governanceStorageAccount)
-  console.log("SEND OPTIN TXNS")
-  let srt = await client.sendRawTransaction(stxns).do()
+
+  // // GIANT OPT IN
+  // // Generate a storage account for the user
+  // const governanceStorageAccount = algosdk.generateAccount()
+  // // Get opt in txns
+  // const optInTxns = await a_client.governance.getOptInTxns(algofiUser, governanceStorageAccount)
+  // // Fund storage account
+  // let stxn0 = algosdk.signTransaction(optInTxns[0], govUser.sk)
+  // // Storage account opt into admin
+  // let stxn1 = algosdk.signTransaction(optInTxns[1], governanceStorageAccount.sk)
+  // // Primary account opt into admin
+  // let stxn2 = algosdk.signTransaction(optInTxns[2], govUser.sk)
+  // // Primary account into voting escrow
+  // let stxn3 = algosdk.signTransaction(optInTxns[3], govUser.sk)
+  // // Primary account into rewards manager
+  // let stxn4 = algosdk.signTransaction(optInTxns[4], govUser.sk)
+  // const stxns = [stxn0.blob, stxn1.blob, stxn2.blob, stxn3.blob, stxn4.blob]
+  // console.log(governanceStorageAccount)
+  // console.log("SEND OPTIN TXNS")
+  // let srt = await client.sendRawTransaction(stxns).do()
+
+  // // LOCK BANK TO GET VEBANK
+  // const lockBankTxns = await a_client.governance.votingEscrow.getLockTxns(
+  //   algofiUser,
+  //   1000000,
+  //   a_client.governance.governanceConfig.votingEscrowMaxTimeLockSeconds - 1
+  // )
+  // await executeTransactions(lockBankTxns, client)
+  // console.log(algofiUser.governance.userVotingEscrowState)
+
+  // // INCREASE LOCK AMOUNT
+  // const increaseLockAmountTxns = await a_client.governance.votingEscrow.getIncreaseLockAmountTxns(algofiUser, 100000000)
+  // await executeTransactions(increaseLockAmountTxns, client)
+  // console.log(algofiUser.governance.userVotingEscrowState)
+
+  // // CLAIM LOCKED BANK
+  // const claimTxns = await a_client.governance.votingEscrow.getClaimTxns(algofiUser)
+  // await executeTransactions(claimTxns, client)
+  // console.log(algofiUser.governance.userVotingEscrowState)
+
+  // // EXTEND LOCK
+  // const extendLockTxns = await a_client.governance.votingEscrow.getExtendLockTxns(algofiUser, 100)
+  // await executeTransactions(extendLockTxns, client)
+  // console.log(algofiUser.governance.userVotingEscrowState)
+
+  // // CREATE PROPOSAL
+  // const createProposalTxns = await a_client.governance.admin.getCreateProposalTxns(
+  //   algofiUser,
+  //   "test_proposal",
+  //   "test_proposal.com"
+  // )
+  // await executeTransactions(createProposalTxns, client)
 
   // let market = a_client.lending.markets[802881530]
   // let stxns = []

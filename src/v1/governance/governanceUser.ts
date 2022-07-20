@@ -34,6 +34,7 @@ export default class governanceUser {
       if (appId == this.governanceClient.votingEscrow.appId) {
         this.userVotingEscrowState = new UserVotingEscrowState(value)
       }
+      // Setting rewards manager
       if (appId == this.governanceClient.rewardsManager.appId) {
         this.userRewardsManagerState = new UserRewardsManagerState()
       }

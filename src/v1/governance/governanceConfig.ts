@@ -32,7 +32,7 @@ export const GovernanceConfigs = {
   // Mainnet clone is launched
   [Network.MAINNET]: new GovernanceConfig(0, 0, 0, 0, 0),
   [Network.MAINNET_CLONE]: new GovernanceConfig(0, 0, 0, 0, 0),
-  [Network.MAINNET_CLONE2]: new GovernanceConfig(812978999, 812971587, 812995964, 812966548, 812961635),
+  [Network.MAINNET_CLONE2]: new GovernanceConfig(813977235, 813976876, 813978348, 813973589, 813973490),
   [Network.TESTNET]: new GovernanceConfig(0, 0, 0, 0, 0)
 }
 

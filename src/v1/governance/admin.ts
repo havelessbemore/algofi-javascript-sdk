@@ -41,7 +41,7 @@ export default class Admin {
   public govToken: number
   public proposalTemplateId: number
   public minimumVeBankToPropose: number
-  public proposals: { [key: number]: Proposal }
+  public proposals: { [key: number]: Proposal } = {}
 
   constructor(governanceClient: GovernanceClient) {
     this.governanceClient = governanceClient
@@ -68,9 +68,11 @@ export default class Admin {
     this.proposalTemplateId = globalStateProposalFactory[PROPOSAL_FACTORY_STRINGS.proposal_template]
     this.minimumVeBankToPropose = globalStateProposalFactory[PROPOSAL_FACTORY_STRINGS.minimum_ve_bank_to_propose]
 
-    // TODO get created apps from account info
+    // Creating the proposal dictionary
     const proposalFactoryAddressInfo = await this.algod.accountInformation(this.proposalFactoryAddress).do()
-    // TODO get add them to the dictionary for proposals
+    for (const appObject of proposalFactoryAddressInfo["created-apps"]) {
+      this.proposals[appObject["id"]] = new Proposal(this.governanceClient, appObject["id"])
+    }
   }
 
   async getUpdateUserVeBankDataTxns(userCalling: AlgofiUser, userUpdating: AlgofiUser): Promise<Transaction[]> {
@@ -275,7 +277,7 @@ export default class Admin {
     // TODO figure out correct funding
     const fundAppTxn = makePaymentTxnWithSuggestedParamsFromObject({
       from: user.address,
-      amount: 100000,
+      amount: 4000000,
       to: this.proposalFactoryAddress,
       suggestedParams: params,
       closeRemainderTo: undefined,
@@ -293,7 +295,7 @@ export default class Admin {
       rekeyTo: undefined
     })
 
-    params.fee = params.fee + 1000
+    params.fee = 6000
     const proposalCreationTxn = makeApplicationNoOpTxnFromObject({
       from: user.address,
       appIndex: this.proposalFactoryAppId,
@@ -301,7 +303,7 @@ export default class Admin {
       suggestedParams: params,
       accounts: [user.address],
       foreignAssets: undefined,
-      foreignApps: undefined,
+      foreignApps: [this.governanceClient.votingEscrow.appId, this.proposalTemplateId, this.adminAppId],
       rekeyTo: undefined
     })
 

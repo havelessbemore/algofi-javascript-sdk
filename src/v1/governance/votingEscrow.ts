@@ -61,12 +61,12 @@ export default class VotingEscrow {
     return [updateUserVebankDataTxn]
   }
 
-  async getLockTxns(user: AlgofiUser, amount: number): Promise<Transaction[]> {
+  async getLockTxns(user: AlgofiUser, amount: number, durationSeconds: number): Promise<Transaction[]> {
     const params = await getParams(this.algod)
     const enc = new TextEncoder()
     const txns = []
 
-    const govTokenTxn = await makeAssetTransferTxnWithSuggestedParamsFromObject({
+    const govTokenTxn = makeAssetTransferTxnWithSuggestedParamsFromObject({
       from: user.address,
       to: getApplicationAddress(this.appId),
       assetIndex: this.governanceClient.governanceConfig.governanceToken,
@@ -76,10 +76,10 @@ export default class VotingEscrow {
       revocationTarget: undefined
     })
 
-    const lockTxn = await makeApplicationNoOpTxnFromObject({
+    const lockTxn = makeApplicationNoOpTxnFromObject({
       from: user.address,
       appIndex: this.appId,
-      appArgs: [enc.encode(VOTING_ESCROW_STRINGS.lock), encodeUint64(amount)],
+      appArgs: [enc.encode(VOTING_ESCROW_STRINGS.lock), encodeUint64(durationSeconds)],
       suggestedParams: params,
       accounts: undefined,
       foreignAssets: undefined,
@@ -95,7 +95,7 @@ export default class VotingEscrow {
     const params = await getParams(this.algod)
     const enc = new TextEncoder()
 
-    const extendLockTxn = await makeApplicationNoOpTxnFromObject({
+    const extendLockTxn = makeApplicationNoOpTxnFromObject({
       from: user.address,
       appIndex: this.appId,
       appArgs: [enc.encode(VOTING_ESCROW_STRINGS.extend_lock), encodeUint64(durationSeconds)],
@@ -114,7 +114,7 @@ export default class VotingEscrow {
     const enc = new TextEncoder()
     const txns = []
 
-    const govTokenTxn = await makeAssetTransferTxnWithSuggestedParamsFromObject({
+    const govTokenTxn = makeAssetTransferTxnWithSuggestedParamsFromObject({
       from: user.address,
       to: getApplicationAddress(this.appId),
       assetIndex: this.governanceClient.governanceConfig.governanceToken,
@@ -124,7 +124,7 @@ export default class VotingEscrow {
       revocationTarget: undefined
     })
 
-    const increaseLockAmountTxns = await makeApplicationNoOpTxnFromObject({
+    const increaseLockAmountTxns = makeApplicationNoOpTxnFromObject({
       from: user.address,
       appIndex: this.appId,
       appArgs: [enc.encode(VOTING_ESCROW_STRINGS.increase_lock_amount)],
@@ -142,6 +142,7 @@ export default class VotingEscrow {
   async getClaimTxns(user: AlgofiUser): Promise<Transaction[]> {
     const params = await getParams(this.algod)
     const enc = new TextEncoder()
+    params.fee = 2000
 
     const claimTxn = makeApplicationNoOpTxnFromObject({
       from: user.address,
