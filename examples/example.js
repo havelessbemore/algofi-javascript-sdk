@@ -90,6 +90,25 @@ async function test() {
   // )
   // await executeTransactions(createProposalTxns, client)
 
+  // // SET OPEN TO DELEGATION
+  // const setOpenToDelegationTxns = await a_client.governance.admin.getSetOpenToDelegationTxns(algofiUser)
+  // await executeTransactions(setOpenToDelegationTxns, client)
+  // console.log(algofiUser.governance.userAdminState)
+
+  // // SET NOT OPEN TO DELEGATION
+  // const setNotOpenToDelegationTxns = await a_client.governance.admin.getSetNotOpenToDelegationTxns(algofiUser)
+  // await executeTransactions(setNotOpenToDelegationTxns, client)
+  // console.log(algofiUser.governance.userAdminState)
+
+  // VOTE
+  // const proposal = a_client.governance.admin.proposals["813985876"]
+  // const voteTxns = await a_client.governance.admin.getVoteTxns(algofiUser, proposal, 1)
+  // await executeTransactions(voteTxns, client)
+  // await a_client.loadState()
+  // const proposalAfter = a_client.governance.admin.proposals["813985876"]
+  // console.log(proposalAfter)
+  console.log(algofiUser.governance.userVotingEscrowState)
+
   // let market = a_client.lending.markets[802881530]
   // let stxns = []
   // //console.log(user.lending)

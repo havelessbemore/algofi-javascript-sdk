@@ -72,6 +72,7 @@ export default class Admin {
     const proposalFactoryAddressInfo = await this.algod.accountInformation(this.proposalFactoryAddress).do()
     for (const appObject of proposalFactoryAddressInfo["created-apps"]) {
       this.proposals[appObject["id"]] = new Proposal(this.governanceClient, appObject["id"])
+      this.proposals[appObject["id"]].loadState()
     }
   }
 
@@ -81,6 +82,7 @@ export default class Admin {
     if (userCalling.address != userUpdating.address) {
       await userUpdating.loadState()
     }
+    params.fee = 2000
     const updateUserVebankDataTxn = makeApplicationNoOpTxnFromObject({
       from: userCalling.address,
       appIndex: this.adminAppId,
@@ -101,6 +103,7 @@ export default class Admin {
 
     // User calling update vebank on themselves
     const updateUserVebankDataTxn = await this.getUpdateUserVeBankDataTxns(user, user)
+    params.fee = 2000
     const voteTxn = makeApplicationNoOpTxnFromObject({
       from: user.address,
       appIndex: this.adminAppId,
@@ -112,8 +115,7 @@ export default class Admin {
       rekeyTo: undefined
     })
 
-    txns.push(updateUserVebankDataTxn, voteTxn)
-    return assignGroupID(txns)
+    return assignGroupID([...updateUserVebankDataTxn, voteTxn])
   }
 
   async getDelegateTxns(user: AlgofiUser, delegatee: AlgofiUser): Promise<Transaction[]> {
@@ -295,6 +297,7 @@ export default class Admin {
       rekeyTo: undefined
     })
 
+    // TODO figure out if this fee is correct
     params.fee = 6000
     const proposalCreationTxn = makeApplicationNoOpTxnFromObject({
       from: user.address,

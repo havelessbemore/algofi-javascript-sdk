@@ -29,7 +29,7 @@ export default class GovernanceConfig {
 }
 
 export const GovernanceConfigs = {
-  // Mainnet clone is launched
+  // Mainnet clone2 is launched
   [Network.MAINNET]: new GovernanceConfig(0, 0, 0, 0, 0),
   [Network.MAINNET_CLONE]: new GovernanceConfig(0, 0, 0, 0, 0),
   [Network.MAINNET_CLONE2]: new GovernanceConfig(813977235, 813976876, 813978348, 813973589, 813973490),
