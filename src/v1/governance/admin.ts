@@ -70,7 +70,6 @@ export default class Admin {
 
     // TODO get created apps from account info
     const proposalFactoryAddressInfo = await this.algod.accountInformation(this.proposalFactoryAddress).do()
-    console.log(proposalFactoryAddressInfo)
     // TODO get add them to the dictionary for proposals
   }
 
@@ -155,23 +154,17 @@ export default class Admin {
     return [validateTxn]
   }
 
-  async getUndelegateTxns(user: AlgofiUser, currentDelegatee: AlgofiUser): Promise<Transaction[]> {
+  async getUndelegateTxns(user: AlgofiUser): Promise<Transaction[]> {
     const params = await getParams(this.algod)
     const enc = new TextEncoder()
     const txns = []
-
-    // To get storage account
-    await currentDelegatee.loadState()
 
     const undelegateTxn = makeApplicationNoOpTxnFromObject({
       from: user.address,
       appIndex: this.adminAppId,
       appArgs: [enc.encode(ADMIN_STRINGS.undelegate)],
       suggestedParams: params,
-      accounts: [
-        user.governance.userAdminState.storageAddress,
-        currentDelegatee.governance.userAdminState.storageAddress
-      ],
+      accounts: [user.governance.userAdminState.storageAddress, user.governance.userAdminState.delegatingTo],
       foreignApps: undefined,
       foreignAssets: undefined,
       rekeyTo: undefined

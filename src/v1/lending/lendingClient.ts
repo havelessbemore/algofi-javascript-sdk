@@ -1,11 +1,7 @@
 // IMPORTS
 
 // external
-import algosdk, {
-  Algodv2,
-  Transaction,
-  assignGroupID
-} from "algosdk"
+import algosdk, { Algodv2, Transaction, assignGroupID } from "algosdk"
 
 // global
 import { Network } from "./../globals"
@@ -58,18 +54,16 @@ export default class LendingClient {
   getUser(address: string): LendingUser {
     return new LendingUser(this, address)
   }
-    
+
   async getClaimRewardsTxns(user: AlgofiUser): Promise<Transaction[]> {
     let transactions: Transaction[] = []
 
     for (const market of user.lending.optedInMarkets) {
-      console.log(market)
       if (transactions.length <= 12) {
         transactions = transactions.concat(await this.markets[market].getClaimRewardsTxns(user))
       }
     }
-    
+
     return assignGroupID(transactions)
   }
-  
 }

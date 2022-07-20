@@ -31,9 +31,8 @@ export default class GovernanceConfig {
 export const GovernanceConfigs = {
   // Mainnet clone is launched
   [Network.MAINNET]: new GovernanceConfig(0, 0, 0, 0, 0),
-  // TODO GET GOV TOKEN
-  [Network.MAINNET_CLONE]: new GovernanceConfig(812978999, 812971587, 812995964, 812966548, 0),
-  [Network.MAINNET_CLONE2]: new GovernanceConfig(0, 0, 0, 0, 0),
+  [Network.MAINNET_CLONE]: new GovernanceConfig(0, 0, 0, 0, 0),
+  [Network.MAINNET_CLONE2]: new GovernanceConfig(812978999, 812971587, 812995964, 812966548, 812961635),
   [Network.TESTNET]: new GovernanceConfig(0, 0, 0, 0, 0)
 }
 

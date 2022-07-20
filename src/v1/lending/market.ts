@@ -13,7 +13,13 @@ import algosdk, {
 } from "algosdk"
 
 // global
-import { FIXED_3_SCALE_FACTOR, FIXED_6_SCALE_FACTOR, ALGO_ASSET_ID, PERMISSIONLESS_SENDER_LOGIC_SIG, TEXT_ENCODER } from "./../globals"
+import {
+  FIXED_3_SCALE_FACTOR,
+  FIXED_6_SCALE_FACTOR,
+  ALGO_ASSET_ID,
+  PERMISSIONLESS_SENDER_LOGIC_SIG,
+  TEXT_ENCODER
+} from "./../globals"
 import { Base64Encoder } from "./../encoder"
 import { decodeBytes, parseAddressBytes } from "./../utils"
 import { getApplicationGlobalState, getLocalStates, getAccountBalances } from "./../stateUtils"
@@ -35,7 +41,6 @@ const DONT_CALC_USER_POSITION = false
 // HELPER CLASSES
 
 export class MarketRewardsProgram {
-
   // state
   public programNumber: number
   public rewardsPerSecond: number
@@ -45,15 +50,23 @@ export class MarketRewardsProgram {
   public index: bigint
 
   constructor(state: {}, programIndex: number) {
-      let rewardsStateBytes = Buffer.from(state[MARKET_STRINGS.rewards_program_state_prefix + String.fromCharCode.apply(null, encodeUint64(programIndex))], "base64").toString("binary")
-      this.programNumber = decodeUint64(decodeBytes(rewardsStateBytes.substr(0, 8)), "safe")
-      this.rewardsPerSecond = decodeUint64(decodeBytes(rewardsStateBytes.substr(8, 8)), "safe")
-      this.assetID = decodeUint64(decodeBytes(rewardsStateBytes.substr(16, 8)), "safe")
-      this.issued = decodeUint64(decodeBytes(rewardsStateBytes.substr(24, 8)), "safe")
-      this.claimed = decodeUint64(decodeBytes(rewardsStateBytes.substr(32, 8)), "safe")
+    let rewardsStateBytes = Buffer.from(
+      state[MARKET_STRINGS.rewards_program_state_prefix + String.fromCharCode.apply(null, encodeUint64(programIndex))],
+      "base64"
+    ).toString("binary")
+    this.programNumber = decodeUint64(decodeBytes(rewardsStateBytes.substr(0, 8)), "safe")
+    this.rewardsPerSecond = decodeUint64(decodeBytes(rewardsStateBytes.substr(8, 8)), "safe")
+    this.assetID = decodeUint64(decodeBytes(rewardsStateBytes.substr(16, 8)), "safe")
+    this.issued = decodeUint64(decodeBytes(rewardsStateBytes.substr(24, 8)), "safe")
+    this.claimed = decodeUint64(decodeBytes(rewardsStateBytes.substr(32, 8)), "safe")
 
-      let rawRewardsIndexBytes = new Uint8Array(Buffer.from(state[MARKET_STRINGS.rewards_index_prefix + String.fromCharCode.apply(null, encodeUint64(programIndex))], "base64"))
-      this.index = bytesToBigInt(rawRewardsIndexBytes)
+    let rawRewardsIndexBytes = new Uint8Array(
+      Buffer.from(
+        state[MARKET_STRINGS.rewards_index_prefix + String.fromCharCode.apply(null, encodeUint64(programIndex))],
+        "base64"
+      )
+    )
+    this.index = bytesToBigInt(rawRewardsIndexBytes)
   }
 }
 
@@ -381,13 +394,17 @@ export default class Market {
     return assignGroupID(preambleTransactions.concat([txn0, txn1]))
   }
 
-  async getRemoveUnderlyingCollateralTxns(user: AlgofiUser, underlyingAmount: number, removeMax: boolean = false): Promise<Transaction[]> {
+  async getRemoveUnderlyingCollateralTxns(
+    user: AlgofiUser,
+    underlyingAmount: number,
+    removeMax: boolean = false
+  ): Promise<Transaction[]> {
     // get b asset amount to remove
     let bAssetAmount = Math.min(
       this.underlyingToBAssetAmount(underlyingAmount),
       user.lending.userMarketStates[this.appId].b_asset_collateral
     )
-    
+
     if (removeMax) {
       bAssetAmount = user.lending.userMarketStates[this.appId].b_asset_collateral
     }
@@ -498,7 +515,11 @@ export default class Market {
     return assignGroupID(preambleTransactions.concat([txn0]))
   }
 
-  async getRepayBorrowTxns(user: AlgofiUser, underlyingAmount: number, repayMax: boolean = false): Promise<Transaction[]> {
+  async getRepayBorrowTxns(
+    user: AlgofiUser,
+    underlyingAmount: number,
+    repayMax: boolean = false
+  ): Promise<Transaction[]> {
     if (this.marketType == MarketType.VAULT) {
       throw "Repay borrow action not supported by vault market"
     }
@@ -539,11 +560,9 @@ export default class Market {
 
     return assignGroupID(preambleTransactions.concat([txn0, txn1]))
   }
-  
+
   // claim rewards
   async getClaimRewardsTxns(user: AlgofiUser): Promise<Transaction[]> {
-    console.log("getting txns")
-    
     const params = await getParams(this.algod)
     const transactions = []
 
@@ -556,7 +575,7 @@ export default class Market {
             transactions.push(getPaymentTxn(params, user.address, user.address, rewardsAssetID, 0))
           }
         }
-        
+
         params.fee = 3000
         const txn = algosdk.makeApplicationNoOpTxnFromObject({
           from: user.address,

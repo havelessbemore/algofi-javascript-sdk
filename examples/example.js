@@ -4,11 +4,16 @@ const algofi = require("../.")
 //const m = "frame auto erosion drop weasel lecture health marine aisle stuff home harsh enough result market boost unknown carbon approve hello deputy what member abstract penalty"
 //const a = "F44Y7B4O4DPUOXPZTHHJ36N7INEG7G4DC6XZ6CSDRORAQQW7YOE4KBZYPU"
 //const a = "WO7ZA3GTZZTWEIU427ZZZ674RPYUUN5LOQJF5TBY2YYFBTTNOR33X45RYI"
-const m =
-  "chicken myth waste moral chuckle boil gossip cash gaze wreck devote give inhale because mango asthma relief grain power castle february level hazard about wish"
-const a = "2NJEG3XKJZQ4PDSFXGIHOSTTY7Q7MBFZ76JQPMWNWV7O3LIB3T3JJYWLPE"
-const decoded_a = algosdk.decodeAddress(a)
-const sk = algosdk.mnemonicToSecretKey(m).sk
+// const m =
+//   "chicken myth waste moral chuckle boil gossip cash gaze wreck devote give inhale because mango asthma relief grain power castle february level hazard about wish"
+// const a = "2NJEG3XKJZQ4PDSFXGIHOSTTY7Q7MBFZ76JQPMWNWV7O3LIB3T3JJYWLPE"
+// const decoded_a = algosdk.decodeAddress(a)
+// const sk = algosdk.mnemonicToSecretKey(m).sk
+
+const userMnemonic =
+  "estate stem promote spend deer crush carry album grid tail pilot mad ocean tilt quantum leisure hammer arctic swamp slush traffic trial entire abandon mutual"
+const govUser = algosdk.mnemonicToSecretKey(userMnemonic)
+const governanceStorgeAccountAddress = "FS3PC2SUWZ5JEPHXLOGWBDNIQVP6PDDYE3WIACPYOJMXZAYD26PWU3B5HY"
 
 async function test() {
   let client = new algosdk.Algodv2(
@@ -21,8 +26,28 @@ async function test() {
   let a_client = new algofi.AlgofiClient(client, algofi.Network.MAINNET_CLONE2)
   await a_client.loadState()
   console.log("STATE LOADED")
-  let user = await a_client.getUser(a)
-  let market = a_client.lending.markets[802881530]
+  // Generate user object
+  let algofiUser = await a_client.getUser(govUser.addr)
+  // Generate a storage account for the user
+  const governanceStorageAccount = algosdk.generateAccount()
+  // Get opt in txns
+  const optInTxns = await a_client.governance.getOptInTxns(algofiUser, governanceStorageAccount)
+  // Fund storage account
+  let stxn0 = algosdk.signTransaction(optInTxns[0], govUser.sk)
+  // Storage account opt into admin
+  let stxn1 = algosdk.signTransaction(optInTxns[1], governanceStorageAccount.sk)
+  // Primary account opt into admin
+  let stxn2 = algosdk.signTransaction(optInTxns[2], govUser.sk)
+  // Primary account into voting escrow
+  let stxn3 = algosdk.signTransaction(optInTxns[3], govUser.sk)
+  // Primary account into rewards manager
+  let stxn4 = algosdk.signTransaction(optInTxns[4], govUser.sk)
+  const stxns = [stxn0.blob, stxn1.blob, stxn2.blob, stxn3.blob, stxn4.blob]
+  console.log(governanceStorageAccount)
+  console.log("SEND OPTIN TXNS")
+  let srt = await client.sendRawTransaction(stxns).do()
+
+  // let market = a_client.lending.markets[802881530]
   // let stxns = []
   // //console.log(user.lending)
   // let staking = a_client.v1Staking.stakingContracts[482625868]

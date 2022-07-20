@@ -5,9 +5,9 @@ import {
   Account,
   Algodv2,
   assignGroupID,
-  makeApplicationCallTxnFromObject,
   makeApplicationOptInTxnFromObject,
-  makePaymentTxnWithSuggestedParamsFromObject
+  makePaymentTxnWithSuggestedParamsFromObject,
+  Transaction
 } from "algosdk"
 
 // global
@@ -66,7 +66,7 @@ export default class GovernanceClient {
     const fundStorageAccountTxn = makePaymentTxnWithSuggestedParamsFromObject({
       from: user.address,
       // TODO figure out exact amount
-      amount: 100_000,
+      amount: 1_000_000,
       to: storageAccount.addr,
       suggestedParams: params,
       closeRemainderTo: undefined,
