@@ -3,6 +3,8 @@
 import {
   Algod,
   Algodv2,
+  assignGroupID,
+  encodeUint64,
   getApplicationAddress,
   makeApplicationNoOpTxnFromObject,
   makeAssetTransferTxnWithSuggestedParamsFromObject,
@@ -41,7 +43,6 @@ export default class VotingEscrow {
     this.assetId = globalState[VOTING_ESCROW_STRINGS.asset_id]
   }
 
-  // TODO implement this
   async getUpdateVeBankDataTxns(userCalling: AlgofiUser, userUpdating: AlgofiUser): Promise<Transaction[]> {
     const params = await getParams(this.algod)
     const enc = new TextEncoder()
@@ -63,6 +64,7 @@ export default class VotingEscrow {
   async getLockTxns(user: AlgofiUser, amount: number): Promise<Transaction[]> {
     const params = await getParams(this.algod)
     const enc = new TextEncoder()
+    const txns = []
 
     const govTokenTxn = await makeAssetTransferTxnWithSuggestedParamsFromObject({
       from: user.address,
@@ -74,12 +76,84 @@ export default class VotingEscrow {
       revocationTarget: undefined
     })
 
-    return [govTokenTxn]
+    const lockTxn = await makeApplicationNoOpTxnFromObject({
+      from: user.address,
+      appIndex: this.appId,
+      appArgs: [enc.encode(VOTING_ESCROW_STRINGS.lock), encodeUint64(amount)],
+      suggestedParams: params,
+      accounts: undefined,
+      foreignAssets: undefined,
+      foreignApps: undefined,
+      rekeyTo: undefined
+    })
+
+    txns.push(govTokenTxn, lockTxn)
+    return assignGroupID(txns)
   }
-  // TODO implement this
-  async getExtendLockTxns() {}
-  // TODO implement this
-  async getIncreaseLockAmountTxns() {}
-  // TODO implement this
-  async getClaimTxns() {}
+
+  async getExtendLockTxns(user: AlgofiUser, durationSeconds: number): Promise<Transaction[]> {
+    const params = await getParams(this.algod)
+    const enc = new TextEncoder()
+
+    const extendLockTxn = await makeApplicationNoOpTxnFromObject({
+      from: user.address,
+      appIndex: this.appId,
+      appArgs: [enc.encode(VOTING_ESCROW_STRINGS.extend_lock), encodeUint64(durationSeconds)],
+      suggestedParams: params,
+      accounts: undefined,
+      foreignAssets: undefined,
+      foreignApps: undefined,
+      rekeyTo: undefined
+    })
+
+    return [extendLockTxn]
+  }
+
+  async getIncreaseLockAmountTxns(user: AlgofiUser, amount: number): Promise<Transaction[]> {
+    const params = await getParams(this.algod)
+    const enc = new TextEncoder()
+    const txns = []
+
+    const govTokenTxn = await makeAssetTransferTxnWithSuggestedParamsFromObject({
+      from: user.address,
+      to: getApplicationAddress(this.appId),
+      assetIndex: this.governanceClient.governanceConfig.governanceToken,
+      amount: amount,
+      suggestedParams: params,
+      rekeyTo: undefined,
+      revocationTarget: undefined
+    })
+
+    const increaseLockAmountTxns = await makeApplicationNoOpTxnFromObject({
+      from: user.address,
+      appIndex: this.appId,
+      appArgs: [enc.encode(VOTING_ESCROW_STRINGS.increase_lock_amount)],
+      suggestedParams: params,
+      accounts: undefined,
+      foreignAssets: undefined,
+      foreignApps: undefined,
+      rekeyTo: undefined
+    })
+
+    txns.push(govTokenTxn, increaseLockAmountTxns)
+    return assignGroupID(txns)
+  }
+
+  async getClaimTxns(user: AlgofiUser): Promise<Transaction[]> {
+    const params = await getParams(this.algod)
+    const enc = new TextEncoder()
+
+    const claimTxn = makeApplicationNoOpTxnFromObject({
+      from: user.address,
+      appIndex: this.appId,
+      appArgs: [enc.encode(VOTING_ESCROW_STRINGS.claim)],
+      suggestedParams: params,
+      foreignAssets: [this.governanceClient.governanceConfig.governanceToken],
+      accounts: undefined,
+      foreignApps: undefined,
+      rekeyTo: undefined
+    })
+
+    return [claimTxn]
+  }
 }
