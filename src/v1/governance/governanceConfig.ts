@@ -20,7 +20,7 @@ export default class GovernanceConfig {
     this.votingEscrowAppId = votingEscrowAppId
     this.proposalFactoryAppId = proposalFactoryAppId
     this.rewardsManagerAppId = rewardsManagerAppId
-    this.governanceToken = governanceToke
+    this.governanceToken = governanceToken
     // 4 years
     this.votingEscrowMaxTimeLockSeconds = 60 * 60 * 24 * 365 * 4
     // 1 week

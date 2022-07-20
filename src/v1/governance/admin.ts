@@ -8,6 +8,7 @@ import {
   getApplicationAddress,
   makeApplicationCloseOutTxnFromObject,
   makeApplicationNoOpTxnFromObject,
+  makePaymentTxnWithSuggestedParamsFromObject,
   Transaction
 } from "algosdk"
 import AlgofiUser from "../algofiUser"
@@ -72,17 +73,6 @@ export default class Admin {
     console.log(proposalFactoryAddressInfo)
     // TODO get add them to the dictionary for proposals
   }
-  // make application noop txn from object template
-  // const voteTxn = makeApplicationNoOpTxnFromObject({
-  //   from:,
-  //   appIndex:,
-  //   appArgs:,
-  //   foreignApps:,
-  //   suggestedParams:,
-  //   accounts:,
-  //   foreignAssets:,
-  //   rekeyTo:
-  // })
 
   async getUpdateUserVeBankDataTxns(userCalling: AlgofiUser, userUpdating: AlgofiUser): Promise<Transaction[]> {
     const params = await getParams(this.algod)
@@ -124,6 +114,7 @@ export default class Admin {
     txns.push(updateUserVebankDataTxn, voteTxn)
     return assignGroupID(txns)
   }
+
   async getDelegateTxns(user: AlgofiUser, delegatee: AlgofiUser): Promise<Transaction[]> {
     const params = await getParams(this.algod)
     const enc = new TextEncoder()
@@ -281,5 +272,47 @@ export default class Admin {
     })
 
     return [setNotOpenToDelegationTxn]
+  }
+
+  async getCreateProposalTxns(user: AlgofiUser, title: string, link: string): Promise<Transaction[]> {
+    const params = await getParams(this.algod)
+    const txns = []
+    const enc = new TextEncoder()
+
+    // TODO figure out correct funding
+    const fundAppTxn = makePaymentTxnWithSuggestedParamsFromObject({
+      from: user.address,
+      amount: 100000,
+      to: this.proposalFactoryAddress,
+      suggestedParams: params,
+      closeRemainderTo: undefined,
+      rekeyTo: undefined
+    })
+
+    const validateUserAccountsTxn = makeApplicationNoOpTxnFromObject({
+      from: user.address,
+      appIndex: this.proposalFactoryAppId,
+      appArgs: [enc.encode(PROPOSAL_FACTORY_STRINGS.validate_user_account)],
+      suggestedParams: params,
+      accounts: undefined,
+      foreignAssets: undefined,
+      foreignApps: undefined,
+      rekeyTo: undefined
+    })
+
+    params.fee = params.fee + 1000
+    const proposalCreationTxn = makeApplicationNoOpTxnFromObject({
+      from: user.address,
+      appIndex: this.proposalFactoryAppId,
+      appArgs: [enc.encode(PROPOSAL_FACTORY_STRINGS.create_proposal), enc.encode(title), enc.encode(link)],
+      suggestedParams: params,
+      accounts: [user.address],
+      foreignAssets: undefined,
+      foreignApps: undefined,
+      rekeyTo: undefined
+    })
+
+    txns.push(fundAppTxn, validateUserAccountsTxn, proposalCreationTxn)
+    return assignGroupID(txns)
   }
 }
