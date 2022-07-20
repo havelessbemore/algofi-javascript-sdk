@@ -67,6 +67,9 @@ export default class AlgofiClient {
 
     // v1 staking
     await this.v1Staking.loadState()
+
+    // governance
+    await this.governance.loadState()
   }
 
   async getUser(address: string): Promise<AlgofiUser> {

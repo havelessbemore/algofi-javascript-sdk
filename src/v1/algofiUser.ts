@@ -64,7 +64,8 @@ export default class AlgofiUser {
     // v1staking
     this.v1Staking = this.algofiClient.v1Staking.getUser(this.address)
 
-    this.governance = this.
+    // governance
+    this.governance = this.algofiClient.governance.getUser(this.address)
   }
 
   async loadState() {
@@ -83,6 +84,9 @@ export default class AlgofiUser {
 
     // update user v1 staking state
     await this.v1Staking.loadState(localStates)
+
+    // update user v1 governance state
+    await this.governance.loadState(localStates)
   }
 
   isOptedInToAsset(assetId: number): boolean {

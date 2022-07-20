@@ -20,9 +20,8 @@ import AlgofiUser from "../algofiUser"
 // local
 import GovernanceConfig, { ADMIN_STRINGS, GovernanceConfigs, REWARDS_MANAGER_STRINGS } from "./governanceConfig"
 import VotingEscrow from "./votingEscrow"
-import GovernanceUser from "./governanceUser"
 import { getParams } from "../transactionUtils"
-import GetApplicationByID from "algosdk/dist/types/src/client/v2/algod/getApplicationByID"
+import governanceUser from "./governanceUser"
 
 export default class GovernanceClient {
   public algofiClient: AlgofiClient
@@ -51,6 +50,10 @@ export default class GovernanceClient {
 
     // Put in empty load state function
     this.rewardsManager = new RewardsManager(this, this.governanceConfig)
+  }
+
+  getUser(address: string) {
+    return new governanceUser(this, address)
   }
 
   // Will opt the user into every application
