@@ -1,4 +1,6 @@
 // IMPORTS
+
+// global
 import { Network } from "./../globals"
 
 export default class GovernanceConfig {

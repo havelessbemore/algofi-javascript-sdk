@@ -13,15 +13,15 @@ import {
 // global
 import AlgofiClient from "./../algofiClient"
 import { Network } from "./../globals"
-import Admin from "./admin"
-import RewardsManager from "./rewardsManager"
 import AlgofiUser from "../algofiUser"
+import { getParams } from "../transactionUtils"
 
 // local
 import GovernanceConfig, { ADMIN_STRINGS, GovernanceConfigs, REWARDS_MANAGER_STRINGS } from "./governanceConfig"
 import VotingEscrow from "./votingEscrow"
-import { getParams } from "../transactionUtils"
 import governanceUser from "./governanceUser"
+import Admin from "./admin"
+import RewardsManager from "./rewardsManager"
 
 export default class GovernanceClient {
   public algofiClient: AlgofiClient

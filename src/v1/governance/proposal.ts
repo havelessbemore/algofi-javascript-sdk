@@ -6,8 +6,7 @@ import { getApplicationGlobalState, getLocalStates } from "../stateUtils"
 
 // local
 import GovernanceClient from "./governanceClient"
-import GovernanceConfig, { ADMIN_STRINGS, ProposalConfig } from "./governanceConfig"
-import { PROPOSAL_STRINGS } from "./governanceConfig"
+import { ADMIN_STRINGS, PROPOSAL_STRINGS } from "./governanceConfig"
 
 export default class Proposal {
   public govClient: GovernanceClient

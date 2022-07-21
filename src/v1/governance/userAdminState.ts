@@ -1,4 +1,9 @@
+// IMPORTS
+
+// global
 import { parseAddressBytes } from "../utils"
+
+// local
 import GovernanceClient from "./governanceClient"
 import { ADMIN_STRINGS, PROPOSAL_STRINGS } from "./governanceConfig"
 

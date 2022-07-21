@@ -1,4 +1,9 @@
+// IMPORTS
+
+// external
 import { Algodv2 } from "algosdk"
+
+// local
 import GovernanceClient from "./governanceClient"
 import GovernanceConfig from "./governanceConfig"
 

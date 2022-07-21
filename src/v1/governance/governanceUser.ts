@@ -2,8 +2,12 @@
 
 // external
 import { Algodv2 } from "algosdk"
+
+// global
 import { getLocalStates } from "../stateUtils"
 import { parseAddressBytes } from "../utils"
+
+// local
 import GovernanceClient from "./governanceClient"
 import { ADMIN_STRINGS } from "./governanceConfig"
 import UserAdminState from "./userAdminState"

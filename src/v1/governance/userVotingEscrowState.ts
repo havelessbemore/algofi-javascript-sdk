@@ -1,3 +1,6 @@
+// IMPORTS
+
+// local
 import { VOTING_ESCROW_STRINGS } from "./governanceConfig"
 
 export default class UserVotingEscrowState {

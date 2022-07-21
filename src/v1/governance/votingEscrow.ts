@@ -1,5 +1,6 @@
 // IMPORTS
 
+// external
 import {
   Algod,
   Algodv2,
@@ -10,12 +11,15 @@ import {
   makeAssetTransferTxnWithSuggestedParamsFromObject,
   Transaction
 } from "algosdk"
-import GovernanceClient from "./governanceClient"
-import GovernanceConfig from "./governanceConfig"
+
+// global
 import { getApplicationGlobalState } from "../stateUtils"
-import { VOTING_ESCROW_STRINGS } from "./governanceConfig"
-import AlgofiUser from "../algofiUser"
 import { getParams } from "../transactionUtils"
+import AlgofiUser from "../algofiUser"
+
+// local
+import GovernanceClient from "./governanceClient"
+import { VOTING_ESCROW_STRINGS } from "./governanceConfig"
 
 export default class VotingEscrow {
   public governanceClient: GovernanceClient
