@@ -111,10 +111,10 @@ async function test() {
   // console.log(algofiUser.governance.userAdminState)
 
   // // VOTE
-  // const proposal = a_client.governance.admin.proposals["814643870"]
-  // const voteTxns = await a_client.governance.admin.getVoteTxns(algofiUser, proposal, 1)
-  // await executeTransactions(voteTxns, govUser.sk, client)
-  // const proposalAfter = a_client.governance.admin.proposals["814643870"]
+  // const proposal = a_client.governance.admin.proposals["814710912"]
+  // const voteTxns = await a_client.governance.admin.getVoteTxns(algofiUser2, proposal, 1)
+  // await executeTransactions(voteTxns, govUser2.sk, client)
+  // const proposalAfter = a_client.governance.admin.proposals["814710912"]
   // console.log(proposalAfter)
 
   // // DELEGATE
@@ -137,19 +137,23 @@ async function test() {
   // console.log(proposal.votesFor)
 
   // // VALIDATE
-  // const proposal = a_client.governance.admin.proposals["814643870"]
+  // const proposal = a_client.governance.admin.proposals["814710912"]
   // const validateTxns = await a_client.governance.admin.getValidateTxns(algofiUser, proposal)
   // await executeTransactions(validateTxns, govUser.sk, client)
-  // console.log(proposal.executionTime)
+  // console.log(proposal)
 
   // // CLOSE OUT FROM PROPOSAL
-  // const proposal = a_client.governance.admin.proposals["814643870"]
+  // const proposal = a_client.governance.admin.proposals["814710912"]
   // const closeOutFromProposalTxns = await a_client.governance.admin.getCloseOutFromProposalTxns(
   //   algofiUser,
   //   algofiUser2,
   //   proposal
   // )
   // await executeTransactions(closeOutFromProposalTxns, govUser.sk, client)
+  // console.log(algofiUser2.governance.userAdminState)
+
+  // console.log(a_client.governance.admin.proposals)
+  // console.log(a_client.governance.admin.proposalDuration)
 
   // let market = a_client.lending.markets[802881530]
   // let stxns = []

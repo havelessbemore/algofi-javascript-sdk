@@ -79,9 +79,7 @@ export default class Admin {
   async getUpdateUserVeBankDataTxns(userCalling: AlgofiUser, userUpdating: AlgofiUser): Promise<Transaction[]> {
     const params = await getParams(this.algod)
     const enc = new TextEncoder()
-    if (userCalling.address != userUpdating.address) {
-      await userUpdating.loadState()
-    }
+
     // TODO figure out correct amount
     params.fee = 5000
     const updateUserVebankDataTxn = makeApplicationNoOpTxnFromObject({
@@ -212,12 +210,9 @@ export default class Admin {
   ): Promise<Transaction[]> {
     const params = await getParams(this.algod)
     const enc = new TextEncoder()
-    // For storage account
-    if (userCalling.address != userClosingOut.address) {
-      userClosingOut.loadState()
-    }
 
-    const closeOutFromProposalTxn = await makeApplicationCloseOutTxnFromObject({
+    params.fee = 3000
+    const closeOutFromProposalTxn = await makeApplicationNoOpTxnFromObject({
       from: userCalling.address,
       appIndex: this.adminAppId,
       suggestedParams: params,
