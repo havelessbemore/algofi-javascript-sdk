@@ -40,6 +40,13 @@ export default class AlgofiClient {
   // governance
   public governance: GovernanceClient
 
+  /**
+   * This is the constructor for the {@link AlgofiClient} class. It will set a lending
+   * client, staking client, v1staking client, and governance client as well.
+   *
+   * @param algod - the client
+   * @param network - network you want the client to be on
+   */
   constructor(algod: Algodv2, network: Network) {
     this.algod = algod
     this.network = network
@@ -58,6 +65,10 @@ export default class AlgofiClient {
     this.governance = new GovernanceClient(this)
   }
 
+  /**
+   * This will asynchronously load state across all clients we have 
+   * as attributes on the full AlgofiClient.
+   */
   async loadState() {
     // lending
     await this.lending.loadState()
@@ -72,6 +83,15 @@ export default class AlgofiClient {
     await this.governance.loadState()
   }
 
+  /**
+   * Given an address, this function will return a new instance of the {@link
+   * AlgofiUser} representing that user on the Algofi protocol.
+   * 
+   * @param address - the public address of the user that we want to create an
+   * algofiClient for.
+   * @returns an {@link AlgofiUser} representing the user with that
+   * address on the Algofi protocol.
+   */
   async getUser(address: string): Promise<AlgofiUser> {
     let user = new AlgofiUser(this, address)
     await user.loadState()
