@@ -5,8 +5,10 @@ import algosdk, { Algodv2 } from "algosdk"
 
 // local
 import { Network } from "./globals"
-import AssetConfig, { AssetConfigs } from "./assetConfig"
 import AlgofiUser from "./algofiUser"
+
+// asset data
+import AssetDataClient from "./assetData/assetDataClient"
 
 // lending
 import LendingClient from "./lending/lendingClient"
@@ -26,7 +28,8 @@ export default class AlgofiClient {
   public algod: Algodv2
   public network: Network
 
-  public assets: { [key: number]: AssetConfig } = {}
+  // asset data
+  public assetData: AssetDataClient
 
   // lending
   public lending: LendingClient
@@ -43,7 +46,9 @@ export default class AlgofiClient {
   constructor(algod: Algodv2, network: Network) {
     this.algod = algod
     this.network = network
-    this.assets = AssetConfigs[this.network]
+    
+    // assetData
+    this.assetData = new AssetDataClient(this)
 
     // lending
     this.lending = new LendingClient(this)

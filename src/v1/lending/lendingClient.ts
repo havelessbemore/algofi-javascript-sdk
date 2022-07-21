@@ -5,7 +5,6 @@ import algosdk, { Algodv2, Transaction, assignGroupID } from "algosdk"
 
 // global
 import { Network } from "./../globals"
-import AssetConfig from "./../assetConfig"
 import AlgofiClient from "./../algofiClient"
 import AlgofiUser from "./../algofiUser"
 

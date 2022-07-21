@@ -1,6 +1,7 @@
 // IMPORTS
 
-import { Network } from "./globals"
+// global
+import { Network } from "./../globals"
 
 // INTERFACE
 

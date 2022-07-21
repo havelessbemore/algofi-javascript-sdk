@@ -173,7 +173,7 @@ export default class Market {
       state[MARKET_STRINGS.oracle_app_id],
       Base64Encoder.decode(state[MARKET_STRINGS.oracle_price_field_name]),
       state[MARKET_STRINGS.oracle_price_scale_factor],
-      Math.pow(10, this.lendingClient.algofiClient.assets[this.underlyingAssetId].decimals)
+      Math.pow(10, this.lendingClient.algofiClient.assetData.assetConfigs[this.underlyingAssetId].decimals)
     )
     await this.oracle.loadPrice()
 
@@ -194,12 +194,12 @@ export default class Market {
     // calculated values
     this.totalSupplied = new AssetAmount(
       this.getUnderlyingSupplied() /
-        Math.pow(10, this.lendingClient.algofiClient.assets[this.underlyingAssetId].decimals),
+        Math.pow(10, this.lendingClient.algofiClient.assetData.assetConfigs[this.underlyingAssetId].decimals),
       this.convertUnderlyingToUSD(this.getUnderlyingSupplied())
     )
 
     this.totalBorrowed = new AssetAmount(
-      this.underlyingBorrowed / Math.pow(10, this.lendingClient.algofiClient.assets[this.underlyingAssetId].decimals),
+      this.underlyingBorrowed / Math.pow(10, this.lendingClient.algofiClient.assetData.assetConfigs[this.underlyingAssetId].decimals),
       this.convertUnderlyingToUSD(this.underlyingBorrowed)
     )
 
@@ -254,7 +254,7 @@ export default class Market {
     }
     let rawUnderlyingAmount = (amount * this.getUnderlyingSupplied()) / this.bAssetCirculation
     let underlyingAmount =
-      rawUnderlyingAmount / Math.pow(10, this.lendingClient.algofiClient.assets[this.underlyingAssetId].decimals)
+      rawUnderlyingAmount / Math.pow(10, this.lendingClient.algofiClient.assetData.assetConfigs[this.underlyingAssetId].decimals)
     let usdAmount = this.convertUnderlyingToUSD(rawUnderlyingAmount)
     return new AssetAmount(underlyingAmount, usdAmount)
   }
@@ -265,7 +265,7 @@ export default class Market {
     }
     let rawUnderlyingAmount = (amount * this.underlyingBorrowed) / this.borrowShareCirculation
     let underlyingAmount =
-      rawUnderlyingAmount / Math.pow(10, this.lendingClient.algofiClient.assets[this.underlyingAssetId].decimals)
+      rawUnderlyingAmount / Math.pow(10, this.lendingClient.algofiClient.assetData.assetConfigs[this.underlyingAssetId].decimals)
     let usdAmount = this.convertUnderlyingToUSD(rawUnderlyingAmount)
     return new AssetAmount(underlyingAmount, usdAmount)
   }
