@@ -41,6 +41,10 @@ export default class User {
   public netBorrowAPR: number
   public netUnclaimedRewards = {}
   public netRewardsPerYear = {}
+  public netSupplyRewardsPerYear: number
+  public netBorrowRewardsPerYear: number
+  public netSupplyRewardsAPR: number
+  public netBorrowRewardsAPR: number
 
   constructor(lendingClient: LendingClient, address: string) {
     this.lendingClient = lendingClient
@@ -97,6 +101,8 @@ export default class User {
       this.netScaledBorrow = 0
       this.netUnclaimedRewards = {}
       this.netRewardsPerYear = {}
+      this.netSupplyRewardsPerYear = 0
+      this.netBorrowRewardsPerYear = 0
       let dollarTotaledSupplyAPR = 0
       let dollarTotaledBorrowAPR = 0
       for (const [key, value] of Object.entries(this.userMarketStates)) {
@@ -113,10 +119,17 @@ export default class User {
           let assetId = value.rewardsProgramStates[i].assetID
           this.netUnclaimedRewards[assetId] = value.rewardsProgramStates[i].realUnclaimed + (this.netUnclaimedRewards[assetId] || 0)
           this.netRewardsPerYear[assetId] = value.rewardsProgramStates[i].rewardsPerYear + (this.netRewardsPerYear[assetId] || 0)
+          if (market.marketType == MarketType.VAULT) {
+            this.netSupplyRewardsPerYear += this.lendingClient.algofiClient.assetData.toUSD(assetId, value.rewardsProgramStates[i].rewardsPerYear)
+          } else {
+            this.netBorrowRewardsPerYear += this.lendingClient.algofiClient.assetData.toUSD(assetId, value.rewardsProgramStates[i].rewardsPerYear)
+          }
         }
       }
       this.netSupplyAPR = dollarTotaledSupplyAPR / this.netSupplied
       this.netBorrowAPR = dollarTotaledBorrowAPR / this.netBorrowed
+      this.netSupplyRewardsAPR = this.netSupplyRewardsPerYear / this.netSupplied
+      this.netBorrowRewardsAPR = this.netBorrowRewardsPerYear / this.netBorrowed
     } else {
       this.optedInToManager = false
     }
