@@ -9,7 +9,7 @@ import GovernanceClient from "./governanceClient"
 import { ADMIN_STRINGS, PROPOSAL_STRINGS } from "./governanceConfig"
 
 export default class Proposal {
-  public govClient: GovernanceClient
+  public governanceClient: GovernanceClient
   public algod: Algodv2
   public appId: number
   public address: string
@@ -24,20 +24,30 @@ export default class Proposal {
   // To get local state for votes for and against
   public adminAppId: number
 
-  constructor(govClient: GovernanceClient, proposalAppId) {
-    this.govClient = govClient
-    this.algod = this.govClient.algod
+  /**
+   * This is the constructor for the Proposal class.
+   * 
+   * @param governanceClient - a governance client
+   * @param proposalAppId - the app id of the proposal 
+   */
+  constructor(governanceClient: GovernanceClient, proposalAppId: number) {
+    this.governanceClient = governanceClient
+    this.algod = this.governanceClient.algod
     this.appId = proposalAppId
-    this.adminAppId = govClient.governanceConfig.adminAppId
+    this.adminAppId = governanceClient.governanceConfig.adminAppId
     this.address = getApplicationAddress(this.appId)
   }
 
+  /**
+   * A function that when called will update the data on the proposal object
+   * with the global and local data of the proposal contract on chain.
+   */
   async loadState() {
     // Set proposal local state
     const proposalLocalStates: { [key: string]: {} } = await getLocalStates(this.algod, this.address)
     for (const [key, value] of Object.entries(proposalLocalStates)) {
       const appId = parseInt(key)
-      if (appId == this.govClient.admin.adminAppId) {
+      if (appId == this.governanceClient.admin.adminAppId) {
         this.votesFor = value[ADMIN_STRINGS.votes_for] || 0
         this.votesAgainst = value[ADMIN_STRINGS.votes_against] || 0
         this.voteCloseTime = value[ADMIN_STRINGS.vote_close_time] || 0

@@ -14,6 +14,13 @@ export default class UserAdminState {
   public delegatingTo: string
   public userProposalStates: { [key: number]: UserProposalState } = {}
 
+  /**
+   * Constructor for the UserAdminState object.
+   * 
+   * @param storageAddress - the address of the storage account for the user
+   * @param userStorageLocalStates - list of local states for the user's storage account
+   * @param governanceClient - a governance client
+   */
   constructor(
     storageAddress: string,
     userStorageLocalStates: { [key: string]: {} },
@@ -37,10 +44,15 @@ export default class UserAdminState {
     }
   }
 }
-
 export class UserProposalState {
   public forOrAgainst: number
   public votingAmount: number
+  /**
+   * Constructor for the UserProposalState object
+   *
+   * @param storageProposalLocalState - an dictionary representing the local
+   * state of the proposal contract with the admin contract.
+   */
   constructor(storageProposalLocalState: {}) {
     this.forOrAgainst = storageProposalLocalState[PROPOSAL_STRINGS.for_or_against]
     this.votingAmount = storageProposalLocalState[PROPOSAL_STRINGS.voting_amount]

@@ -22,12 +22,26 @@ export default class governanceUser {
   public userAdminState: UserAdminState
   public userRewardsManagerState: UserRewardsManagerState
 
+  /**
+   * Constructor for the governance user class.
+   * 
+   * @param governanceClient - a governance client
+   * @param address - an address for the user
+   */
   constructor(governanceClient: GovernanceClient, address: string) {
     this.governanceClient = governanceClient
     this.algod = this.governanceClient.algod
     this.address = address
   }
 
+  /**
+   * A function which will load in all of the state for a governance user
+   * including their admin state, voting escrow state, and rewards manager
+   * state.
+   * 
+   * @param userLocalStates - a list of all of the local states for the
+   * particular user represented by the governance user object.
+   */
   async loadState(userLocalStates: { [key: string]: {} }) {
     for (const [key, value] of Object.entries(userLocalStates)) {
       const appId = parseInt(key)

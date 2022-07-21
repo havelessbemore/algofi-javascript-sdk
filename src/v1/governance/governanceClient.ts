@@ -32,13 +32,21 @@ export default class GovernanceClient {
   public rewardsManager: RewardsManager
   public governanceConfig: GovernanceConfig
 
+  /**
+   * Constructor for the algofi governance client.
+   * 
+   * @param algofiClient - an instance of an algofi client
+   */
   constructor(algofiClient: AlgofiClient) {
     this.algofiClient = algofiClient
     this.algod = this.algofiClient.algod
     this.network = this.algofiClient.network
     this.governanceConfig = GovernanceConfigs[this.network]
   }
-
+  /**
+   * Creates new admin, voting escrow, and rewards managers on the algofi client 
+   * object and loads their state
+   */
   async loadState() {
     // Creating new Admin + Proposal Factory and filling in state
     this.admin = new Admin(this)
@@ -52,11 +60,28 @@ export default class GovernanceClient {
     this.rewardsManager = new RewardsManager(this, this.governanceConfig)
   }
 
+  /**
+   * Gets a governance user given an address.
+   * 
+   * @param address - the address of the user we are interested in.
+   * @returns an algofi governance user
+   */
   getUser(address: string) {
     return new governanceUser(this, address)
   }
 
-  // Will opt the user into every application
+  /**
+   * Constructs a series of transactions to opt the user and their storage
+   * account into all of the necessary applications for governance including the
+   * admin, the voting escrow, and the rewards manager.
+   * 
+   * @param user - user we are opting into the contracts
+   * @param storageAccount - a newly created account that will serve as the
+   * storage account for the user on the protocol.
+   * @returns a series of transactions to opt the user and their storage
+   * account into all of the necessary applications for governance including the
+   * admin, the voting escrow, and the rewards manager.
+   */
   async getOptInTxns(user: AlgofiUser, storageAccount: Account): Promise<Transaction[]> {
     const params = await getParams(this.algod)
     const txns = []

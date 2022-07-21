@@ -90,13 +90,11 @@ export default class Admin {
   }
 
   /**
-   * This will return the transactions we need to update a target user's vebank
-   * through the admin contract.
+   * Constructs a series of transactions to update a target user's vebank.
    * 
    * @param userCalling - the user who is calling the transaction
    * @param userUpdating - the user who is being updated
-   * @returns a list of transactions that when executed will update a target
-   * user's vebank.
+   * @returns a series of transactions to update a target user's vebank.
    */
   async getUpdateUserVeBankDataTxns(userCalling: AlgofiUser, userUpdating: AlgofiUser): Promise<Transaction[]> {
     const params = await getParams(this.algod)
@@ -119,12 +117,11 @@ export default class Admin {
   }
 
   /**
-   * This will return the transactions needed for a user to vote on a proposal.
+   * Constructs a series of transactions to vote on a proposal.
    * 
    * @param user - user who is voting
    * @param proposal - proposal being voted on
-   * @returns a list of transactions that when executed will vote for a specific
-   * proposal on behalf of a user.
+   * @returns a series of transactions to vote on a proposal.
    */
   async getVoteTxns(user: AlgofiUser, proposal: Proposal, forOrAgainst: number): Promise<Transaction[]> {
     const params = await getParams(this.algod)
@@ -149,13 +146,13 @@ export default class Admin {
   }
 
   /**
-   * This will return the transactions needed for a user to delegate to another
+   * Constructs a series of transactions to delegate a user's votes to another
    * user.
    * 
    * @param user - user who is delegating
    * @param delegatee - user who is being delegated to
-   * @returns a list of transactions that when executed will delegate the a
-   * users votes to the delegatee passed in.
+   * @returns a series of transactions to delegate a user's votes to another
+   * user.
    */
   async getDelegateTxns(user: AlgofiUser, delegatee: AlgofiUser): Promise<Transaction[]> {
     const params = await getParams(this.algod)
@@ -177,12 +174,11 @@ export default class Admin {
   }
 
   /**
-   * This will return the transactions needed for a user to validate a proposal.
+   * Constructs a series of transactions that will validate a specific proposal.
    * 
    * @param user - user who is trying to validate a proposal
    * @param proposal - the proposal to validate
-   * @returns a list of transactions that when executed will attempt to validate
-   * the proposal passed in with the admin contract.
+   * @returns a series of transactions that will validate a specific proposal.
    */
   async getValidateTxns(user: AlgofiUser, proposal: Proposal): Promise<Transaction[]> {
     const params = await getParams(this.algod)
@@ -204,11 +200,12 @@ export default class Admin {
   }
 
   /**
-   * This will return the transactions needed for a user undelegate their votes.
+   * Constructs a series of transactions that will undelegate a user from their
+   * current delegatee.
    * 
    * @param user - user who is undelegating
-   * @returns a list of transactions that when executed will undelegate the user
-   * passed in from anyone who they are currently delegating to.
+   * @returns a series of transactions that will undelegate a user from their
+   * current delegatee.
    */
   async getUndelegateTxns(user: AlgofiUser): Promise<Transaction[]> {
     const params = await getParams(this.algod)
@@ -230,15 +227,14 @@ export default class Admin {
   }
 
   /**
-   * This will return the transactions needed for a user to vote to call a
-   * delegated vote transaction on another user.
+   * Constructs a series of transactions that will make a user vote on a
+   * proposal as their delegatee has.
    * 
    * @param callingUser - user who is calling the delegated vote transaction
    * @param votingUser - user who is voting
    * @param proposal - proposal being voted on
-   * @returns a list of transactions that when executed will attempt to push a
-   * user who has delegated to vote as their delegatee has on a certain
-   * proposal.
+   * @returns a series of transactions that will make a user vote on a proposal
+   * as their delegatee has.
    */
   async getDelegatedVoteTxns(
     callingUser: AlgofiUser,
@@ -270,13 +266,12 @@ export default class Admin {
   }
 
   /**
-   * This will return the transactions needed for a user to close out from a proposal.
+   * Constructs a series of transactions which will close out a target user from a proposal.
    * 
    * @param userCalling - user who is calling the transaction
    * @param userClosingOut - user who is closing out
    * @param proposal - proposal being closed out of 
-   * @returns a list of transactions that when executed will close out a target
-   * user from a target proposal.
+   * @returns a series of transactions which will close out a target user from a proposal.
    */
   async getCloseOutFromProposalTxns(
     userCalling: AlgofiUser,
@@ -302,11 +297,10 @@ export default class Admin {
   }
 
   /**
-   * This will set the user passed in to be open to delegation.
+   * Constructs a series of tranactions to set a user open to delegation.
    * 
    * @param user - user who is setting themselves open to delegation
-   * @returns a list of transactions that when executed will set the passed in
-   * user to be open to delegation.
+   * @returns a series of tranactions to set a user open to delegation.
    */
   async getSetOpenToDelegationTxns(user: AlgofiUser): Promise<Transaction[]> {
     const params = await getParams(this.algod)
@@ -328,11 +322,10 @@ export default class Admin {
   }
 
   /**
-   * This will set the user passed in to be not open to delegation.
+   * Constructs a series of tranactions to set a user not open to delegation.
    * 
    * @param user - user who is setting themselves not open to delegation
-   * @returns a list of transactions that when executed will set the passed in
-   * user to be not open to delegation.
+   * @returns a series of tranactions to set a user not open to delegation.
    */
   async getSetNotOpenToDelegationTxns(user: AlgofiUser): Promise<Transaction[]> {
     const params = await getParams(this.algod)
@@ -354,13 +347,12 @@ export default class Admin {
   }
 
   /**
-   * This will create a proposal.
+   * Constructs a series of transactions to create a proposal.
    * 
    * @param user - user who is trying to create the transaction.
    * @param title - title of the proposal to be created
    * @param link - link of the proposal to be created
-   * @returns a list of transactions that when executed will create a proposal
-   * with the title and link passed in on behalf of the user passed in.
+   * @returns a series of transactions to create a proposal.
    */
   async getCreateProposalTxns(user: AlgofiUser, title: string, link: string): Promise<Transaction[]> {
     const params = await getParams(this.algod)
