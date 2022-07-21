@@ -106,7 +106,7 @@ export default class Market {
   // interest rate model
   public baseInterestRate: number
   public baseInterestSlope: number
-  public exponentialInterestAmplificationFactor: number
+  public quadraticInterestAmplificationFactor: number
   public targetUtilizationRatio: number
 
   // oracle
@@ -164,7 +164,7 @@ export default class Market {
     // interest rate model
     this.baseInterestRate = state[MARKET_STRINGS.base_interest_rate]
     this.baseInterestSlope = state[MARKET_STRINGS.base_interest_slope]
-    this.exponentialInterestAmplificationFactor = state[MARKET_STRINGS.exponential_interest_amplification_factor]
+    this.quadraticInterestAmplificationFactor = state[MARKET_STRINGS.quadratic_interest_amplification_factor]
     this.targetUtilizationRatio = state[MARKET_STRINGS.target_utilization_ratio]
 
     // oracle
@@ -230,7 +230,7 @@ export default class Market {
     borrowAPR += (borrowUtilization * this.baseInterestSlope) / FIXED_6_SCALE_FACTOR
     if (borrowUtilization > this.targetUtilizationRatio / FIXED_6_SCALE_FACTOR) {
       borrowAPR +=
-        this.exponentialInterestAmplificationFactor *
+        this.quadraticInterestAmplificationFactor *
         Math.pow(borrowUtilization - this.targetUtilizationRatio / FIXED_6_SCALE_FACTOR, 2)
     }
 
