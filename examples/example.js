@@ -36,7 +36,7 @@ async function test() {
   )
   let indexer = new algosdk.Indexer(
     "",
-    "https://crimson-icy-meadow.algorand-mainnet.quiknode.pro/366f073317e2f6d87f525b328393e587ffb3628d/index", // MAINNET
+    "", // MAINNET
     ""
   )
   console.log("TESTING")
