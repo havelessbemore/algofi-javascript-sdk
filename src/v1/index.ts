@@ -6,7 +6,7 @@ import { addressEquals, composeTransactions } from "./utils"
 
 import AlgofiClient from "./algofiClient"
 import AssetConfig from "./assetConfig"
-import AlgofiUser from "./algofiUser"
+import AlgofiUser, { TxnLoadMode } from "./algofiUser"
 
 // lending
 import * as lending from "./lending"
@@ -22,6 +22,7 @@ export {
   AlgofiClient,
   AssetConfig,
   AlgofiUser,
+  TxnLoadMode,
   // lending
   lending,
   Base64Encoder

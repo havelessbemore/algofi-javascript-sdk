@@ -1,7 +1,7 @@
 // IMPORTS
 
 // external
-import algosdk, { Algodv2 } from "algosdk"
+import algosdk, { Algodv2, Indexer } from "algosdk"
 
 // local
 import { Network } from "./globals"
@@ -21,6 +21,7 @@ import V1StakingClient from "./v1_staking/v1_stakingClient"
 
 export default class AlgofiClient {
   public algod: Algodv2
+  public indexer: Indexer
   public network: Network
 
   public assets: { [key: number]: AssetConfig } = {}
@@ -34,8 +35,9 @@ export default class AlgofiClient {
   // v1 staking
   public v1Staking: V1StakingClient
 
-  constructor(algod: Algodv2, network: Network) {
+  constructor(algod: Algodv2, indexer: Indexer, network: Network) {
     this.algod = algod
+    this.indexer = indexer
     this.network = network
     this.assets = AssetConfigs[this.network]
 
