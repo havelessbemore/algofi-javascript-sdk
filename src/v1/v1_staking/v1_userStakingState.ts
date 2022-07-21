@@ -28,7 +28,7 @@ export default class V1UserStakingState {
   public secondaryRewardsPerYear: number
 
   /**
-   * Constructor for the v1 user staking state object
+   * Constructor for the v1 user staking state object.
    * 
    * @param algod - algod client
    * @param staking - staking 

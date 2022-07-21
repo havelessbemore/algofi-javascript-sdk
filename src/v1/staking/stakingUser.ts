@@ -25,7 +25,7 @@ export default class stakingUser {
   public userStakingStates: { [key: number]: UserStakingState }
 
   /**
-   * Constructor for the staking user
+   * Constructor for the staking user.
    * 
    * @param stakingClient - staking client
    * @param address - address of the user

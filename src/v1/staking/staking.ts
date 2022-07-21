@@ -50,8 +50,6 @@ export default class Staking {
    * @param stakingClient - staking client
    * @param rewardsManagerAppId - rewards manager app id
    * @param stakingConfig - stakingConfig object with information on the staking
-   * contract
-   * contract
    */
   constructor(algod: Algodv2, stakingClient: StakingClient, rewardsManagerAppId: number, stakingConfig: StakingConfig) {
     this.algod = algod
@@ -63,7 +61,7 @@ export default class Staking {
   }
 
   /**
-   * Loads in the global stae of the specific staking contract and sets relevant
+   * Loads in the global state of the specific staking contract and sets relevant
    * fields on the class.
    */
   async loadState() {
@@ -89,12 +87,12 @@ export default class Staking {
 
   /**
    * Constructs a series of transactions to stake user's assets in the staking
-   * contract
+   * contract.
    * 
    * @param user - user who is staking
    * @param amount - amount they are staking
    * @returns a series of transactions to stake user's assets in the staking
-   * contract
+   * contract.
    */
   async getStakeTxns(user: AlgofiUser, amount: number): Promise<Transaction[]> {
     const params = await getParams(this.algod)
@@ -209,10 +207,12 @@ export default class Staking {
   }
 
   /**
-   * Constructs a series of transactions that opt a user into the staking contract.
+   * Constructs a series of transactions that opt a user into the staking
+   * contract.
    * 
    * @param user - user who is opting in 
-   * @returns a series of transactions that opt a user into the staking contract.
+   * @returns a series of transactions that opt a user into the staking
+   * contract.
    */
   async getUserOptInTxns(user: AlgofiUser): Promise<Transaction[]> {
     const params = await getParams(this.algod)

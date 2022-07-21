@@ -15,7 +15,7 @@ export default class UserStakingState {
   userRewardsProgramStates: { [key: number]: UserRewardsProgramState }
 
   /**
-   * Constructor for the user staking state object
+   * Constructor for the user staking state object.
    * 
    * @param userLocalState - user's local state with one staking contract
    * @param staking - staking contract of interest

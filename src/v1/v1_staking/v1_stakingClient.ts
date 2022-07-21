@@ -22,7 +22,7 @@ export default class StakingClient {
   public stakingContracts: { [key: number]: V1Staking }
 
   /**
-   * Constructor for the staking client
+   * Constructor for the staking client.
    * 
    * @param algofiClient - algofi client
    */
@@ -50,10 +50,10 @@ export default class StakingClient {
   }
 
   /**
-   * Function to create a v1 staking user from an address
+   * Function to create a v1 staking user from an address.
    * 
    * @param address - address of user
-   * @returns a constructed v1 staking user
+   * @returns a constructed v1 staking user.
    */
   getUser(address: string): V1StakingUser {
     return new V1StakingUser(this, address)

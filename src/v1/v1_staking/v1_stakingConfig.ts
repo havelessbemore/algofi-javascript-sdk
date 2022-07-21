@@ -11,7 +11,7 @@ export default class V1StakingConfig {
   public oracleAppId: number
 
   /**
-   * Constructor for the v1 staking config
+   * Constructor for the v1 staking config.
    * 
    * @param name - name
    * @param managerAppId - manager app id

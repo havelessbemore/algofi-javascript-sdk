@@ -49,7 +49,7 @@ export class UserRewardsProgramState {
   userUnrealizedRewards: number
 
   /**
-   * Constructor for UserRewardsProgramState
+   * Constructor for user rewards program state object
    * 
    * @param formattedUserLocalState - local state for the user
    * @param rewardsProgramIndex - index of the rewards program

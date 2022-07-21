@@ -54,7 +54,7 @@ export default class V1Staking {
   
 
   /**
-   * Constructor for the v1staking object
+   * Constructor for the v1staking object.
    * 
    * @param algod - algod client
    * @param stakingClient - staking client
