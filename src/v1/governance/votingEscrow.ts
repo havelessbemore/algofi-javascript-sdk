@@ -31,6 +31,11 @@ export default class VotingEscrow {
   public votingEscrowMaxTimeLockSeconds: number
   public votingEscrowMinTimeLockSeconds: number
 
+  /**
+   * The constructor for the VotingEscrow object
+   * 
+   * @param governanceClient - a governance client
+   */
   constructor(governanceClient: GovernanceClient) {
     this.governanceClient = governanceClient
     this.algod = this.governanceClient.algod
@@ -39,6 +44,10 @@ export default class VotingEscrow {
     this.votingEscrowMinTimeLockSeconds = governanceClient.governanceConfig.votingEscrowMinTimeLockSeconds
   }
 
+  /**
+   * A function which when called will update the data on the voting escrow
+   * object to match that of the global state of the voting escrow contract.
+   */
   async loadState() {
     const globalState = await getApplicationGlobalState(this.algod, this.appId)
 
@@ -47,6 +56,13 @@ export default class VotingEscrow {
     this.assetId = globalState[VOTING_ESCROW_STRINGS.asset_id] || 0
   }
 
+  /**
+   * Constructs a series of transactions to update a target user's vebank.
+   * 
+   * @param userCalling - user who is calling the udpate transaction
+   * @param userUpdating - user whose vebank is actually being updated
+   * @returns a series of transactions to update a target user's vebank
+   */
   async getUpdateVeBankDataTxns(userCalling: AlgofiUser, userUpdating: AlgofiUser): Promise<Transaction[]> {
     const params = await getParams(this.algod)
     const enc = new TextEncoder()
@@ -65,6 +81,14 @@ export default class VotingEscrow {
     return [updateUserVebankDataTxn]
   }
 
+  /**
+   * Constructs a series of transactions that lock a user's BANK to get veBANK.
+   * 
+   * @param user - user who is locking
+   * @param amount - amount they are locking
+   * @param durationSeconds - amount of time they are locking for 
+   * @returns a series of transactions that lock a user's BANK to get veBANK.
+   */
   async getLockTxns(user: AlgofiUser, amount: number, durationSeconds: number): Promise<Transaction[]> {
     const params = await getParams(this.algod)
     const enc = new TextEncoder()
@@ -95,6 +119,13 @@ export default class VotingEscrow {
     return assignGroupID(txns)
   }
 
+  /**
+   * Constructs a series of transactions that extend a user's lock on their BANK.
+   * 
+   * @param user - user who is locking
+   * @param durationSeconds - amount of time they are extending for
+   * @returns a series of transactions that extend a user's lock on their BANK.
+   */
   async getExtendLockTxns(user: AlgofiUser, durationSeconds: number): Promise<Transaction[]> {
     const params = await getParams(this.algod)
     const enc = new TextEncoder()
@@ -113,6 +144,13 @@ export default class VotingEscrow {
     return [extendLockTxn]
   }
 
+  /**
+   * Constructs a series of transactions that increase a user's lock amount.
+   * 
+   * @param user - user who is locking
+   * @param amount - amount they are increasing their lock for
+   * @returns a series of transactions that increase a user's lock amount.
+   */
   async getIncreaseLockAmountTxns(user: AlgofiUser, amount: number): Promise<Transaction[]> {
     const params = await getParams(this.algod)
     const enc = new TextEncoder()
