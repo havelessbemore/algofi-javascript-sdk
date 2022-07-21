@@ -9,15 +9,13 @@ const a = "2NJEG3XKJZQ4PDSFXGIHOSTTY7Q7MBFZ76JQPMWNWV7O3LIB3T3JJYWLPE"
 const decoded_a = algosdk.decodeAddress(a)
 const sk = algosdk.mnemonicToSecretKey(m).sk
 
-//const userMnemonic =
-//  "estate stem promote spend deer crush carry album grid tail pilot mad ocean tilt quantum leisure hammer arctic swamp slush traffic trial entire abandon mutual"
-//const govUser = algosdk.mnemonicToSecretKey(userMnemonic)
-//const governanceStorgeAccountAddress = "M3Q7BMHSQWTJR4S4WHX2ZOYWXVYUSSNS4MSSVS3KOM4ZH6JQYZKUYF4N54"
-//
-//const user2Mnemonic =
-//  "faith chunk spring chair coil diesel silk shoulder front fork urban comfort raw gravity brush toward spot day swim try flip tilt punch above feature"
-//const govUser2 = algosdk.mnemonicToSecretKey(user2Mnemonic)
-//const governanceStorageAccountAddress2 = "FJPSSPVVBNO2YU4DELX75BHZNLHWBWL4R3SGYJVTUPN4JPSJVADJJTPRTU"
+const userMnemonic = ""
+const govUser = algosdk.mnemonicToSecretKey(userMnemonic)
+const governanceStorgeAccountAddress = ""
+
+const user2Mnemonic = ""
+const govUser2 = algosdk.mnemonicToSecretKey(user2Mnemonic)
+const governanceStorageAccountAddress2 = ""
 
 async function executeTransactions(transactions, sk, client) {
   let stxns = []
@@ -28,11 +26,12 @@ async function executeTransactions(transactions, sk, client) {
   await client.sendRawTransaction(stxns).do()
 }
 
+NODE_URL = ""
+
 async function test() {
   let client = new algosdk.Algodv2(
     "",
-    //"https://delicate-icy-brook.algorand-testnet.quiknode.pro/29f8674f6a148877a83c15e4150186fab984e175/algod/", // TESTNET
-    "https://crimson-icy-meadow.algorand-mainnet.quiknode.pro/366f073317e2f6d87f525b328393e587ffb3628d/algod", // MAINNET
+    NODE_URL,
     ""
   )
   let indexer = new algosdk.Indexer(
