@@ -17,7 +17,7 @@ import V1UserStakingState from "./v1_userStakingState"
 // interface
 
 export default class stakingUser {
-  public algod: Algodv2
+	public algod: Algodv2
   public address: string
   public stakingClient: V1StakingClient
 
@@ -25,7 +25,7 @@ export default class stakingUser {
   public userStakingStates: { [key: number]: V1UserStakingState }
 
   constructor(stakingClient: V1StakingClient, address: string) {
-    this.stakingClient = stakingClient
+		this.stakingClient = stakingClient
     this.algod = this.stakingClient.algod
     this.address = address
   }

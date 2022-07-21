@@ -54,7 +54,7 @@ export const MARKET_STRINGS = {
   // interest rate model
   base_interest_rate: "bir",
   base_interest_slope: "bis",
-  exponential_interest_amplification_factor: "eiaf",
+  quadratic_interest_amplification_factor: "eiaf",
   target_utilization_ratio: "tur",
 
   // oracle
