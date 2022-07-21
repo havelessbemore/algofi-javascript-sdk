@@ -5,7 +5,7 @@ export default class AssetAmount {
   public usd: number
 
   /**
-   * This is a constructor for the {@link AssetAmount} class.
+   * Constructor for the asset amount class
    * 
    * @param underlying - quantity of underlying asset
    * @param usd - usd value of underlying

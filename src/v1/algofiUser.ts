@@ -51,11 +51,10 @@ export default class AlgofiUser {
   public governance: GovernanceUser
 
   /**
-   * This is a constructor for the AlgofiUser class. It represents a user on the
-   * Algofi protocol.
+   * Constructor for the algofi client class.
    * 
-   * @param algofiClient - an instance of an {@link AlgofiClient}
-   * @returns address - a public address for a user
+   * @param algofiClient - algofi client
+   * @param address - address for user
    */
   constructor(algofiClient: AlgofiClient, address: string) {
     this.algofiClient = algofiClient
@@ -76,8 +75,8 @@ export default class AlgofiUser {
   }
 
   /**
-   * This function will asynchronously update the state of an {@link AlgofiUser}
-   * object.  It will load its states for lending, staking, and governance.
+   * Function to load the states of all of the sub users on the algofi user
+   * class.
    */
   async loadState() {
     // load balance state
@@ -100,6 +99,12 @@ export default class AlgofiUser {
     await this.governance.loadState(localStates)
   }
 
+  /**
+   * Function to determine whether someone is opted into an asset or not.
+   * 
+   * @param assetId - asset id
+   * @returns whether or not the user is opted into the asset id.
+   */
   isOptedInToAsset(assetId: number): boolean {
     if (assetId in this.balances) {
       return true
