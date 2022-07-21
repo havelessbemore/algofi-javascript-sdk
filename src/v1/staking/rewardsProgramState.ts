@@ -12,6 +12,12 @@ export default class RewardsProgramState {
   rewardsPayed: number
 
   // pass in formatted staking state and extract based on index
+  /**
+   * Constructor for rewards program state
+   * 
+   * @param stakingState - formatted staking state
+   * @param rewardsProgramIndex - index of rewards program 
+   */
   constructor(stakingState: {}, rewardsProgramIndex: number) {
     this.rewardsProgramIndex = rewardsProgramIndex
     this.rewardsProgramCounter =
@@ -42,6 +48,14 @@ export class UserRewardsProgramState {
   userUnclaimedRewards: number
   userUnrealizedRewards: number
 
+  /**
+   * Constructor for UserRewardsProgramState
+   * 
+   * @param formattedUserLocalState - local state for the user
+   * @param rewardsProgramIndex - index of the rewards program
+   * @param staking - staking
+   * @param userScaledTotalStaked - scaled user total staked
+   */
   constructor(
     formattedUserLocalState: {},
     rewardsProgramIndex: number,
