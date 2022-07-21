@@ -29,9 +29,6 @@ export default class AlgofiClient {
   public indexer: Indexer
   public network: Network
 
-  // asset data
-  public assetData: AssetDataClient
-
   // lending
   public lending: LendingClient
 
@@ -44,13 +41,13 @@ export default class AlgofiClient {
   // governance
   public governance: GovernanceClient
 
+  // asset data
+  public assetData: AssetDataClient
+
   constructor(algod: Algodv2, indexer: Indexer, network: Network) {
     this.algod = algod
     this.indexer = indexer
     this.network = network
-    
-    // assetData
-    this.assetData = new AssetDataClient(this)
 
     // lending
     this.lending = new LendingClient(this)
@@ -63,6 +60,9 @@ export default class AlgofiClient {
 
     // governance
     this.governance = new GovernanceClient(this)
+    
+    // assetData
+    this.assetData = new AssetDataClient(this)
   }
 
   async loadState() {
@@ -77,6 +77,9 @@ export default class AlgofiClient {
 
     // governance
     await this.governance.loadState()
+
+    // asset data (must load AFTER lending)
+    await this.assetData.loadState()
   }
 
   async getUser(address: string): Promise<AlgofiUser> {

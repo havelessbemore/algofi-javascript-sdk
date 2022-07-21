@@ -58,7 +58,7 @@ export const AssetConfigs = {
     802874445: new AssetConfig("goETH", 802874445, 8),
     802888853: new AssetConfig("AF-BANK-GOETH-STANDARD", 802888853, 6),
     802872834: new AssetConfig("STBL2", 802872834, 6),
-    802887973: new AssetConfig("AF-BANK-STBL-STBL2", 802887973, 6)
+    802887973: new AssetConfig("AF-BANK-STBL-STBL2", 802887973, 6),
   },
   [Network.TESTNET]: {
     1: new AssetConfig("ALGO", 1, 6),
