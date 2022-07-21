@@ -1,7 +1,7 @@
 // IMPORTS
 
 // external
-import algosdk, { Algodv2 } from "algosdk"
+import algosdk, { Algodv2, Indexer } from "algosdk"
 
 // local
 import { Network } from "./globals"
@@ -24,6 +24,7 @@ import GovernanceClient from "./governance/governanceClient"
 
 export default class AlgofiClient {
   public algod: Algodv2
+  public indexer: Indexer
   public network: Network
 
   public assets: { [key: number]: AssetConfig } = {}
@@ -40,8 +41,9 @@ export default class AlgofiClient {
   // governance
   public governance: GovernanceClient
 
-  constructor(algod: Algodv2, network: Network) {
+  constructor(algod: Algodv2, indexer: Indexer, network: Network) {
     this.algod = algod
+    this.indexer = indexer
     this.network = network
     this.assets = AssetConfigs[this.network]
 
