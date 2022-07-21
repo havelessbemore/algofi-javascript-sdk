@@ -37,8 +37,8 @@ export default class Proposal {
     for (const [key, value] of Object.entries(proposalLocalStates)) {
       const appId = parseInt(key)
       if (appId == this.govClient.admin.adminAppId) {
-        this.votesFor = value[ADMIN_STRINGS.votes_for]
-        this.votesAgainst = value[ADMIN_STRINGS.votes_against]
+        this.votesFor = value[ADMIN_STRINGS.votes_for] || 0
+        this.votesAgainst = value[ADMIN_STRINGS.votes_against] || 0
         this.voteCloseTime = value[ADMIN_STRINGS.vote_close_time] || 0
         this.executionTime = value[ADMIN_STRINGS.execution_time] || 0
         this.executed = value[ADMIN_STRINGS.executed] || 0
@@ -47,7 +47,7 @@ export default class Proposal {
     }
     // Set proposal global state
     const globalState = await getApplicationGlobalState(this.algod, this.appId)
-    this.title = globalState[PROPOSAL_STRINGS.title]
-    this.link = globalState[PROPOSAL_STRINGS.link]
+    this.title = atob(globalState[PROPOSAL_STRINGS.title])
+    this.link = atob(globalState[PROPOSAL_STRINGS.link])
   }
 }

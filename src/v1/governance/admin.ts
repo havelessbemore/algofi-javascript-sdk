@@ -55,18 +55,18 @@ export default class Admin {
   async loadState() {
     // Setting state for admin
     const globalStateAdmin = await getApplicationGlobalState(this.algod, this.adminAppId)
-    this.quorumValue = globalStateAdmin[ADMIN_STRINGS.quorum_value]
-    this.superMajority = globalStateAdmin[ADMIN_STRINGS.super_majority]
-    this.proposalDuration = globalStateAdmin[ADMIN_STRINGS.proposal_duration]
-    this.proposalExecutionDelay = globalStateAdmin[ADMIN_STRINGS.proposal_execution_delay]
+    this.quorumValue = globalStateAdmin[ADMIN_STRINGS.quorum_value] || 0
+    this.superMajority = globalStateAdmin[ADMIN_STRINGS.super_majority] || 0
+    this.proposalDuration = globalStateAdmin[ADMIN_STRINGS.proposal_duration] || 0
+    this.proposalExecutionDelay = globalStateAdmin[ADMIN_STRINGS.proposal_execution_delay] || 0
 
     // Setting state for proposal factory
     const globalStateProposalFactory = await getApplicationGlobalState(this.algod, this.proposalFactoryAppId)
 
     // Put this in config (fixed)
-    this.govToken = globalStateProposalFactory[PROPOSAL_FACTORY_STRINGS.gov_token]
-    this.proposalTemplateId = globalStateProposalFactory[PROPOSAL_FACTORY_STRINGS.proposal_template]
-    this.minimumVeBankToPropose = globalStateProposalFactory[PROPOSAL_FACTORY_STRINGS.minimum_ve_bank_to_propose]
+    this.govToken = globalStateProposalFactory[PROPOSAL_FACTORY_STRINGS.gov_token] || 0
+    this.proposalTemplateId = globalStateProposalFactory[PROPOSAL_FACTORY_STRINGS.proposal_template] || 0
+    this.minimumVeBankToPropose = globalStateProposalFactory[PROPOSAL_FACTORY_STRINGS.minimum_ve_bank_to_propose] || 0
 
     // Creating the proposal dictionary
     const proposalFactoryAddressInfo = await this.algod.accountInformation(this.proposalFactoryAddress).do()

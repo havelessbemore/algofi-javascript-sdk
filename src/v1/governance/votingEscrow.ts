@@ -42,9 +42,9 @@ export default class VotingEscrow {
   async loadState() {
     const globalState = await getApplicationGlobalState(this.algod, this.appId)
 
-    this.totalLocked = globalState[VOTING_ESCROW_STRINGS.total_locked]
-    this.totalVebank = globalState[VOTING_ESCROW_STRINGS.total_vebank]
-    this.assetId = globalState[VOTING_ESCROW_STRINGS.asset_id]
+    this.totalLocked = globalState[VOTING_ESCROW_STRINGS.total_locked] || 0
+    this.totalVebank = globalState[VOTING_ESCROW_STRINGS.total_vebank] || 0
+    this.assetId = globalState[VOTING_ESCROW_STRINGS.asset_id] || 0
   }
 
   async getUpdateVeBankDataTxns(userCalling: AlgofiUser, userUpdating: AlgofiUser): Promise<Transaction[]> {
