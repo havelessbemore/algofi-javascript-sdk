@@ -51,6 +51,7 @@ export default class Staking {
    * @param rewardsManagerAppId - rewards manager app id
    * @param stakingConfig - stakingConfig object with information on the staking
    * contract
+   * contract
    */
   constructor(algod: Algodv2, stakingClient: StakingClient, rewardsManagerAppId: number, stakingConfig: StakingConfig) {
     this.algod = algod

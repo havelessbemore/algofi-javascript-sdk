@@ -53,6 +53,14 @@ export default class V1Staking {
   public rewardsSecondaryRatio: number
   
 
+  /**
+   * Constructor for the v1staking object
+   * 
+   * @param algod - algod client
+   * @param stakingClient - staking client
+   * @param stakingConfig - stakingConfig object with information on the staking
+   * contract
+   */
   constructor(algod: Algodv2, stakingClient: V1StakingClient, stakingConfig: V1StakingConfig) {
     this.algod = algod
     this.stakingClient = stakingClient
@@ -63,6 +71,9 @@ export default class V1Staking {
     this.assetId = stakingConfig.assetId
   }
 
+  /**
+   * Function to load in global state into the relevant fields on the class.
+   */
   async loadState() {
     // loading in global state staking specific
     const managerGlobalState = await getApplicationGlobalState(this.algod, this.managerAppId)
@@ -81,6 +92,15 @@ export default class V1Staking {
     this.rewardsSecondaryRatio = managerGlobalState[V1_STAKING_STRINGS.rewards_secondary_ratio]
   }
   
+  /**
+   * Constructs a series of transactions to opt a user into the staking
+   * contract.
+   * 
+   * @param user - user opting in
+   * @param storageAccount - storage account for user opting in
+   * @returns a series of transactions to opt a user into the staking
+   * contract.
+   */
   async getOptInTxns(user: AlgofiUser, storageAccount: Account): Promise<Transaction[]> {
     const params = await getParams(this.algod)
     
@@ -140,6 +160,14 @@ export default class V1Staking {
     return assignGroupID(txns)
   }
 
+  /**
+   * Constructs a series of transactions to put before many of the transactions
+   * in staking on the Algofi protocol.
+   * 
+   * @param user - user to get preamble transactions for 
+   * @returns a series of transactions to put before many of the transactions
+   * in staking on the Algofi protocol.
+   */
   async getPreambleTxns(user: AlgofiUser): Promise<Transaction[]> {
     const params = await getParams(this.algod)
     const txns = []
@@ -204,6 +232,15 @@ export default class V1Staking {
     return txns
   }
 
+  /**
+   * Constructs a series of transactions to stake a certain amount of an asset for
+   * a user.
+   * 
+   * @param user - user staking
+   * @param amount - amount staking
+   * @returns a series of transactions to stake a certain amount of an asset for
+   * a user.
+   */
   async getStakeTxns(user: AlgofiUser, amount: number): Promise<Transaction[]> {
     const params = await getParams(this.algod)
     const enc = new TextEncoder()
@@ -252,6 +289,15 @@ export default class V1Staking {
     return assignGroupID(txns)
   }
 
+  /**
+   * Constructs a series of transactions to unstake a certain amount for a user on
+   * a staking contract.
+   * 
+   * @param user - user to unstake for
+   * @param amount - amount to unstake
+   * @returns a series of transactions to unstake a certain amount for a user on
+   * a staking contract.
+   */
   async getUnstakeTxns(user: AlgofiUser, amount: number): Promise<Transaction[]> {
     const params = await getParams(this.algod)
     const enc = new TextEncoder()
@@ -288,6 +334,12 @@ export default class V1Staking {
     return assignGroupID(txns)
   }
 
+  /**
+   * Constructs a series of transactions to claim a user's staked assets.
+   * 
+   * @param user - user to claim 
+   * @returns a series of transactions to claim a user's staked assets.
+   */
   async getClaimTxns(user: AlgofiUser): Promise<Transaction[]> {
     const params = await getParams(this.algod)
     const enc = new TextEncoder()
