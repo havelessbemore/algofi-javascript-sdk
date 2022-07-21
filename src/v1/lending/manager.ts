@@ -16,19 +16,32 @@ import Market from "./market"
 // interface
 
 export default class Manager {
-  // constatns
+  // constants
   public localMinBalance: number = 614000
   
   public algod: Algodv2
   public appId: number
   public address: string
 
+  /**
+   * Constructor for the Manager class.
+   * 
+   * @param algod - an algod client
+   * @param appId - app id of the manager
+   */
   constructor(algod: Algodv2, appId: number) {
     this.algod = algod
     this.appId = appId
     this.address = getApplicationAddress(this.appId)
   }
 
+  /**
+   * Constructs a series of transactions that opt the user into the manager.
+   * 
+   * @param user - algofi user representing the user we want to opt in
+   * @param storageAccount - storage account for the user
+   * @returns a series of transactions that opt the user into the manager
+   */
   async getOptInTxns(user: AlgofiUser, storageAccount: Account): Promise<Transaction[]> {
     const params = await getParams(this.algod)
 
@@ -62,6 +75,12 @@ export default class Manager {
     return assignGroupID([txn0, txn1, txn2])
   }
 
+  /**
+   * Constructs a series of transactions that opt the user out of the manager.
+   * 
+   * @param user - algofi user representing the user we want to opt in
+   * @returns a series of transactions that opt the user out of the manager
+   */
   async getOptOutTxns(user: AlgofiUser): Promise<Transaction[]> {
     const params = await getParams(this.algod)
 
@@ -81,6 +100,13 @@ export default class Manager {
     return [txn0]
   }
 
+  /**
+   * Constructs a series of transactions that opt the user into a market.
+   * 
+   * @param user - algofi user representing the user we want to opt in
+   * @param market - the market we want to opt the user into
+   * @returns a series of transactions that opt the user into a market
+   */
   async getMarketOptInTxns(user: AlgofiUser, market: Market): Promise<Transaction[]> {
     const params = await getParams(this.algod)
 
@@ -115,6 +141,13 @@ export default class Manager {
     return assignGroupID([txn0, txn1, txn2])
   }
 
+  /**
+   * Constructs a series of transactions that opt the user out of a market.
+   * 
+   * @param user - algofi user representing the user we want to opt in
+   * @param market - the market we want to opt the user out of 
+   * @returns a series of transactions that opt the user out of a market.
+   */
   async getMarketOptOutTxns(user: AlgofiUser, market: Market): Promise<Transaction[]> {
     const params = await getParams(this.algod)
 
@@ -140,7 +173,14 @@ export default class Manager {
   }
 
   // vault
-
+  /**
+   * Constructs a series of transactions that sends a governance transaction from the user
+   * 
+   * @param user - algofi user representing the user we want to opt in
+   * @param targetAddress - the target address we are sending the gov transaction to
+   * @param note - a note to put in the governance transaction
+   * @returns a series of transactions that sends a governance transaction from the user
+   */
   async getGovernanceTxns(user: AlgofiUser, targetAddress: string, note: string): Promise<Transaction[]> {
     const params = await getParams(this.algod)
 
@@ -161,6 +201,21 @@ export default class Manager {
     return assignGroupID([txn0])
   }
 
+  /**
+   * Constructs a series of transactions that send a keyreg transaction for
+   * governance from the user.
+   * 
+   * @param user - algofi user representing the user we want to send the keyreg
+   * txn on behalf
+   * @param votePK -root participation public key
+   * @param selectionPK - the VRF public key
+   * @param stateProofPK - the 64 byte state proof public key commitment
+   * @param voteFirst - the first round that hte participation key is valid
+   * @param voteLast - The last round that th eparticipatin key is valid
+   * @param voteKeyDilution - The dilution for the 2-level participation key
+   * @returns a series of transactions that send a keyreg transaction for 
+   * governance from the user
+   */
   async getKeyregTxns(
     user: AlgofiUser,
     votePK: string,
@@ -196,6 +251,13 @@ export default class Manager {
     return assignGroupID([txn0])
   }
 
+  /**
+   * Constructs a series of transactions that send an offlinek eyreg
+   * transaction.
+   * 
+   * @param user - algofi user representing the user we want to send the offline
+   * keyreg transaction on behalf
+   */
   async getKeyregOfflineTxns(user: AlgofiUser): Promise<Transaction[]> {
     const params = await getParams(this.algod)
 

@@ -49,6 +49,12 @@ export class MarketRewardsProgram {
   public claimed: number
   public index: bigint
 
+  /**
+   * Constructs a MarketRewardsProgram object
+   * 
+   * @param state - state of the market rewards program on chain
+   * @param programIndex - the index of the rewardss program
+   */
   constructor(state: {}, programIndex: number) {
     let rewardsStateBytes = Buffer.from(
       state[MARKET_STRINGS.rewards_program_state_prefix + String.fromCharCode.apply(null, encodeUint64(programIndex))],
@@ -135,6 +141,14 @@ export default class Market {
   public rewardsPrograms = []
   public rewardsEscrowAccount: string
 
+  /**
+   * Constructor for the Market class 
+   * 
+   * @param algod - algod client
+   * @param lendingClient - lending client
+   * @param managerAppId - manager app idd
+   * @param marketConfig - market config
+   */
   constructor(algod: Algodv2, lendingClient: LendingClient, managerAppId: number, marketConfig: MarketConfig) {
     this.algod = algod
     this.lendingClient = lendingClient
@@ -146,6 +160,9 @@ export default class Market {
     this.bAssetId = marketConfig.bAssetId
   }
 
+  /**
+   * Gets the application global state and loads in all of the updated values into the actual object.
+   */
   async loadState() {
     let state = await getApplicationGlobalState(this.algod, this.appId)
 
@@ -215,6 +232,11 @@ export default class Market {
 
   // GETTERS
 
+  /**
+   * Gets the underlying supplied for a market.
+   * 
+   * @returns the underlying supplied for a market.
+   */
   getUnderlyingSupplied(): number {
     if (this.marketType == MarketType.STBL) {
       return this.underlyingCash
@@ -223,6 +245,13 @@ export default class Market {
     }
   }
 
+  /**
+   * Gets supply and borrow aprs for a market.
+   * 
+   * @param totalSupplied - the total supplied for the market
+   * @param totalBorrowed - the total borrowed for the market
+   * @returns a list containing both the supply and borrow apr
+   */
   getAPRs(totalSupplied: number, totalBorrowed: number): [number, number] {
     let borrowUtilization = totalBorrowed / totalSupplied || 0
     let borrowAPR = this.baseInterestRate / FIXED_6_SCALE_FACTOR
@@ -239,10 +268,23 @@ export default class Market {
 
   // CONVERSIONS
 
+  /**
+   * Converts the underlying asset to its value in USD
+   * 
+   * @param amount - amount of the underlying asset
+   * @returns the dollarized value for that amount of the asset
+   * governance from the user
+   */
   convertUnderlyingToUSD(amount: number): number {
     return (amount * this.oracle.rawPrice) / (this.oracle.scaleFactor * FIXED_3_SCALE_FACTOR)
   }
 
+  /**
+   * Converts the b asset to the underlying asset amount
+   * 
+   * @param amount - the amount of the b asset we want to convert
+   * @returns the asset amount that corresponds to the b asset amount that we passed in
+   */
   bAssetToAssetAmount(amount: number): AssetAmount {
     if (amount == 0) {
       return new AssetAmount(0, 0)
@@ -254,6 +296,14 @@ export default class Market {
     return new AssetAmount(underlyingAmount, usdAmount)
   }
 
+  /**
+   * Converts the borrow shares to the acutal underlying asset amount those
+   * borrow shares represent.
+   * 
+   * @param amount - amount of borrow shares we want to convert
+   * @returns the amount of the underlying that is represented by the amount of
+   * borrow shares that we passed in.
+   */
   borrowSharesToAssetAmount(amount: number): AssetAmount {
     if (amount == 0) {
       return new AssetAmount(0, 0)
@@ -265,12 +315,26 @@ export default class Market {
     return new AssetAmount(underlyingAmount, usdAmount)
   }
 
+  /**
+   * Converts the underlying to b assets
+   * 
+   * @param amount - the amount of underlying we want to convert
+   * @returns the corresponding amount of the b asset for the underlying that we
+   * passed in.
+   */
   underlyingToBAssetAmount(amount: number): number {
     return Math.floor((amount * this.bAssetCirculation) / this.getUnderlyingSupplied())
   }
 
   // TRANSACTIONS
 
+  /**
+   * Constructs a series of transactions that are required for several other transactions in lending.
+   * 
+   * @param params - parameters for the transaction
+   * @param user - the user to send the preamble transactions on behalf
+   * @returns a series of transactions that are required for several other transactions in lending.
+   */
   async getPreambleTransactions(
     params: SuggestedParams,
     user: AlgofiUser,
@@ -298,6 +362,13 @@ export default class Market {
     return [preamble, additionalFee]
   }
 
+  /**
+   * Constructs a series of transactions that mint b assets for the user
+   * 
+   * @param user - the user minting b assets
+   * @param underlyingAmount - how much of the underlying the user wants to mint
+   * @returns a series of transactions that mint b assets for the user
+   */
   async getMintTxns(user: AlgofiUser, underlyingAmount: number): Promise<Transaction[]> {
     if (this.marketType == MarketType.VAULT) {
       throw "Mint action not supported by vault market"
@@ -331,6 +402,15 @@ export default class Market {
     return assignGroupID(preambleTransactions.concat([txn0, txn1]))
   }
 
+  /**
+   * Constructs a series of transactions that adds underlying collateral for the
+   * user
+   * 
+   * @param user - algofi user who wants to add underlying
+   * @param underlyingAmount - the amount of the underlying we want to add
+   * @returns a series of transactions that adds underlying collateral for the
+   * user
+   */
   async getAddUnderlyingCollateralTxns(user: AlgofiUser, underlyingAmount: number): Promise<Transaction[]> {
     const params = await getParams(this.algod)
     const transactions = []
@@ -361,6 +441,14 @@ export default class Market {
     return assignGroupID(preambleTransactions.concat([txn0, txn1]))
   }
 
+  /**
+   * Constructs a series of transactions that adds b asset collateral for a
+   * user.
+   * 
+   * @param user - the user who is adding b assets
+   * @param bAssetAmount - the amount of b assets to add
+   * @returns a series of transactions that adds b asset collateral for a user.
+   */
   async getAddBAssetCollateralTxns(user: AlgofiUser, bAssetAmount: number): Promise<Transaction[]> {
     if (this.marketType == MarketType.VAULT) {
       throw "Add b asset collateral action not supported by vault market"
@@ -394,6 +482,14 @@ export default class Market {
     return assignGroupID(preambleTransactions.concat([txn0, txn1]))
   }
 
+  /**
+   * Constructs a series of transactions that remove underlying collateral for a user.
+   * 
+   * @param user - algofi user representing hte user that wants to remove underlying collateral
+   * @param underlyingAmount - algofi user representing the user we want to opt in
+   * @param removeMax - whether or not we want to remove the maximum amount
+   * @returns a series of transactions that remove underlying collateral for a user.
+   */
   async getRemoveUnderlyingCollateralTxns(
     user: AlgofiUser,
     underlyingAmount: number,
@@ -430,6 +526,15 @@ export default class Market {
     return assignGroupID(preambleTransactions.concat([txn0]))
   }
 
+  /**
+   * Constructs a series of transactions that remove underlying b asset
+   * collateral for a user.
+   * 
+   * @param user - algofi user representing the user we want to remove b asset collateral for
+   * @param bAssetAmount - the amount of b asset collateral we want to move
+   * @returns a series of transactions that remove underlying b asset
+   * collateral for a user.
+   */
   async getRemoveBAssetCollateralTxns(user: AlgofiUser, bAssetAmount: number): Promise<Transaction[]> {
     if (this.marketType == MarketType.VAULT) {
       throw "Remove b asset collateral action not supported by vault market"
@@ -456,6 +561,13 @@ export default class Market {
     return assignGroupID(preambleTransactions.concat([txn0]))
   }
 
+  /**
+   * Constructs a series of transactions that represent a burning of b assets
+   * 
+   * @param user - algofi user representing the user we want to burn the b assets for
+   * @param bAssetAmount - the amount of b asset we want to burn 
+   * @returns a series of transactions that represent a burning of b assets
+   */
   async getBurnTxns(user: AlgofiUser, bAssetAmount: number): Promise<Transaction[]> {
     if (this.marketType == MarketType.VAULT) {
       throw "Burn action not supported by vault market"
@@ -489,6 +601,15 @@ export default class Market {
     return assignGroupID(preambleTransactions.concat([txn0, txn1]))
   }
 
+  /**
+   * Constructs a series of transactions that allow a user to borrow some amount
+   * of underlying from the market>
+   * 
+   * @param user - algofi user representing the user we want to borrow for 
+   * @param underlyingAmount - the amount of underlying to borrow
+   * @returns a series of transactions that allow a user to borrow some amount
+   * of underlying from the market.
+   */
   async getBorrowTxns(user: AlgofiUser, underlyingAmount: number): Promise<Transaction[]> {
     if (this.marketType == MarketType.VAULT) {
       throw "Borrow action not supported by vault market"
@@ -515,6 +636,15 @@ export default class Market {
     return assignGroupID(preambleTransactions.concat([txn0]))
   }
 
+  /**
+   * Constructs a series of transactions that allow a user to repay some of
+   * their borrow.
+   * 
+   * @param user - algofi user representing the user we want to borrow for 
+   * @param underlyingAmount - the amount of underlying to repay
+   * @returns a series of transactions that allow a user to repay some of their
+   * borrow.
+   */
   async getRepayBorrowTxns(
     user: AlgofiUser,
     underlyingAmount: number,
@@ -562,6 +692,15 @@ export default class Market {
   }
 
   // claim rewards
+  /**
+   * Constructs a series of transactions that allow a user to claim their
+   * rewards from the market.
+   * 
+   * @param user - algofi user representing the user we want to claim rewards
+   * for
+   * @returns a series of transactions that allow a user to claim their
+   * rewards from the market.
+   */
   async getClaimRewardsTxns(user: AlgofiUser): Promise<Transaction[]> {
     const params = await getParams(this.algod)
     const transactions = []
@@ -595,7 +734,12 @@ export default class Market {
   }
 
   // vault specific actions
-
+  /**
+   * Constructs a series of transactions to sync the vault
+   * 
+   * @param user - algofi user representing the user we want to sync the vault for
+   * @returns a series of transactions to sync the vault
+   */
   async getSyncVaultTxns(user: AlgofiUser): Promise<Transaction[]> {
     if (this.marketType != MarketType.VAULT) {
       throw "Sync vault action only supported by vault market"
