@@ -47,6 +47,7 @@ export const PERMISSIONLESS_SENDER_LOGIC_SIG = new LogicSigAccount(
 )
 
 export const TEXT_ENCODER = new TextEncoder()
+export const TEXT_DECODER = new TextDecoder()
 
 export const ANALYTICS_ENDPOINT = "Algofianalytics-env.eba-nbpu8uqb.us-east-2.elasticbeanstalk.com"
 

@@ -5,6 +5,7 @@ import algosdk, { Algodv2, encodeAddress } from "algosdk"
 
 // local
 import { Base64Encoder } from "./encoder"
+import { ALGO_ASSET_ID } from "./globals"
 
 // FUNCTIONS
 
@@ -96,4 +97,19 @@ export async function getAccountBalances(algodClient: Algodv2, address: string):
 export async function getAccountMinBalance(algodClient: Algodv2, address: string): Promise<number> {
   let accountInfo = await algodClient.accountInformation(address).do()
   return accountInfo["min-balance"]
+}
+
+export function getTransferDetails(txn: {}) : [number, number] {
+  let assetId = 0
+  let amount = 0
+
+  if (txn["tx-type"] == "pay") {
+    assetId = ALGO_ASSET_ID
+    amount = txn['payment-transaction']['amount']
+  } else if (txn["tx-type"] == "axfer") {
+    assetId = txn['asset-transfer-transaction']['asset-id']
+    amount = txn['asset-transfer-transaction']['amount']
+  }
+
+  return [assetId, amount]
 }

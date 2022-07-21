@@ -65,4 +65,10 @@ export default class LendingClient {
 
     return assignGroupID(transactions)
   }
+
+  isLendingTransaction(txn : object) : boolean {
+    let appId = txn['application-transaction']['application-id']
+    return (appId in this.markets || appId == this.manager.appId)
+  }
+
 }
