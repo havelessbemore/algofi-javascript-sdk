@@ -278,7 +278,7 @@ export default class Market {
   
   getMaximumWithdrawAmount(user: AlgofiUser, borrowUtilLimit: number=0.9): AssetAmount {
     let userExcessScalledCollateral = user.lending.netScaledCollateral - user.lending.netScaledBorrow / borrowUtilLimit
-    let maximumWithdrawUSD = .999 * userExcessScalledCollateral * FIXED_3_SCALE_FACTOR / this.collateralFactor
+    let maximumWithdrawUSD = userExcessScalledCollateral * FIXED_3_SCALE_FACTOR / this.collateralFactor
     let maximumWithdrawUnderlying = Math.floor(this.convertUSDToUnderlying(maximumWithdrawUSD))
     return new AssetAmount(maximumWithdrawUnderlying, maximumWithdrawUSD)
   }
