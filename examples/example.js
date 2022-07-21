@@ -152,9 +152,6 @@ async function test() {
   // await executeTransactions(closeOutFromProposalTxns, govUser.sk, client)
   // console.log(algofiUser2.governance.userAdminState)
 
-  // console.log(a_client.governance.admin.proposals)
-  // console.log(a_client.governance.admin.proposalDuration)
-
   // let market = a_client.lending.markets[802881530]
   // let stxns = []
   // //console.log(user.lending)
@@ -172,6 +169,7 @@ async function test() {
   //stxns = [stxn0.blob, stxn1.blob, stxn2.blob, stxn3.blob]
   //console.log("SEND TXNS")
   //let srt = await client.sendRawTransaction(stxns).do()
+
   // STAKE
   //console.log("STAKE")
   //let stakeTxns = await staking.getStakeTxns(user, 10000)
@@ -182,6 +180,7 @@ async function test() {
   //}
   //console.log("SEND TXNS")
   //await client.sendRawTransaction(stxns).do()
+
   // UNSTAKE
   //console.log("UNSTAKE")
   //let unstakeTxns = await staking.getUnstakeTxns(user, 10000)
@@ -192,6 +191,7 @@ async function test() {
   //}
   //console.log("SEND TXNS")
   //await client.sendRawTransaction(stxns).do()
+
   // // CLAIM
   // console.log("CLAIM")
   // let claimTxns = await staking.getClaimTxns(user)
@@ -202,6 +202,7 @@ async function test() {
   // }
   // console.log("SEND TXNS")
   // await client.sendRawTransaction(stxns).do()
+
   // OPT IN TO MANAGER
   //console.log("OPT IN")
   //let storageAccount = algosdk.generateAccount()
@@ -213,6 +214,7 @@ async function test() {
   //stxns = [stxn0.blob, stxn1.blob, stxn2.blob]
   //console.log("SEND TXNS")
   //let srt = await client.sendRawTransaction(stxns).do()
+
   // OPT IN TO MARKET
   //console.log("MARKET OPT IN")
   //let optInTxns = await a_client.lending.manager.getMarketOptInTxns(user, market)
@@ -223,6 +225,7 @@ async function test() {
   //stxns = [stxn0.blob, stxn1.blob, stxn2.blob]
   //console.log("SEND TXNS")
   //let srt = await client.sendRawTransaction(stxns).do()
+
   // OPT OUT OF MARKET
   //console.log("MARKET OPT OUT")
   //let optOutTxns = await a_client.lending.manager.getMarketOptOutTxns(user, market)
@@ -231,6 +234,7 @@ async function test() {
   //stxns = [stxn0.blob]
   //console.log("SEND TXNS")
   //let srt = await client.sendRawTransaction(stxns).do()
+
   // MINT B ASSET
   //console.log("MINT")
   //let mintTxns = await market.getMintTxns(user, 100000000)
@@ -245,6 +249,7 @@ async function test() {
   //}
   //console.log("SEND TXNS")
   //await client.sendRawTransaction(stxns).do()
+
   // ADD B ASSET COLLATERAL
   //console.log("ADD B ASSET COLLATERAL")
   //let addBAssetCollateralTxns = await market.getAddBAssetCollateralTxns(user, 100000000)
@@ -259,6 +264,7 @@ async function test() {
   //}
   //console.log("SEND TXNS")
   //await client.sendRawTransaction(stxns).do()
+
   // ADD UNDERLYING COLLATERAL
   //console.log("ADD UNDERLYING COLLATERAL")
   //let addUnderlyingCollateralTxns = await market.getAddUnderlyingCollateralTxns(user, 100000000)
@@ -273,6 +279,7 @@ async function test() {
   //}
   //console.log("SEND TXNS")
   //await client.sendRawTransaction(stxns).do()
+
   // REMOVE UNDERLYING COLLATERAL
   //console.log("REMOVE UNDERLYING COLLATERAL")
   //let removeUnderlyingCollateralTxns = await market.getRemoveUnderlyingCollateralTxns(user, 21000000)
@@ -288,6 +295,7 @@ async function test() {
   //}
   //console.log("SEND TXNS")
   //await client.sendRawTransaction(stxns).do()
+
   // REMOVE B ASSET COLLATERAL
   //console.log("REMOVE B ASSET COLLATERAL")
   //let removeBAssetCollateralTxns = await market.getRemoveBAssetCollateralTxns(user, 100000000)
@@ -302,6 +310,7 @@ async function test() {
   //}
   //console.log("SEND TXNS")
   //await client.sendRawTransaction(stxns).do()
+
   // BURN B ASSET
   //console.log("BURN B ASSET")
   //let burnTxns = await market.getBurnTxns(user, 100000000)
@@ -316,6 +325,7 @@ async function test() {
   //}
   //console.log("SEND TXNS")
   //await client.sendRawTransaction(stxns).do()
+
   // BORROW
   //console.log("BORROW")
   //let borrowTxns = await market.getBorrowTxns(user, 1000000)
@@ -330,6 +340,7 @@ async function test() {
   //}
   //console.log("SEND TXNS")
   //await client.sendRawTransaction(stxns).do()
+
   // REPAY BORROW
   //console.log("REPAY BORROW")
   //let repayBorrowTxns = await market.getRepayBorrowTxns(user, 110000000, true)
@@ -345,6 +356,7 @@ async function test() {
   //}
   //console.log("SEND TXNS")
   //await client.sendRawTransaction(stxns).do()
+
   // CLAIM REWARDS
   //console.log("CLAIM REWARDS")
   //let claimRewardsTxns = await a_client.lending.getClaimRewardsTxns(user)
@@ -359,6 +371,7 @@ async function test() {
   //}
   //console.log("SEND TXNS")
   //await client.sendRawTransaction(stxns).do()
+
   // SYNC VAULT
   //console.log("SYNC VAULT")
   //let syncVaultTxns = await market.getSyncVaultTxns(user)
@@ -373,6 +386,7 @@ async function test() {
   //}
   //console.log("SEND TXNS")
   //await client.sendRawTransaction(stxns).do()
+
   // SEND GOVERNANCE TXN
   //console.log("SEND GOV TXN")
   //let govTxns = await a_client.lending.manager.getGovernanceTxns(user, user.address, "testing")
@@ -387,6 +401,7 @@ async function test() {
   //}
   //console.log("SEND TXNS")
   //await client.sendRawTransaction(stxns).do()
+
   // SEND KEYREG
   //console.log("SEND KEYREG TXN")
   //let keyregTxns = await a_client.lending.manager.getKeyregTxns(user, user.address, "00000000000000000000000000000000", "00000000000000000000000000000000", "0000000000000000000000000000000000000000000000000000000000000000", 21833648, 21833648, 10000)
@@ -401,6 +416,7 @@ async function test() {
   //}
   //console.log("SEND TXNS")
   //await client.sendRawTransaction(stxns).do()
+
   // SEND KEYREG OFFLINE TXN
   //  console.log("SEND KEYREG OFFLINE TXN")
   //  let keyregOfflineTxns = await a_client.lending.manager.getKeyregOfflineTxns(user)
