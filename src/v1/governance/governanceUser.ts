@@ -1,9 +1,14 @@
+// IMPORTS
+
+// external
 import { Algodv2 } from "algosdk"
 import { getLocalStates } from "../stateUtils"
 import { parseAddressBytes } from "../utils"
 import GovernanceClient from "./governanceClient"
 import { ADMIN_STRINGS } from "./governanceConfig"
-import { UserAdminState, UserRewardsManagerState, UserVotingEscrowState } from "./userGovernanceStates"
+import UserAdminState from "./userAdminState"
+import UserRewardsManagerState from "./userRewardsManagerState"
+import UserVotingEscrowState from "./userVotingEscrowState"
 
 export default class governanceUser {
   public governanceClient: GovernanceClient

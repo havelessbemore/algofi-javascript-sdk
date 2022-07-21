@@ -19,7 +19,7 @@ import { getParams } from "../transactionUtils"
 
 // local
 import GovernanceClient from "./governanceClient"
-import GovernanceConfig, { GovernanceConfigs, ADMIN_STRINGS, PROPOSAL_FACTORY_STRINGS } from "./governanceConfig"
+import { ADMIN_STRINGS, PROPOSAL_FACTORY_STRINGS } from "./governanceConfig"
 import Proposal from "./proposal"
 
 export default class Admin {
@@ -82,7 +82,8 @@ export default class Admin {
     if (userCalling.address != userUpdating.address) {
       await userUpdating.loadState()
     }
-    params.fee = 2000
+    // TODO figure out correct amount
+    params.fee = 5000
     const updateUserVebankDataTxn = makeApplicationNoOpTxnFromObject({
       from: userCalling.address,
       appIndex: this.adminAppId,
@@ -123,15 +124,13 @@ export default class Admin {
     const enc = new TextEncoder()
     const txns = []
 
-    // To get storage account
-    await delegatee.loadState()
-
+    // We assume that delegatee has loaded state so they have a storage account
     const delegateTxn = makeApplicationNoOpTxnFromObject({
       from: user.address,
       appIndex: this.adminAppId,
       appArgs: [enc.encode(ADMIN_STRINGS.delegate)],
       suggestedParams: params,
-      accounts: [delegatee.governance.userAdminState.storageAddress],
+      accounts: [user.governance.userAdminState.storageAddress, delegatee.governance.userAdminState.storageAddress],
       foreignApps: undefined,
       foreignAssets: undefined,
       rekeyTo: undefined
@@ -187,7 +186,7 @@ export default class Admin {
     const txns = []
 
     const updateUserVebankDataTxn = await this.getUpdateUserVeBankDataTxns(callingUser, votingUser)
-    const getDelegatedVoteTxn = makeApplicationNoOpTxnFromObject({
+    const delegatedVoteTxn = makeApplicationNoOpTxnFromObject({
       from: callingUser.address,
       appIndex: this.adminAppId,
       appArgs: [enc.encode(ADMIN_STRINGS.delegated_vote)],
@@ -203,8 +202,7 @@ export default class Admin {
       rekeyTo: undefined
     })
 
-    txns.push(updateUserVebankDataTxn, getDelegatedVoteTxn)
-    return assignGroupID(txns)
+    return assignGroupID([...updateUserVebankDataTxn, delegatedVoteTxn])
   }
 
   async getCloseOutFromProposalTxns(

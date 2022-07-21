@@ -16,6 +16,10 @@ export default class Proposal {
   public address: string
   public votesFor: number
   public votesAgainst: number
+  public voteCloseTime: number
+  public executionTime: number
+  public executed: number
+  public canceledByEmergencyDao: number
   public title: string
   public link: string
   // To get local state for votes for and against
@@ -36,6 +40,10 @@ export default class Proposal {
       if (appId == this.govClient.admin.adminAppId) {
         this.votesFor = value[ADMIN_STRINGS.votes_for]
         this.votesAgainst = value[ADMIN_STRINGS.votes_against]
+        this.voteCloseTime = value[ADMIN_STRINGS.vote_close_time] || 0
+        this.executionTime = value[ADMIN_STRINGS.execution_time] || 0
+        this.executed = value[ADMIN_STRINGS.executed] || 0
+        this.canceledByEmergencyDao = value[ADMIN_STRINGS.canceled_by_emergency_dao] || 0
       }
     }
     // Set proposal global state
