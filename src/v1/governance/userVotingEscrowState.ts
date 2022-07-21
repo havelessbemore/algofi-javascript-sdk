@@ -9,6 +9,7 @@ export default class UserVotingEscrowState {
   public lockDuration: number
   public amountVeBank: number
   public boostMultiplier: number
+
   constructor(userLocalState: {}) {
     this.amountLocked = userLocalState[VOTING_ESCROW_STRINGS.user_amount_locked]
     this.lockStartTime = userLocalState[VOTING_ESCROW_STRINGS.user_lock_start_time]

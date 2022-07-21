@@ -23,6 +23,7 @@ export default class Proposal {
   public link: string
   // To get local state for votes for and against
   public adminAppId: number
+
   constructor(govClient: GovernanceClient, proposalAppId) {
     this.govClient = govClient
     this.algod = this.govClient.algod

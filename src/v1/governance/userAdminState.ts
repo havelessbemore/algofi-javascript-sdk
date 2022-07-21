@@ -13,6 +13,7 @@ export default class UserAdminState {
   public delegatorCount: number
   public delegatingTo: string
   public userProposalStates: { [key: number]: UserProposalState } = {}
+
   constructor(
     storageAddress: string,
     userStorageLocalStates: { [key: string]: {} },
