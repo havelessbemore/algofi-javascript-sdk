@@ -34,7 +34,7 @@ export default class Oracle {
   }
 
   /**
-   * Sets raw price after getting global state
+   * Sets raw price after getting global state.
    */
   async loadPrice() {
     let state = await getApplicationGlobalState(this.algod, this.appId)

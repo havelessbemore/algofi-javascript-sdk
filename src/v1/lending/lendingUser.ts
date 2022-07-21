@@ -40,6 +40,12 @@ export default class User {
   public netUnclaimedRewards = {}
   public netRewardsPerYear = {}
 
+  /**
+   * Constructor for the lending user class.
+   * 
+   * @param lendingClient - lending client
+   * @param address - address for user
+   */
   constructor(lendingClient: LendingClient, address: string) {
     this.lendingClient = lendingClient
     this.algod = this.lendingClient.algod
@@ -47,7 +53,8 @@ export default class User {
   }
 
   /**
-   * Update the lending user object to match the user's actual lending local state.
+   * Functino which updates the lending user object to match the user's actual
+   * lending local state.
    * 
    * @param userLocalStates - a list of all of the user's local states
    */
@@ -126,10 +133,10 @@ export default class User {
   }
 
   /**
-   * Returns whether or not the user is opted into the market
+   * Returns whether or not the user is opted into the market.
    * 
    * @param marketAppId - application id of the market
-   * @returns whether or not the user is opted into the market
+   * @returns whether or not the user is opted into the market.
    */
   isUserOptedIntoMarket(marketAppId: number): boolean {
     return marketAppId in this.userMarketStates
@@ -139,7 +146,7 @@ export default class User {
    * Returns page offset for a market.
    * 
    * @param marketAppId - application id of the market
-   * @returns an array of the page and offset that the market is stored at
+   * @returns an array of the page and offset that the market is stored at.
    */
   getMarketPageOffset(marketAppId: number): [number, number] {
     let marketIndex = this.optedInMarkets.indexOf(marketAppId)

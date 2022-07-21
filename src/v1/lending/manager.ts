@@ -24,7 +24,7 @@ export default class Manager {
   public address: string
 
   /**
-   * Constructor for the Manager class.
+   * Constructor for the manager class.
    * 
    * @param algod - an algod client
    * @param appId - app id of the manager
@@ -40,7 +40,7 @@ export default class Manager {
    * 
    * @param user - algofi user representing the user we want to opt in
    * @param storageAccount - storage account for the user
-   * @returns a series of transactions that opt the user into the manager
+   * @returns a series of transactions that opt the user into the manager.
    */
   async getOptInTxns(user: AlgofiUser, storageAccount: Account): Promise<Transaction[]> {
     const params = await getParams(this.algod)
@@ -79,7 +79,7 @@ export default class Manager {
    * Constructs a series of transactions that opt the user out of the manager.
    * 
    * @param user - algofi user representing the user we want to opt in
-   * @returns a series of transactions that opt the user out of the manager
+   * @returns a series of transactions that opt the user out of the manager.
    */
   async getOptOutTxns(user: AlgofiUser): Promise<Transaction[]> {
     const params = await getParams(this.algod)
@@ -105,7 +105,7 @@ export default class Manager {
    * 
    * @param user - algofi user representing the user we want to opt in
    * @param market - the market we want to opt the user into
-   * @returns a series of transactions that opt the user into a market
+   * @returns a series of transactions that opt the user into a market.
    */
   async getMarketOptInTxns(user: AlgofiUser, market: Market): Promise<Transaction[]> {
     const params = await getParams(this.algod)
@@ -174,12 +174,12 @@ export default class Manager {
 
   // vault
   /**
-   * Constructs a series of transactions that sends a governance transaction from the user
+   * Constructs a series of transactions that sends a governance transaction from the user.
    * 
    * @param user - algofi user representing the user we want to opt in
    * @param targetAddress - the target address we are sending the gov transaction to
    * @param note - a note to put in the governance transaction
-   * @returns a series of transactions that sends a governance transaction from the user
+   * @returns a series of transactions that sends a governance transaction from the user.
    */
   async getGovernanceTxns(user: AlgofiUser, targetAddress: string, note: string): Promise<Transaction[]> {
     const params = await getParams(this.algod)
@@ -214,7 +214,7 @@ export default class Manager {
    * @param voteLast - The last round that th eparticipatin key is valid
    * @param voteKeyDilution - The dilution for the 2-level participation key
    * @returns a series of transactions that send a keyreg transaction for 
-   * governance from the user
+   * governance from the user.
    */
   async getKeyregTxns(
     user: AlgofiUser,
@@ -257,6 +257,8 @@ export default class Manager {
    * 
    * @param user - algofi user representing the user we want to send the offline
    * keyreg transaction on behalf
+   * @returns - a series of transactions that send an offlinek eyreg
+   * transaction.
    */
   async getKeyregOfflineTxns(user: AlgofiUser): Promise<Transaction[]> {
     const params = await getParams(this.algod)

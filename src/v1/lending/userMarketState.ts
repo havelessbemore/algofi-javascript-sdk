@@ -27,7 +27,7 @@ export class UserMarketRewardsState {
   public rewardsPerYear: number
   
   /**
-   * Constructor for the user's market rewards state
+   * Constructor for the user's market rewards state.
    * 
    * @param marketState - a dictionary representing a users state in a market on chain
    * @param market - the market of interest
@@ -80,7 +80,7 @@ export default class UserMarketState {
   public rewardsProgramStates = []
 
   /**
-   * Constor for a user market state
+   * Constructor for a user market state
    * 
    * @param marketState - a dictionary representing the user's state in a market
    * @param market - the market of interest

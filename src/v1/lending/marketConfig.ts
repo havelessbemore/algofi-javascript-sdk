@@ -14,6 +14,14 @@ export default class MarketConfig {
   public bAssetId: number
   public marketType: MarketType
 
+  /**
+   * Constructor for the market config class
+   * 
+   * @param appId - market app id
+   * @param underlyingAssetId - underlying asset id
+   * @param bAssetId - b asset id
+   * @param marketType - market type
+   */
   constructor(appId: number, underlyingAssetId: number, bAssetId: number, marketType: MarketType) {
     this.appId = appId
     this.underlyingAssetId = underlyingAssetId

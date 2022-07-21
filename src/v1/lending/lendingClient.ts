@@ -60,7 +60,7 @@ export default class LendingClient {
   }
 
   /**
-   * Returns a lending user with the given address
+   * Returns a lending user with the given address.
    * 
    * @param address - the address that we want to get the lending user for
    */
