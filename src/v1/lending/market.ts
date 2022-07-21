@@ -563,7 +563,6 @@ export default class Market {
   
   // claim rewards
   async getClaimRewardsTxns(user: AlgofiUser): Promise<Transaction[]> {
-    console.log("getting txns")
     
     const params = await getParams(this.algod)
     const transactions = []
