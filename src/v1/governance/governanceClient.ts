@@ -45,7 +45,7 @@ export default class GovernanceClient {
   }
   /**
    * Creates new admin, voting escrow, and rewards managers on the algofi client 
-   * object and loads their state
+   * object and loads their state.
    */
   async loadState() {
     // Creating new Admin + Proposal Factory and filling in state
@@ -61,10 +61,10 @@ export default class GovernanceClient {
   }
 
   /**
-   * Gets a governance user given an address.
+   * Gets an algofi governance user given an address.
    * 
    * @param address - the address of the user we are interested in.
-   * @returns an algofi governance user
+   * @returns an algofi governance user.
    */
   getUser(address: string) {
     return new governanceUser(this, address)
@@ -77,7 +77,7 @@ export default class GovernanceClient {
    * 
    * @param user - user we are opting into the contracts
    * @param storageAccount - a newly created account that will serve as the
-   * storage account for the user on the protocol.
+   * storage account for the user on the protocol
    * @returns a series of transactions to opt the user and their storage
    * account into all of the necessary applications for governance including the
    * admin, the voting escrow, and the rewards manager.

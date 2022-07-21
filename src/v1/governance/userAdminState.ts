@@ -15,7 +15,7 @@ export default class UserAdminState {
   public userProposalStates: { [key: number]: UserProposalState } = {}
 
   /**
-   * Constructor for the UserAdminState object.
+   * Constructor for the user admin state class.
    * 
    * @param storageAddress - the address of the storage account for the user
    * @param userStorageLocalStates - list of local states for the user's storage account
@@ -48,7 +48,7 @@ export class UserProposalState {
   public forOrAgainst: number
   public votingAmount: number
   /**
-   * Constructor for the UserProposalState object
+   * Constructor for the user proposal state object.
    *
    * @param storageProposalLocalState - an dictionary representing the local
    * state of the proposal contract with the admin contract.

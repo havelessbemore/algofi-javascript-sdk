@@ -26,7 +26,7 @@ export default class governanceUser {
    * Constructor for the governance user class.
    * 
    * @param governanceClient - a governance client
-   * @param address - an address for the user
+   * @param address - address of the user
    */
   constructor(governanceClient: GovernanceClient, address: string) {
     this.governanceClient = governanceClient
@@ -37,10 +37,11 @@ export default class governanceUser {
   /**
    * A function which will load in all of the state for a governance user
    * including their admin state, voting escrow state, and rewards manager
-   * state.
+   * state into the governance user object.
    * 
    * @param userLocalStates - a list of all of the local states for the
-   * particular user represented by the governance user object.
+   * particular user with the admin, voting escrow, and rewards manager
+   * contracts.
    */
   async loadState(userLocalStates: { [key: string]: {} }) {
     for (const [key, value] of Object.entries(userLocalStates)) {

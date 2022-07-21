@@ -32,7 +32,7 @@ export default class VotingEscrow {
   public votingEscrowMinTimeLockSeconds: number
 
   /**
-   * The constructor for the VotingEscrow object
+   * The constructor for the voting escrow object.
    * 
    * @param governanceClient - a governance client
    */
@@ -45,8 +45,8 @@ export default class VotingEscrow {
   }
 
   /**
-   * A function which when called will update the data on the voting escrow
-   * object to match that of the global state of the voting escrow contract.
+   * Function which will update the data on the voting escrow object to match
+   * that of the global state of the voting escrow contract.
    */
   async loadState() {
     const globalState = await getApplicationGlobalState(this.algod, this.appId)
@@ -61,7 +61,7 @@ export default class VotingEscrow {
    * 
    * @param userCalling - user who is calling the udpate transaction
    * @param userUpdating - user whose vebank is actually being updated
-   * @returns a series of transactions to update a target user's vebank
+   * @returns a series of transactions to update a target user's vebank.
    */
   async getUpdateVeBankDataTxns(userCalling: AlgofiUser, userUpdating: AlgofiUser): Promise<Transaction[]> {
     const params = await getParams(this.algod)
@@ -82,12 +82,12 @@ export default class VotingEscrow {
   }
 
   /**
-   * Constructs a series of transactions that lock a user's BANK to get veBANK.
+   * Constructs a series of transactions that lock a user's BANK.
    * 
    * @param user - user who is locking
    * @param amount - amount they are locking
    * @param durationSeconds - amount of time they are locking for 
-   * @returns a series of transactions that lock a user's BANK to get veBANK.
+   * @returns a series of transactions that lock a user's BANK.
    */
   async getLockTxns(user: AlgofiUser, amount: number, durationSeconds: number): Promise<Transaction[]> {
     const params = await getParams(this.algod)
@@ -120,11 +120,11 @@ export default class VotingEscrow {
   }
 
   /**
-   * Constructs a series of transactions that extend a user's lock on their BANK.
+   * Constructs a series of transactions that extend a user's lock.
    * 
    * @param user - user who is locking
    * @param durationSeconds - amount of time they are extending for
-   * @returns a series of transactions that extend a user's lock on their BANK.
+   * @returns a series of transactions that extend a user's lock.
    */
   async getExtendLockTxns(user: AlgofiUser, durationSeconds: number): Promise<Transaction[]> {
     const params = await getParams(this.algod)

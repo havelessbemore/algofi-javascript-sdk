@@ -44,12 +44,9 @@ export default class Admin {
   public proposals: { [key: number]: Proposal } = {}
 
   /**
-   * This is a constructor for the Admin class. It represents the admin
-   * contract on the protocol.  From the admin we can vote, delegate, validate
-   * proposals, undelegate, delegated vote, close out from proposals, set open
-   * to delegation, set not open to delegation, and create proposals.
+   * Constructor for the Admin class.
    * 
-   * @param governanceClient - an Algofi Governance Client 
+   * @param governanceClient - algofi governance client
    */
   constructor(governanceClient: GovernanceClient) {
     this.governanceClient = governanceClient
@@ -61,9 +58,9 @@ export default class Admin {
   }
 
   /**
-   * This is an asynchronous function which will refresh and load all of the
-   * global and local state we need to keep track of on the admin, including all
-   * of the proposals that hvae been created as well.
+   * Function to refresh and load all of the global and local state we need to
+   * keep track of on the admin, including all of the proposals that have been
+   * created.
    */
   async loadState() {
     // Setting state for admin
@@ -349,7 +346,7 @@ export default class Admin {
   /**
    * Constructs a series of transactions to create a proposal.
    * 
-   * @param user - user who is trying to create the transaction.
+   * @param user - user who is trying to create the transaction
    * @param title - title of the proposal to be created
    * @param link - link of the proposal to be created
    * @returns a series of transactions to create a proposal.

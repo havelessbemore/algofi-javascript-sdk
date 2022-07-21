@@ -11,7 +11,7 @@ export default class UserVotingEscrowState {
   public boostMultiplier: number
 
   /**
-   * Constructor for the UserVotingEscrowState object
+   * Constructor for the user voting escrow class.
    * 
    * @param userLocalState - a dictionary representing a user's local state with
    * the voting escrow contract.

@@ -25,7 +25,7 @@ export default class Proposal {
   public adminAppId: number
 
   /**
-   * This is the constructor for the Proposal class.
+   * Constructor for the proposal class.
    * 
    * @param governanceClient - a governance client
    * @param proposalAppId - the app id of the proposal 
@@ -39,8 +39,8 @@ export default class Proposal {
   }
 
   /**
-   * A function that when called will update the data on the proposal object
-   * with the global and local data of the proposal contract on chain.
+   * Function that will update the data on the proposal object with the global
+   * and local data of the proposal contract on chain.
    */
   async loadState() {
     // Set proposal local state
