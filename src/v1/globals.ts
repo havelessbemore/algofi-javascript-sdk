@@ -47,6 +47,9 @@ export const PERMISSIONLESS_SENDER_LOGIC_SIG = new LogicSigAccount(
 )
 
 export const TEXT_ENCODER = new TextEncoder()
+export const TEXT_DECODER = new TextDecoder()
+
+export const ANALYTICS_ENDPOINT = "http://Algofianalytics-env.eba-nbpu8uqb.us-east-2.elasticbeanstalk.com"
 
 // ENUMS
 
@@ -54,5 +57,6 @@ export enum Network {
   MAINNET = 0,
   MAINNET_CLONE = 1,
   MAINNET_CLONE2 = 2,
-  TESTNET = 3
+  TESTNET = 3,
+  MAINNET_CLONE3 = 4,
 }

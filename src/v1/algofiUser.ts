@@ -3,6 +3,7 @@
 // external
 import algosdk, {
   Algodv2,
+  Indexer,
   encodeAddress,
   LogicSigAccount,
   Transaction,
@@ -17,6 +18,7 @@ import algosdk, {
 // local
 import { getLocalStates, getAccountBalances, getAccountMinBalance } from "./stateUtils"
 import AlgofiClient from "./algofiClient"
+import ParsedTransaction from "./parsedTransaction"
 
 // lending
 import LendingUser from "./lending/lendingUser"
@@ -30,16 +32,27 @@ import V1StakingUser from "./v1_staking/v1_stakingUser"
 // governance
 import GovernanceUser from "./governance/governanceUser"
 
+// ENUMS
+export enum TxnLoadMode {
+  REFRESH = 0,
+  REVERSE = 1
+}
+
 // INTERFACE
 
 export default class AlgofiUser {
   public algofiClient: AlgofiClient
   public algod: Algodv2
+  public indexer: Indexer
   public address: string
 
-  // state
+  // account state
   public balances = {}
   public minBalance: number
+
+  // transaction state
+  public oldestLoadedRound: number
+  public transactions: ParsedTransaction[]
 
   // protcol users
   public lending: LendingUser
@@ -59,6 +72,7 @@ export default class AlgofiUser {
   constructor(algofiClient: AlgofiClient, address: string) {
     this.algofiClient = algofiClient
     this.algod = this.algofiClient.algod
+    this.indexer = this.algofiClient.indexer
     this.address = address
 
     // lending
@@ -110,6 +124,38 @@ export default class AlgofiUser {
       return true
     } else {
       return false
+    }
+  }
+
+  async getTransactionHistory(mode : TxnLoadMode) {
+    let accountTxns = {}
+    let newParsedTxns: ParsedTransaction[] = []
+    
+    if (mode == TxnLoadMode.REFRESH) {
+      // clear transactions
+      this.transactions = []
+    }
+
+    if (mode == TxnLoadMode.REVERSE && this.transactions.length > 0) {
+      accountTxns = await this.indexer
+        .lookupAccountTransactions(this.address)
+        .maxRound(this.transactions.slice(-1)[0].block)
+        .limit(100)
+        .do()
+    } else {
+      accountTxns = await this.indexer
+        .lookupAccountTransactions(this.address)
+        .limit(100)
+        .do()
+    }
+
+    for (var txnIdx = 0; txnIdx < accountTxns["transactions"].length; txnIdx++) {
+      const txn = accountTxns["transactions"][txnIdx]
+      if (txn["tx-type"] == "appl") {
+        if (this.algofiClient.lending.isLendingTransaction(txn)) {
+          this.lending.parseTransaction(accountTxns["transactions"], txnIdx, this.transactions)
+        }
+      }
     }
   }
 }

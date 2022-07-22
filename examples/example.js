@@ -1,6 +1,14 @@
 const algosdk = require("algosdk")
 const algofi = require("../.")
 
+//const m = ""
+//const a = "F44Y7B4O4DPUOXPZTHHJ36N7INEG7G4DC6XZ6CSDRORAQQW7YOE4KBZYPU"
+//const a = "WO7ZA3GTZZTWEIU427ZZZ674RPYUUN5LOQJF5TBY2YYFBTTNOR33X45RYI"
+const m = ""
+const a = "2NJEG3XKJZQ4PDSFXGIHOSTTY7Q7MBFZ76JQPMWNWV7O3LIB3T3JJYWLPE"
+const decoded_a = algosdk.decodeAddress(a)
+const sk = algosdk.mnemonicToSecretKey(m).sk
+
 const userMnemonic = ""
 const govUser = algosdk.mnemonicToSecretKey(userMnemonic)
 const governanceStorgeAccountAddress = ""
@@ -26,13 +34,23 @@ async function test() {
     NODE_URL,
     ""
   )
+  let indexer = new algosdk.Indexer(
+    "",
+    "", // MAINNET
+    ""
+  )
   console.log("TESTING")
-  let a_client = new algofi.AlgofiClient(client, algofi.Network.MAINNET_CLONE2)
+  let a_client = new algofi.AlgofiClient(client, indexer, algofi.Network.MAINNET_CLONE2)
   await a_client.loadState()
   console.log("STATE LOADED")
   // Generate user object and load state
-  let algofiUser = await a_client.getUser(govUser.addr)
-  let algofiUser2 = await a_client.getUser(govUser2.addr)
+  let user = await a_client.getUser(a)
+  //let algofiUser = await a_client.getUser(govUser.addr)
+  //let algofiUser2 = await a_client.getUser(govUser2.addr)
+  
+  // fetch user transactions
+  await user.getTransactionHistory(algofi.TxnLoadMode.REFRESH)
+  console.log(user.transactions)
 
   // // GIANT OPT IN
   // // Generate a storage account for the user

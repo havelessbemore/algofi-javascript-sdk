@@ -1,12 +1,14 @@
 // IMPORTS
 import { Base64Encoder } from "./encoder"
+
 // local
 import { Network, PERMISSIONLESS_SENDER_LOGIC_SIG } from "./globals"
 import { addressEquals, composeTransactions } from "./utils"
-
 import AlgofiClient from "./algofiClient"
-import AssetConfig from "./assetConfig"
-import AlgofiUser from "./algofiUser"
+import AlgofiUser, { TxnLoadMode } from "./algofiUser"
+
+// asset data
+import AssetConfig from "./assetData/assetConfig"
 
 // lending
 import * as lending from "./lending"
@@ -22,6 +24,7 @@ export {
   AlgofiClient,
   AssetConfig,
   AlgofiUser,
+  TxnLoadMode,
   // lending
   lending,
   Base64Encoder

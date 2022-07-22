@@ -1,12 +1,14 @@
 // IMPORTS
 
 // external
-import algosdk, { Algodv2 } from "algosdk"
+import algosdk, { Algodv2, Indexer } from "algosdk"
 
 // local
 import { Network } from "./globals"
-import AssetConfig, { AssetConfigs } from "./assetConfig"
 import AlgofiUser from "./algofiUser"
+
+// asset data
+import AssetDataClient from "./assetData/assetDataClient"
 
 // lending
 import LendingClient from "./lending/lendingClient"
@@ -24,9 +26,8 @@ import GovernanceClient from "./governance/governanceClient"
 
 export default class AlgofiClient {
   public algod: Algodv2
+  public indexer: Indexer
   public network: Network
-
-  public assets: { [key: number]: AssetConfig } = {}
 
   // lending
   public lending: LendingClient
@@ -40,16 +41,20 @@ export default class AlgofiClient {
   // governance
   public governance: GovernanceClient
 
+  // asset data
+  public assetData: AssetDataClient
+
   /**
    * Constructor for the algofi client class
    *
    * @param algod - algod client
+   * @param indexer - indexer client
    * @param network - chain network
    */
-  constructor(algod: Algodv2, network: Network) {
+  constructor(algod: Algodv2, indexer: Indexer, network: Network) {
     this.algod = algod
+    this.indexer = indexer
     this.network = network
-    this.assets = AssetConfigs[this.network]
 
     // lending
     this.lending = new LendingClient(this)
@@ -62,6 +67,9 @@ export default class AlgofiClient {
 
     // governance
     this.governance = new GovernanceClient(this)
+    
+    // assetData
+    this.assetData = new AssetDataClient(this)
   }
 
   /**
@@ -79,6 +87,9 @@ export default class AlgofiClient {
 
     // governance
     await this.governance.loadState()
+
+    // asset data (must load AFTER lending)
+    await this.assetData.loadState()
   }
 
   /**

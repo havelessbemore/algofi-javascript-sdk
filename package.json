@@ -1,6 +1,6 @@
 {
   "name": "@algofi/v1",
-  "version": "0.2.1",
+  "version": "0.2.8",
   "description": "The official JavaScript SDK for the V2 Algofi Lending Market",
   "main": "dist/index.js",
   "files": [
@@ -24,6 +24,7 @@
   },
   "dependencies": {
     "algosdk": "1.16.0",
+    "axios": "^0.27.2",
     "typescript": "^3.9.10"
   },
   "devDependencies": {

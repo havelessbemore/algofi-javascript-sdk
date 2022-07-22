@@ -22,5 +22,6 @@ export const ManagerConfigs = {
   [Network.MAINNET]: new ManagerConfig(0),
   [Network.MAINNET_CLONE]: new ManagerConfig(753081696),
   [Network.MAINNET_CLONE2]: new ManagerConfig(802875339),
+  [Network.MAINNET_CLONE3]: new ManagerConfig(812891680),
   [Network.TESTNET]: new ManagerConfig(91633688)
 }

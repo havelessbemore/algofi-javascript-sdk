@@ -5,12 +5,14 @@ import algosdk, { Algodv2, Transaction, encodeUint64, decodeUint64 } from "algos
 
 // global
 import { FIXED_3_SCALE_FACTOR, TEXT_ENCODER, PERMISSIONLESS_SENDER_LOGIC_SIG } from "./../globals"
-import { getLocalStates, getAccountBalances, getAccountMinBalance } from "./../stateUtils"
+import { getLocalStates, getAccountBalances, getAccountMinBalance, getTransferDetails } from "./../stateUtils"
 import { getParams } from "./../transactionUtils"
 import { decodeBytes, parseAddressBytes } from "./../utils"
+import ParsedTransaction from "./../parsedTransaction"
+import { Base64Encoder } from "./../encoder"
 
 // local
-import { MANAGER_STRINGS, MARKET_STRINGS } from "./lendingConfig"
+import { MANAGER_STRINGS, MARKET_STRINGS, MarketType } from "./lendingConfig"
 import LendingClient from "./lendingClient"
 import Market from "./market"
 import UserMarketState from "./userMarketState"
@@ -39,6 +41,10 @@ export default class User {
   public netBorrowAPR: number
   public netUnclaimedRewards = {}
   public netRewardsPerYear = {}
+  public netSupplyRewardsPerYear: number
+  public netBorrowRewardsPerYear: number
+  public netSupplyRewardsAPR: number
+  public netBorrowRewardsAPR: number
 
   /**
    * Constructor for the lending user class.
@@ -107,14 +113,18 @@ export default class User {
       this.netScaledBorrow = 0
       this.netUnclaimedRewards = {}
       this.netRewardsPerYear = {}
+      this.netSupplyRewardsPerYear = 0
+      this.netBorrowRewardsPerYear = 0
       let dollarTotaledSupplyAPR = 0
       let dollarTotaledBorrowAPR = 0
       for (const [key, value] of Object.entries(this.userMarketStates)) {
         let market = this.lendingClient.markets[key]
         this.netSupplied += value.suppliedAmount.usd
         this.netBorrowed += value.borrowedAmount.usd
-        this.netScaledCollateral += (value.suppliedAmount.usd * market.collateralFactor) / FIXED_3_SCALE_FACTOR
-        this.netScaledBorrow += (value.borrowedAmount.usd * market.borrowFactor) / FIXED_3_SCALE_FACTOR
+        this.netScaledCollateral += Number(((value.suppliedAmount.usd * market.collateralFactor) / FIXED_3_SCALE_FACTOR).toFixed(3))
+        if (value.borrowShares != 0) { // round up unless exactly 0
+          this.netScaledBorrow += Number(((value.borrowedAmount.usd * market.borrowFactor) / FIXED_3_SCALE_FACTOR).toFixed(3)) + 0.001
+        }
         dollarTotaledSupplyAPR += value.suppliedAmount.usd * market.supplyAPR
         dollarTotaledBorrowAPR += value.borrowedAmount.usd * market.borrowAPR
         
@@ -123,10 +133,17 @@ export default class User {
           let assetId = value.rewardsProgramStates[i].assetID
           this.netUnclaimedRewards[assetId] = value.rewardsProgramStates[i].realUnclaimed + (this.netUnclaimedRewards[assetId] || 0)
           this.netRewardsPerYear[assetId] = value.rewardsProgramStates[i].rewardsPerYear + (this.netRewardsPerYear[assetId] || 0)
+          if (market.marketType == MarketType.VAULT) {
+            this.netSupplyRewardsPerYear += this.lendingClient.algofiClient.assetData.toUSD(assetId, value.rewardsProgramStates[i].rewardsPerYear)
+          } else {
+            this.netBorrowRewardsPerYear += this.lendingClient.algofiClient.assetData.toUSD(assetId, value.rewardsProgramStates[i].rewardsPerYear)
+          }
         }
       }
       this.netSupplyAPR = dollarTotaledSupplyAPR / this.netSupplied
       this.netBorrowAPR = dollarTotaledBorrowAPR / this.netBorrowed
+      this.netSupplyRewardsAPR = this.netSupplyRewardsPerYear / this.netSupplied
+      this.netBorrowRewardsAPR = this.netBorrowRewardsPerYear / this.netBorrowed
     } else {
       this.optedInToManager = false
     }
@@ -197,6 +214,164 @@ export default class User {
     }
 
     return transactions
+  }
+
+  parseTransaction(txns: {}[], txnIdx: number, parsedTransactions: ParsedTransaction[]) {
+    const txn = txns[txnIdx]
+    const nextTxn = txns[txnIdx + 1]
+    let appId = txn['application-transaction']['application-id']
+
+    if (appId == this.lendingClient.manager.appId) { // manager
+      let command = Base64Encoder.decode(txn['application-transaction']['application-args'][0])
+      switch(command) { // TODO implement gov and vault functions and manager close out
+        case MANAGER_STRINGS.user_opt_in:
+          {
+            parsedTransactions.push(
+              new ParsedTransaction(txn, "LENDING v2", appId, "PROTOCOL OPT IN", [], 0, 0, 0, 0)
+            )
+
+            break
+          }
+        case MANAGER_STRINGS.user_market_opt_in:
+          {
+            let marketAppId = txn['application-transaction']['foreign-apps'][0]
+
+            parsedTransactions.push(
+              new ParsedTransaction(txn, "LENDING v2", marketAppId, "MARKET OPT IN", [], 0, 0, 0, 0)
+            )
+
+            break
+          }
+        case MANAGER_STRINGS.user_market_close_out:
+          {
+            let marketAppId = txn['application-transaction']['foreign-apps'][0]
+
+            parsedTransactions.push(
+              new ParsedTransaction(txn, "LENDING v2", marketAppId, "MARKET OPT OUT", [], 0, 0, 0, 0)
+            )
+
+            break
+          }
+        default:
+          return
+      }
+
+    } else if (appId in this.lendingClient.markets) { // markets
+      let command = Base64Encoder.decode(txn['application-transaction']['application-args'][0])
+      switch(command) { // add support for vault txns
+        case MARKET_STRINGS.mint_b_asset:
+          {
+            if (!nextTxn) { return }; // skip, transfer not included
+
+            let [assetIn, amountIn] = getTransferDetails(nextTxn)
+            let [assetOut, amountOut] = getTransferDetails(txn['inner-txns'][1])
+
+            parsedTransactions.push(
+              new ParsedTransaction(txn, "LENDING v2", appId, "MINT B ASSET", [], assetIn, amountIn, assetOut, amountOut)
+            )
+
+            break
+          }
+        case MARKET_STRINGS.add_underlying_collateral:
+          {
+            if (!nextTxn) { return }; // skip, transfer not included
+
+            let [assetIn, amountIn] = getTransferDetails(nextTxn)
+
+            parsedTransactions.push(
+              new ParsedTransaction(txn, "LENDING v2", appId, "ADD COLLATERAL", [], assetIn, amountIn, 0, 0)
+            )
+
+            break
+          }
+        case MARKET_STRINGS.add_b_asset_collateral:
+          {
+            if (!nextTxn) { return }; // skip, transfer not included
+
+            let [assetIn, amountIn] = getTransferDetails(nextTxn)
+
+            parsedTransactions.push(
+              new ParsedTransaction(txn, "LENDING v2", appId, "ADD B ASSET", [], assetIn, amountIn, 0, 0)
+            )
+
+            break
+          }
+        case MARKET_STRINGS.remove_underlying_collateral:
+          {
+            let assetOut = 0
+            let amountOut = 0
+
+            if (this.lendingClient.markets[appId].marketType == MarketType.VAULT) {
+              [assetOut, amountOut] = getTransferDetails(txn['inner-txns'][1]['inner-txns'][0])
+            } else {
+              [assetOut, amountOut] = getTransferDetails(txn['inner-txns'][1])
+            }
+
+            parsedTransactions.push(
+              new ParsedTransaction(txn, "LENDING v2", appId, "REMOVE COLLATERAL", [], 0, 0, assetOut, amountOut)
+            )
+
+            break
+          }
+        case MARKET_STRINGS.remove_b_asset_collateral:
+          {
+
+            let [assetOut, amountOut] = getTransferDetails(txn['inner-txns'][1])
+
+            parsedTransactions.push(
+              new ParsedTransaction(txn, "LENDING v2", appId, "REMOVE B ASSET", [], 0, 0, assetOut, amountOut)
+            )
+
+            break
+          }
+        case MARKET_STRINGS.burn_b_asset:
+          {
+            if (!nextTxn) { return }; // skip, transfer not included
+
+            let [assetIn, amountIn] = getTransferDetails(nextTxn)
+            let [assetOut, amountOut] = getTransferDetails(txn['inner-txns'][1])
+
+            parsedTransactions.push(
+              new ParsedTransaction(txn, "LENDING v2", appId, "BURN", [], assetIn, amountIn, assetOut, amountOut)
+            )
+
+            break
+          }
+        case MARKET_STRINGS.borrow:
+          {
+            let [assetOut, amountOut] = getTransferDetails(txn['inner-txns'][1])
+
+            parsedTransactions.push(
+              new ParsedTransaction(txn, "LENDING v2", appId, "BORROW", [], 0, 0, assetOut, amountOut)
+            )
+            break
+          }
+        case MARKET_STRINGS.repay_borrow:
+          {
+            if (!nextTxn) { return }; // skip, transfer not included
+
+            let [assetIn, amountIn] = getTransferDetails(nextTxn)
+
+            parsedTransactions.push(
+              new ParsedTransaction(txn, "LENDING v2", appId, "REPAY BORROW", [], assetIn, amountIn, 0, 0)
+            )
+
+            break
+          }
+        case MARKET_STRINGS.claim_rewards:
+          {
+            let [assetOut, amountOut] = getTransferDetails(txn['inner-txns'][1])
+
+            parsedTransactions.push(
+              new ParsedTransaction(txn, "LENDING v2", appId, "CLAIM REWARDS", [], 0, 0, assetOut, amountOut)
+            )
+
+            break
+          }
+        default:
+          return
+      }
+    }
   }
   
 }

@@ -31,12 +31,12 @@ export class UserMarketRewardsState {
    * 
    * @param marketState - a dictionary representing a users state in a market on chain
    * @param market - the market of interest
-   * @param b_asset_collateral - b asset collateral for market
-   * @param borrow_shares - borrow shares for market
+   * @param bAssetCollateral - b asset collateral for market
+   * @param borrowShares - borrow shares for market
    * @param programIndex - program index we are interested in 
    */
-  constructor(marketState: { string: any }, market: Market, b_asset_collateral: number, borrow_shares: number, programIndex: number) {
-    this.programNumber = marketState[MARKET_STRINGS.user_rewards_program_number_prefix + String.fromCharCode.apply(null, encodeUint64(programIndex))]
+  constructor(marketState: { string: any }, market: Market, bAssetCollateral: number, borrowShares: number, programIndex: number) {
+    this.programNumber = marketState?.[MARKET_STRINGS.user_rewards_program_number_prefix + String.fromCharCode.apply(null, encodeUint64(programIndex))] || 0
     this.assetID = market.rewardsPrograms[programIndex].assetID
     
     if (this.programNumber == market.rewardsPrograms[programIndex].programNumber) {
@@ -55,10 +55,10 @@ export class UserMarketRewardsState {
     let userTotal = 0
     let globalTotal = 0
     if (market.marketType == MarketType.VAULT) {
-      userTotal = b_asset_collateral
+      userTotal = bAssetCollateral
       globalTotal = market.bAssetCirculation
     } else {
-      userTotal = borrow_shares
+      userTotal = borrowShares
       globalTotal = market.borrowShareCirculation
     }
     this.realUnclaimed += Number((market.rewardsPrograms[programIndex].index - this.latestIndex) * BigInt(userTotal) / FIXED_18_SCALE_FACTOR)
@@ -71,8 +71,8 @@ export class UserMarketRewardsState {
 // INTERFACE
 
 export default class UserMarketState {
-  public b_asset_collateral: number
-  public borrow_shares: number
+  public bAssetCollateral: number
+  public borrowShares: number
 
   public suppliedAmount: AssetAmount
   public borrowedAmount: AssetAmount
@@ -86,13 +86,13 @@ export default class UserMarketState {
    * @param market - the market of interest
    */
   constructor(marketState: { string: any }, market: Market) {
-    this.b_asset_collateral = marketState[MARKET_STRINGS.user_active_b_asset_collateral] || 0
-    this.borrow_shares = marketState[MARKET_STRINGS.user_borrow_shares] || 0
-    this.suppliedAmount = market.bAssetToAssetAmount(this.b_asset_collateral)
-    this.borrowedAmount = market.borrowSharesToAssetAmount(this.borrow_shares)
+    this.bAssetCollateral = marketState?.[MARKET_STRINGS.user_active_b_asset_collateral] || 0
+    this.borrowShares = marketState?.[MARKET_STRINGS.user_borrow_shares] || 0
+    this.suppliedAmount = market.bAssetToAssetAmount(this.bAssetCollateral)
+    this.borrowedAmount = market.borrowSharesToAssetAmount(this.borrowShares)
     
     this.rewardsProgramStates = []
-    this.rewardsProgramStates.push(new UserMarketRewardsState(marketState, market, this.b_asset_collateral, this.borrow_shares, 0))
-    this.rewardsProgramStates.push(new UserMarketRewardsState(marketState, market, this.b_asset_collateral, this.borrow_shares, 1))
+    this.rewardsProgramStates.push(new UserMarketRewardsState(marketState, market, this.bAssetCollateral, this.borrowShares, 0))
+    this.rewardsProgramStates.push(new UserMarketRewardsState(marketState, market, this.bAssetCollateral, this.borrowShares, 1))
   }
 }

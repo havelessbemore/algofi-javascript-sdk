@@ -112,7 +112,7 @@ export default class Market {
   // interest rate model
   public baseInterestRate: number
   public baseInterestSlope: number
-  public exponentialInterestAmplificationFactor: number
+  public quadraticInterestAmplificationFactor: number
   public targetUtilizationRatio: number
 
   // oracle
@@ -182,7 +182,7 @@ export default class Market {
     // interest rate model
     this.baseInterestRate = state[MARKET_STRINGS.base_interest_rate]
     this.baseInterestSlope = state[MARKET_STRINGS.base_interest_slope]
-    this.exponentialInterestAmplificationFactor = state[MARKET_STRINGS.exponential_interest_amplification_factor]
+    this.quadraticInterestAmplificationFactor = state[MARKET_STRINGS.quadratic_interest_amplification_factor]
     this.targetUtilizationRatio = state[MARKET_STRINGS.target_utilization_ratio]
 
     // oracle
@@ -190,7 +190,8 @@ export default class Market {
       this.algod,
       state[MARKET_STRINGS.oracle_app_id],
       Base64Encoder.decode(state[MARKET_STRINGS.oracle_price_field_name]),
-      state[MARKET_STRINGS.oracle_price_scale_factor]
+      state[MARKET_STRINGS.oracle_price_scale_factor],
+      Math.pow(10, this.lendingClient.algofiClient.assetData.assetConfigs[this.underlyingAssetId].decimals)
     )
     await this.oracle.loadPrice()
 
@@ -211,12 +212,12 @@ export default class Market {
     // calculated values
     this.totalSupplied = new AssetAmount(
       this.getUnderlyingSupplied() /
-        Math.pow(10, this.lendingClient.algofiClient.assets[this.underlyingAssetId].decimals),
+        Math.pow(10, this.lendingClient.algofiClient.assetData.assetConfigs[this.underlyingAssetId].decimals),
       this.convertUnderlyingToUSD(this.getUnderlyingSupplied())
     )
 
     this.totalBorrowed = new AssetAmount(
-      this.underlyingBorrowed / Math.pow(10, this.lendingClient.algofiClient.assets[this.underlyingAssetId].decimals),
+      this.underlyingBorrowed / Math.pow(10, this.lendingClient.algofiClient.assetData.assetConfigs[this.underlyingAssetId].decimals),
       this.convertUnderlyingToUSD(this.underlyingBorrowed)
     )
 
@@ -259,7 +260,7 @@ export default class Market {
     borrowAPR += (borrowUtilization * this.baseInterestSlope) / FIXED_6_SCALE_FACTOR
     if (borrowUtilization > this.targetUtilizationRatio / FIXED_6_SCALE_FACTOR) {
       borrowAPR +=
-        this.exponentialInterestAmplificationFactor *
+        this.quadraticInterestAmplificationFactor *
         Math.pow(borrowUtilization - this.targetUtilizationRatio / FIXED_6_SCALE_FACTOR, 2)
     }
 
@@ -279,6 +280,10 @@ export default class Market {
   convertUnderlyingToUSD(amount: number): number {
     return (amount * this.oracle.rawPrice) / (this.oracle.scaleFactor * FIXED_3_SCALE_FACTOR)
   }
+  
+  convertUSDToUnderlying(amount: number): number {
+    return (amount * this.oracle.scaleFactor * FIXED_3_SCALE_FACTOR) / (this.oracle.rawPrice)
+  }
 
   /**
    * Converts the b asset to the underlying asset amount
@@ -292,7 +297,7 @@ export default class Market {
     }
     let rawUnderlyingAmount = (amount * this.getUnderlyingSupplied()) / this.bAssetCirculation
     let underlyingAmount =
-      rawUnderlyingAmount / Math.pow(10, this.lendingClient.algofiClient.assets[this.underlyingAssetId].decimals)
+      rawUnderlyingAmount / Math.pow(10, this.lendingClient.algofiClient.assetData.assetConfigs[this.underlyingAssetId].decimals)
     let usdAmount = this.convertUnderlyingToUSD(rawUnderlyingAmount)
     return new AssetAmount(underlyingAmount, usdAmount)
   }
@@ -311,7 +316,7 @@ export default class Market {
     }
     let rawUnderlyingAmount = (amount * this.underlyingBorrowed) / this.borrowShareCirculation
     let underlyingAmount =
-      rawUnderlyingAmount / Math.pow(10, this.lendingClient.algofiClient.assets[this.underlyingAssetId].decimals)
+      rawUnderlyingAmount / Math.pow(10, this.lendingClient.algofiClient.assetData.assetConfigs[this.underlyingAssetId].decimals)
     let usdAmount = this.convertUnderlyingToUSD(rawUnderlyingAmount)
     return new AssetAmount(underlyingAmount, usdAmount)
   }
@@ -325,6 +330,36 @@ export default class Market {
    */
   underlyingToBAssetAmount(amount: number): number {
     return Math.floor((amount * this.bAssetCirculation) / this.getUnderlyingSupplied())
+  }
+
+  // QUOTES
+  
+  getMaximumWithdrawAmount(user: AlgofiUser, borrowUtilLimit: number=0.9): AssetAmount {
+    let userExcessScalledCollateral = user.lending.netScaledCollateral - user.lending.netScaledBorrow / borrowUtilLimit
+    let maximumWithdrawUSD = userExcessScalledCollateral * FIXED_3_SCALE_FACTOR / this.collateralFactor
+    let maximumMarketWithdrawUnderlying = Math.min(
+      Math.floor(this.convertUSDToUnderlying(maximumWithdrawUSD)),
+      user.lending.userMarketStates[this.appId].suppliedAmount.underlying
+    )
+    let maximumMarketWithdrawUSD = this.convertUnderlyingToUSD(maximumMarketWithdrawUnderlying)
+    return new AssetAmount(maximumMarketWithdrawUnderlying, maximumMarketWithdrawUSD)
+  }
+  
+  getMaximumWithdrawBAsset(user: AlgofiUser, borrowUtilLimit: number=0.9): number {
+    let userExcessScalledCollateral = user.lending.netScaledCollateral - user.lending.netScaledBorrow / borrowUtilLimit
+    let maximumWithdrawUSD = userExcessScalledCollateral * FIXED_3_SCALE_FACTOR / this.collateralFactor
+    let maximumWithdrawUnderlying = Math.floor(this.convertUSDToUnderlying(maximumWithdrawUSD))
+    return Math.min(
+      this.underlyingToBAssetAmount(maximumWithdrawUnderlying),
+      user.lending.userMarketStates[this.appId].bAssetCollateral
+    )
+  }
+
+  getMaximumBorrowAmount(user: AlgofiUser, borrowUtilLimit: number=0.9): AssetAmount {
+    let userExcessScalledCollateral = user.lending.netScaledCollateral * borrowUtilLimit - user.lending.netScaledBorrow
+    let maximumBorrowUSD = (userExcessScalledCollateral * FIXED_3_SCALE_FACTOR) / this.borrowFactor
+    let maximumBorrowUnderlying = Math.floor(this.convertUSDToUnderlying(maximumBorrowUSD))
+    return new AssetAmount(maximumBorrowUnderlying, maximumBorrowUSD)
   }
 
   // TRANSACTIONS
@@ -501,11 +536,11 @@ export default class Market {
     // get b asset amount to remove
     let bAssetAmount = Math.min(
       this.underlyingToBAssetAmount(underlyingAmount),
-      user.lending.userMarketStates[this.appId].b_asset_collateral
+      user.lending.userMarketStates[this.appId].bAssetCollateral
     )
 
     if (removeMax) {
-      bAssetAmount = user.lending.userMarketStates[this.appId].b_asset_collateral
+      bAssetAmount = this.getMaximumWithdrawBAsset(user)
     }
 
     const params = await getParams(this.algod)
@@ -706,6 +741,7 @@ export default class Market {
    * rewards from the market.
    */
   async getClaimRewardsTxns(user: AlgofiUser): Promise<Transaction[]> {
+    
     const params = await getParams(this.algod)
     const transactions = []
 

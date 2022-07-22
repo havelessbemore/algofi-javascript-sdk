@@ -5,7 +5,6 @@ import algosdk, { Algodv2, Transaction, assignGroupID } from "algosdk"
 
 // global
 import { Network } from "./../globals"
-import AssetConfig from "./../assetConfig"
 import AlgofiClient from "./../algofiClient"
 import AlgofiUser from "./../algofiUser"
 
@@ -79,4 +78,10 @@ export default class LendingClient {
 
     return assignGroupID(transactions)
   }
+
+  isLendingTransaction(txn : object) : boolean {
+    let appId = txn['application-transaction']['application-id']
+    return (appId in this.markets || appId == this.manager.appId)
+  }
+
 }
