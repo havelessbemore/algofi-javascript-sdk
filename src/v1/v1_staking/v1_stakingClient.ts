@@ -21,6 +21,11 @@ export default class StakingClient {
   public stakingConfigs: V1StakingConfig[]
   public stakingContracts: { [key: number]: V1Staking }
 
+  /**
+   * Constructor for the staking client.
+   * 
+   * @param algofiClient - algofi client
+   */
   constructor(algofiClient: AlgofiClient) {
     this.algofiClient = algofiClient
     this.algod = this.algofiClient.algod
@@ -28,6 +33,10 @@ export default class StakingClient {
     this.stakingConfigs = V1StakingConfigs[this.network]
   }
 
+  /**
+   * Function to load in the staking contracts from the config and update their
+   * internal object state with what is represented on chain.
+   */
   async loadState() {
     this.stakingContracts = {}
     
@@ -40,6 +49,12 @@ export default class StakingClient {
     )
   }
 
+  /**
+   * Function to create a v1 staking user from an address.
+   * 
+   * @param address - address of user
+   * @returns a constructed v1 staking user.
+   */
   getUser(address: string): V1StakingUser {
     return new V1StakingUser(this, address)
   }

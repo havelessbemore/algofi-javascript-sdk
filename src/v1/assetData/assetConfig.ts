@@ -10,6 +10,13 @@ export default class AssetConfig {
   public assetId: number
   public decimals: number
 
+  /**
+   * Constructor for the asset config class.
+   * 
+   * @param name - asset name
+   * @param assetId - asset id
+   * @param decimals - asset decimals
+   */
   constructor(name: string, assetId: number, decimals: number) {
     this.name = name
     this.assetId = assetId

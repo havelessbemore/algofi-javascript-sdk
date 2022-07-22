@@ -11,6 +11,16 @@ export default class GovernanceConfig {
   public votingEscrowMaxTimeLockSeconds: number
   public votingEscrowMinTimeLockSeconds: number
   public governanceToken: number
+
+  /**
+   * Constructor for the governance config clas
+   * 
+   * @param adminAppId - admin app id
+   * @param votingEscrowAppId - voting escrow app id
+   * @param proposalFactoryAppId - proposal factory app id
+   * @param rewardsManagerAppId - rewards manager app id
+   * @param governanceToken - governance token
+   */
   constructor(
     adminAppId: number,
     votingEscrowAppId: number,
@@ -40,6 +50,12 @@ export const GovernanceConfigs = {
 
 export class ProposalConfig {
   public appId: number
+
+  /**
+   * Constructor for the proposal config class.
+   * 
+   * @param appId - app id of proposal contract
+   */
   constructor(appId: number) {
     this.appId = appId
   }

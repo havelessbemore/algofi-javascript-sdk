@@ -63,6 +63,12 @@ export default class AlgofiUser {
 
   public governance: GovernanceUser
 
+  /**
+   * Constructor for the algofi client class.
+   * 
+   * @param algofiClient - algofi client
+   * @param address - address for user
+   */
   constructor(algofiClient: AlgofiClient, address: string) {
     this.algofiClient = algofiClient
     this.algod = this.algofiClient.algod
@@ -82,6 +88,10 @@ export default class AlgofiUser {
     this.governance = this.algofiClient.governance.getUser(this.address)
   }
 
+  /**
+   * Function to load the states of all of the sub users on the algofi user
+   * class.
+   */
   async loadState() {
     // load balance state
     this.balances = await getAccountBalances(this.algod, this.address)
@@ -103,6 +113,12 @@ export default class AlgofiUser {
     await this.governance.loadState(localStates)
   }
 
+  /**
+   * Function to determine whether someone is opted into an asset or not.
+   * 
+   * @param assetId - asset id
+   * @returns whether or not the user is opted into the asset id.
+   */
   isOptedInToAsset(assetId: number): boolean {
     if (assetId in this.balances) {
       return true

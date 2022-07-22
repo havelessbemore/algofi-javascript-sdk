@@ -46,12 +46,24 @@ export default class User {
   public netSupplyRewardsAPR: number
   public netBorrowRewardsAPR: number
 
+  /**
+   * Constructor for the lending user class.
+   * 
+   * @param lendingClient - lending client
+   * @param address - address for user
+   */
   constructor(lendingClient: LendingClient, address: string) {
     this.lendingClient = lendingClient
     this.algod = this.lendingClient.algod
     this.address = address
   }
 
+  /**
+   * Functino which updates the lending user object to match the user's actual
+   * lending local state.
+   * 
+   * @param userLocalStates - a list of all of the user's local states
+   */
   async loadState(userLocalStates: {}) {
     // parse user state
     if (this.lendingClient.manager.appId in userLocalStates) {
@@ -135,10 +147,22 @@ export default class User {
     }
   }
 
+  /**
+   * Returns whether or not the user is opted into the market.
+   * 
+   * @param marketAppId - application id of the market
+   * @returns whether or not the user is opted into the market.
+   */
   isUserOptedIntoMarket(marketAppId: number): boolean {
     return marketAppId in this.userMarketStates
   }
 
+  /**
+   * Returns page offset for a market.
+   * 
+   * @param marketAppId - application id of the market
+   * @returns an array of the page and offset that the market is stored at.
+   */
   getMarketPageOffset(marketAppId: number): [number, number] {
     let marketIndex = this.optedInMarkets.indexOf(marketAppId)
     let page = Math.floor(marketIndex / 3)
@@ -146,6 +170,12 @@ export default class User {
     return [page, offset]
   }
 
+  /**
+   * Constructs a series of transactions that calculate a user's positions in a market.
+   * 
+   * @param targetMarketAppId - an instance of an algofi client
+   * @returns a series of transactions that calculate a user's positions in a market.
+   */
   async getCalcUserPositionTransactions(targetMarketAppId: number): Promise<Transaction[]> {
     let transactions: Transaction[] = []
 

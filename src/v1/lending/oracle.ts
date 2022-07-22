@@ -21,6 +21,15 @@ export default class Oracle {
   public rawPrice: number
   public price: number
 
+  /**
+   * Constructor for the oracle class.
+   * 
+   * @param algod - algod client
+   * @param appId - oracle app id
+   * @param priceFieldName - price field name 
+   * @param scaleFactor - asset scale factor
+   * @param underlyingAssetDecimals - asset underlying decimals
+   */
   constructor(algod: Algodv2, appId: number, priceFieldName: string, scaleFactor: number, underlyingAssetDecimals: number) {
     this.algod = algod
     this.appId = appId
@@ -29,6 +38,9 @@ export default class Oracle {
     this.underlyingAssetDecimals = underlyingAssetDecimals
   }
 
+  /**
+   * Sets raw price after getting global state.
+   */
   async loadPrice() {
     let state = await getApplicationGlobalState(this.algod, this.appId)
     this.rawPrice = state[this.priceFieldName]

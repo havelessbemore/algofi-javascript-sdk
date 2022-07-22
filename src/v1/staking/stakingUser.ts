@@ -24,6 +24,12 @@ export default class stakingUser {
   public optedInStakingContracts: number[]
   public userStakingStates: { [key: number]: UserStakingState }
 
+  /**
+   * Constructor for the staking user.
+   * 
+   * @param stakingClient - staking client
+   * @param address - address of the user
+   */
   constructor(stakingClient: StakingClient, address: string) {
     this.stakingClient = stakingClient
     this.algod = this.stakingClient.algod
@@ -31,6 +37,12 @@ export default class stakingUser {
   }
 
   // get opted in staking contracts
+  /**
+   * Function to take in the user's local states and update their state with the
+   * staking contractsw on the staking user object.
+   * 
+   * @param userLocalStates - a list of local states for the user
+   */
   async loadState(userLocalStates: {}) {
     const allStakingContracts = StakingConfigs[this.stakingClient.network].map(stakingConfig => stakingConfig.appId)
 

@@ -43,6 +43,14 @@ export default class Staking {
   public rewardsProgramCount: number
   public rewardsProgramStates: { [key: number]: RewardsProgramState }
 
+  /**
+   * Constructor for the staking object. 
+   * 
+   * @param algod - algod client
+   * @param stakingClient - staking client
+   * @param rewardsManagerAppId - rewards manager app id
+   * @param stakingConfig - stakingConfig object with information on the staking
+   */
   constructor(algod: Algodv2, stakingClient: StakingClient, rewardsManagerAppId: number, stakingConfig: StakingConfig) {
     this.algod = algod
     this.stakingClient = stakingClient
@@ -52,6 +60,10 @@ export default class Staking {
     this.rewardsManagerAppId = rewardsManagerAppId
   }
 
+  /**
+   * Loads in the global state of the specific staking contract and sets relevant
+   * fields on the class.
+   */
   async loadState() {
     // loading in global state staking specific
     const globalState = await getApplicationGlobalState(this.algod, this.appId)
@@ -73,6 +85,15 @@ export default class Staking {
     }
   }
 
+  /**
+   * Constructs a series of transactions to stake user's assets in the staking
+   * contract.
+   * 
+   * @param user - user who is staking
+   * @param amount - amount they are staking
+   * @returns a series of transactions to stake user's assets in the staking
+   * contract.
+   */
   async getStakeTxns(user: AlgofiUser, amount: number): Promise<Transaction[]> {
     const params = await getParams(this.algod)
     const txns = []
@@ -107,6 +128,15 @@ export default class Staking {
     return assignGroupID(txns)
   }
 
+  /**
+   * Constructs a series of transactions that unstake a user's current stake
+   * from the staking contract.
+   * 
+   * @param user - user who is unstaking
+   * @param amount - amount they are unstaking
+   * @returns a series of transactions that unstake a user's current stake
+   * from the staking contract.
+   */
   async getUnstakeTxns(user: AlgofiUser, amount: number): Promise<Transaction[]> {
     const params = await getParams(this.algod)
     const enc = new TextEncoder()
@@ -127,6 +157,12 @@ export default class Staking {
     return [unstakeTxn]
   }
 
+  /**
+   * Constructs a series of transactions that claim a user's staked assets.
+   * 
+   * @param user - user who is claiming
+   * @returns a series of transactions that claim a user's staked assets.
+   */
   async getClaimTxns(user: AlgofiUser): Promise<any> {
     const params = await getParams(this.algod)
     const enc = new TextEncoder()
@@ -170,6 +206,14 @@ export default class Staking {
     }
   }
 
+  /**
+   * Constructs a series of transactions that opt a user into the staking
+   * contract.
+   * 
+   * @param user - user who is opting in 
+   * @returns a series of transactions that opt a user into the staking
+   * contract.
+   */
   async getUserOptInTxns(user: AlgofiUser): Promise<Transaction[]> {
     const params = await getParams(this.algod)
     const enc = new TextEncoder()
