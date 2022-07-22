@@ -7,6 +7,9 @@ import { addressEquals, composeTransactions } from "./utils"
 import AlgofiClient from "./algofiClient"
 import AlgofiUser, { TxnLoadMode } from "./algofiUser"
 
+// lending v2
+import { MarketType } from "./lending/v2/lendingConfig"
+
 // asset data
 import AssetConfig from "./assetData/assetConfig"
 
@@ -21,4 +24,6 @@ export {
   AssetConfig,
   AlgofiUser,
   TxnLoadMode,
+  // lending v2
+  MarketType
 }
