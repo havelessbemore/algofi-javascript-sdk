@@ -423,11 +423,11 @@ export default class Market {
     // get b asset amount to remove
     let bAssetAmount = Math.min(
       this.underlyingToBAssetAmount(underlyingAmount),
-      user.lending.userMarketStates[this.appId].b_asset_collateral
+      user.lending.userMarketStates[this.appId].bAssetCollateral
     )
 
     if (removeMax) {
-      bAssetAmount = user.lending.userMarketStates[this.appId].b_asset_collateral
+      bAssetAmount = user.lending.userMarketStates[this.appId].bAssetCollateral
     }
 
     const params = await getParams(this.algod)

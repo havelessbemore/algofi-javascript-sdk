@@ -109,8 +109,10 @@ export default class User {
         let market = this.lendingClient.markets[key]
         this.netSupplied += value.suppliedAmount.usd
         this.netBorrowed += value.borrowedAmount.usd
-        this.netScaledCollateral += (value.suppliedAmount.usd * market.collateralFactor) / FIXED_3_SCALE_FACTOR
-        this.netScaledBorrow += (value.borrowedAmount.usd * market.borrowFactor) / FIXED_3_SCALE_FACTOR
+        if (value.borrowShares != 0) { // round up unless exactly 0
+          this.netScaledCollateral += (value.suppliedAmount.usd * market.collateralFactor) / FIXED_3_SCALE_FACTOR
+        }
+        this.netScaledBorrow += Number(((value.borrowedAmount.usd * market.borrowFactor) / FIXED_3_SCALE_FACTOR).toFixed(3)) + 0.001
         dollarTotaledSupplyAPR += value.suppliedAmount.usd * market.supplyAPR
         dollarTotaledBorrowAPR += value.borrowedAmount.usd * market.borrowAPR
         
