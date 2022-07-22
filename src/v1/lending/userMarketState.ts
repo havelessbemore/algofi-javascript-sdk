@@ -27,7 +27,7 @@ export class UserMarketRewardsState {
   public rewardsPerYear: number
   
   constructor(marketState: { string: any }, market: Market, b_asset_collateral: number, borrow_shares: number, programIndex: number) {
-    this.programNumber = marketState[MARKET_STRINGS.user_rewards_program_number_prefix + String.fromCharCode.apply(null, encodeUint64(programIndex))]
+    this.programNumber = marketState?.[MARKET_STRINGS.user_rewards_program_number_prefix + String.fromCharCode.apply(null, encodeUint64(programIndex))] || 0
     this.assetID = market.rewardsPrograms[programIndex].assetID
     
     if (this.programNumber == market.rewardsPrograms[programIndex].programNumber) {
@@ -71,8 +71,8 @@ export default class UserMarketState {
   public rewardsProgramStates = []
 
   constructor(marketState: { string: any }, market: Market) {
-    this.b_asset_collateral = marketState[MARKET_STRINGS.user_active_b_asset_collateral] || 0
-    this.borrow_shares = marketState[MARKET_STRINGS.user_borrow_shares] || 0
+    this.b_asset_collateral = marketState?.[MARKET_STRINGS.user_active_b_asset_collateral] || 0
+    this.borrow_shares = marketState?.[MARKET_STRINGS.user_borrow_shares] || 0
     this.suppliedAmount = market.bAssetToAssetAmount(this.b_asset_collateral)
     this.borrowedAmount = market.borrowSharesToAssetAmount(this.borrow_shares)
     
