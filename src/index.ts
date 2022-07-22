@@ -24,6 +24,7 @@ export {
   AssetConfig,
   AlgofiUser,
   TxnLoadMode,
+  Base64Encoder,
   // lending v2
   MarketType
 }
