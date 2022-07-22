@@ -33,6 +33,38 @@ export async function getApplicationGlobalState(algodClient: Algodv2, applicatio
 }
 
 /**
+ * Function to get local state for an account info object
+ *
+ * @param   {AccountInformation}           accountInfo
+ *
+ * @return  {dict<number,dict{string:any}>}  dictionary of user local states
+ */
+export async function getLocalStatesFromAccountInfo(accountInfo: object): Promise<{}> {
+  let results = {}
+
+  await Promise.all(
+    accountInfo["apps-local-state"].map(async appLocalState => {
+      if (appLocalState["key-value"]) {
+        let localState = {}
+        await Promise.all(
+          appLocalState["key-value"].map(async x => {
+            let key = Base64Encoder.decode(x.key)
+            if (x.value.type == 1) {
+              localState[key] = x.value.bytes
+            } else {
+              localState[key] = x.value.uint
+            }
+          })
+        )
+        results[appLocalState.id] = localState
+      }
+    })
+  )
+
+  return results
+}
+
+/**
  * Function to get local state for a given address and application
  *
  * @param   {Algodv2}           algodClient
@@ -67,6 +99,24 @@ export async function getLocalStates(algodClient: Algodv2, address: string, addr
 }
 
 /**
+ * Function to get balances given an account info object
+ *
+ * @param   {AccountInformation}           accountInfo
+ *
+ * @return  {dict<string,int>}  dictionary of assets to amounts
+ */
+export async function getAccountBalancesFromAccountInfo(accountInfo: object): Promise<{}> {
+  let results = {}
+  results[1] = accountInfo["amount"]
+  await Promise.all(
+    accountInfo["assets"].map(async x => {
+      results[x["asset-id"]] = x["amount"]
+    })
+  )
+  return results
+}
+
+/**
  * Function to get balances for an account
  *
  * @param   {Algodv2}           algodClient
@@ -84,6 +134,17 @@ export async function getAccountBalances(algodClient: Algodv2, address: string):
     })
   )
   return results
+}
+
+/**
+ * Function to get min balance from an account info object
+ *
+ * @param   {AccountInformation}           accountInfo
+ *
+ * @return  {number}  min algo balance for an account
+ */
+export async function getAccountMinBalanceFromAccountInfo(accountInfo: object): Promise<number> {
+  return accountInfo["min-balance"]
 }
 
 /**

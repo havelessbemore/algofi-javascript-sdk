@@ -68,16 +68,22 @@ export default class AlgofiClient {
    */
   async loadState() {
     // lending
-    await this.lending.loadState()
+    let loadLendingPromise = this.lending.loadState()
 
     // staking
-    await this.staking.loadState()
+    let loadStakingPromise = this.staking.loadState()
 
     // governance
-    await this.governance.loadState()
+    let loadGovernancePromise = this.governance.loadState()
 
+    // wait for lending to complete
+    await loadLendingPromise
+    
     // asset data (must load AFTER lending)
-    await this.assetData.loadState()
+    let loadAssetDataPromise = this.assetData.loadState()
+
+    // wait for all to complete
+    await Promise.all([loadStakingPromise, loadGovernancePromise, loadAssetDataPromise])
   }
 
   /**
