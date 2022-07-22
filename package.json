@@ -24,7 +24,6 @@
   },
   "dependencies": {
     "algosdk": "1.16.0",
-    "http-browserify": "^1.7.0",
     "typescript": "^3.9.10"
   },
   "devDependencies": {
