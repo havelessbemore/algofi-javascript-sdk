@@ -1,6 +1,24 @@
-import * as v1 from "./v1";
+// IMPORTS
+import { Base64Encoder } from "./encoder"
 
-// export current main version (v1) as top-level
-export * from "./v1";
+// local
+import { Network, PERMISSIONLESS_SENDER_LOGIC_SIG } from "./globals"
+import { addressEquals, composeTransactions } from "./utils"
+import AlgofiClient from "./algofiClient"
+import AlgofiUser, { TxnLoadMode } from "./algofiUser"
 
-export {v1}
+// asset data
+import AssetConfig from "./assetData/assetConfig"
+
+// EXPORTS
+export {
+  // global
+  Network,
+  PERMISSIONLESS_SENDER_LOGIC_SIG,
+  addressEquals,
+  composeTransactions,
+  AlgofiClient,
+  AssetConfig,
+  AlgofiUser,
+  TxnLoadMode,
+}
