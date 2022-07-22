@@ -22,13 +22,13 @@ export default class Oracle {
   public price: number
 
   /**
-   * Constructor for the oracle class.
+   * Constructor for the oracle object
    * 
    * @param algod - algod client
-   * @param appId - oracle app id
-   * @param priceFieldName - price field name 
-   * @param scaleFactor - asset scale factor
-   * @param underlyingAssetDecimals - asset underlying decimals
+   * @param appId - appid of the oracle
+   * @param priceFieldName - price field name
+   * @param scaleFactor - scale factor for the asset price
+   * @param underlyingAssetDecimals - decimals for the asset
    */
   constructor(algod: Algodv2, appId: number, priceFieldName: string, scaleFactor: number, underlyingAssetDecimals: number) {
     this.algod = algod

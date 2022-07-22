@@ -45,11 +45,11 @@ export default class AlgofiClient {
   public assetData: AssetDataClient
 
   /**
-   * Constructor for the algofi client class.
-   * 
+   * Constructor for the algofi client class
+   *
    * @param algod - algod client
    * @param indexer - indexer client
-   * @param network - network 
+   * @param network - chain network
    */
   constructor(algod: Algodv2, indexer: Indexer, network: Network) {
     this.algod = algod
