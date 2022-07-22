@@ -285,7 +285,7 @@ export default class Market {
 
   getMaximumBorrowAmount(user: AlgofiUser, borrowUtilLimit: number=0.9): AssetAmount {
     let userExcessScalledCollateral = user.lending.netScaledCollateral * borrowUtilLimit - user.lending.netScaledBorrow
-    let maximumBorrowUSD = .999 * (userExcessScalledCollateral * FIXED_3_SCALE_FACTOR) / this.borrowFactor
+    let maximumBorrowUSD = (userExcessScalledCollateral * FIXED_3_SCALE_FACTOR) / this.borrowFactor
     let maximumBorrowUnderlying = Math.floor(this.convertUSDToUnderlying(maximumBorrowUSD))
     return new AssetAmount(maximumBorrowUnderlying, maximumBorrowUSD)
   }
