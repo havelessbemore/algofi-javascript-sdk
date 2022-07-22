@@ -10,6 +10,12 @@ export default class UserVotingEscrowState {
   public amountVeBank: number
   public boostMultiplier: number
 
+  /**
+   * Constructor for the user voting escrow class.
+   * 
+   * @param userLocalState - a dictionary representing a user's local state with
+   * the voting escrow contract.
+   */
   constructor(userLocalState: {}) {
     this.amountLocked = userLocalState[VOTING_ESCROW_STRINGS.user_amount_locked]
     this.lockStartTime = userLocalState[VOTING_ESCROW_STRINGS.user_lock_start_time]

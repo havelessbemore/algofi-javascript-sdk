@@ -10,6 +10,15 @@ export default class V1StakingConfig {
   public assetId: number
   public oracleAppId: number
 
+  /**
+   * Constructor for the v1 staking config.
+   * 
+   * @param name - name
+   * @param managerAppId - manager app id
+   * @param marketAppId - market app id
+   * @param assetId - asset id
+   * @param oracleAppId - oracle app id
+   */
   constructor(
     name: string,
     managerAppId: number,

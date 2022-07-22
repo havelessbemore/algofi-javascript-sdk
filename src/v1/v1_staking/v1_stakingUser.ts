@@ -31,6 +31,12 @@ export default class stakingUser {
   }
 
   // get opted in staking contracts
+  /**
+   * Function to take the local states of a user and update the data on the
+   * object.
+   * 
+   * @param userLocalStates - collection of all of the local states for the user
+   */
   async loadState(userLocalStates: {}) {
     this.optedInStakingContracts = []
     this.userStakingStates = {}

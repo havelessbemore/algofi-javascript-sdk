@@ -8,13 +8,19 @@ import GovernanceClient from "./governanceClient"
 import GovernanceConfig from "./governanceConfig"
 
 export default class RewardsManager {
-  public govClient: GovernanceClient
+  public governanceClient: GovernanceClient
   public algod: Algodv2
   public appId: number
 
-  constructor(govClient: GovernanceClient, governanceConfig: GovernanceConfig) {
-    this.govClient = govClient
-    this.algod = this.govClient.algod
+  /**
+   * Constructor for the rewardsManager object.
+   * 
+   * @param governanceClient - governance client
+   * @param governanceConfig - governance config
+   */
+  constructor(governanceClient: GovernanceClient, governanceConfig: GovernanceConfig) {
+    this.governanceClient = governanceClient
+    this.algod = this.governanceClient.algod
     this.appId = governanceConfig.rewardsManagerAppId
   }
 }

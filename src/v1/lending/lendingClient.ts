@@ -30,6 +30,11 @@ export default class LendingClient {
   public marketConfigs: MarketConfig[]
   public markets: { [key: number]: Market } = {}
 
+  /**
+   * Constructor for the algofi lending client.
+   * 
+   * @param algofiClient - an instance of an algofi client
+   */
   constructor(algofiClient: AlgofiClient) {
     this.algofiClient = algofiClient
     this.algod = this.algofiClient.algod
@@ -40,6 +45,9 @@ export default class LendingClient {
     this.manager = new Manager(this.algod, this.managerConfig.appId)
   }
 
+  /**
+   * Call load stat eand update all of the user's market and load it into the object.
+   */
   async loadState() {
     await Promise.all(
       this.marketConfigs.map(async config => {
@@ -50,6 +58,11 @@ export default class LendingClient {
     )
   }
 
+  /**
+   * Returns a lending user with the given address.
+   * 
+   * @param address - the address that we want to get the lending user for
+   */
   getUser(address: string): LendingUser {
     return new LendingUser(this, address)
   }

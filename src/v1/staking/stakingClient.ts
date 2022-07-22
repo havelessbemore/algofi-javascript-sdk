@@ -21,6 +21,11 @@ export default class StakingClient {
   public stakingConfigs: StakingConfig[]
   public stakingContracts: { [key: number]: Staking }
 
+  /**
+   * Constructor for the staking client.
+   * 
+   * @param algofiClient - algofi client
+   */
   constructor(algofiClient: AlgofiClient) {
     this.algofiClient = algofiClient
     this.algod = this.algofiClient.algod
@@ -28,6 +33,10 @@ export default class StakingClient {
     this.stakingConfigs = StakingConfigs[this.network]
   }
 
+  /**
+   * Function to load in all of the global states from the staking contracts and
+   * store their state in the object.
+   */
   async loadState() {
     const newStakingContracts = await Promise.all(
       this.stakingConfigs.map(async config => {
@@ -42,6 +51,13 @@ export default class StakingClient {
     }, {})
   }
 
+  /**
+   * Returns a staking user
+   * 
+   * @param address - the address of the person we are generating the staking
+   * user for
+   * @returns a new staking user
+   */
   getUser(address: string): StakingUser {
     return new StakingUser(this, address)
   }

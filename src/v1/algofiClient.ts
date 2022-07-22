@@ -44,6 +44,13 @@ export default class AlgofiClient {
   // asset data
   public assetData: AssetDataClient
 
+  /**
+   * Constructor for the algofi client class
+   *
+   * @param algod - algod client
+   * @param indexer - indexer client
+   * @param network - chain network
+   */
   constructor(algod: Algodv2, indexer: Indexer, network: Network) {
     this.algod = algod
     this.indexer = indexer
@@ -65,6 +72,9 @@ export default class AlgofiClient {
     this.assetData = new AssetDataClient(this)
   }
 
+  /**
+   * Function to load the state of all of the different types of clients.
+   */
   async loadState() {
     // lending
     await this.lending.loadState()
@@ -82,6 +92,12 @@ export default class AlgofiClient {
     await this.assetData.loadState()
   }
 
+  /**
+   * Function to get an algofi user given an address.
+   * 
+   * @param address - address of the user
+   * @returns an algofi user given the address passed in.
+   */
   async getUser(address: string): Promise<AlgofiUser> {
     let user = new AlgofiUser(this, address)
     await user.loadState()

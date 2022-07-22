@@ -14,6 +14,13 @@ export default class StakingConfig {
   public assetId: number
   public type: StakingType
 
+  /**
+   * Constructor for staking config.
+   * 
+   * @param appId - staking app id
+   * @param assetId - staking asset id
+   * @param type - type
+   */
   constructor(appId: number, assetId: number, type: StakingType) {
     this.appId = appId
     this.assetId = assetId

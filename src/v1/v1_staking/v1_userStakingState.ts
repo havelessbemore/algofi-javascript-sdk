@@ -27,12 +27,23 @@ export default class V1UserStakingState {
   public rewardsPerYear: number
   public secondaryRewardsPerYear: number
 
+  /**
+   * Constructor for the v1 user staking state object.
+   * 
+   * @param algod - algod client
+   * @param staking - staking 
+   * @param storageAddress - storage address
+   */
   constructor(algod: Algodv2, staking: V1Staking, storageAddress: string) {
     this.algod = algod
     this.staking = staking
     this.storageAddress = storageAddress
   }
   
+  /**
+   * Function to get the local states of the staking contract and update the
+   * information in the object.
+   */
   async loadState() {
     let storageLocalStates = await getLocalStates(this.algod, this.storageAddress)
 

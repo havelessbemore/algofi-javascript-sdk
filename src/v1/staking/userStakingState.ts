@@ -13,6 +13,13 @@ export default class UserStakingState {
   scaledTotalStaked: number
   boostMultiplier: number
   userRewardsProgramStates: { [key: number]: UserRewardsProgramState }
+
+  /**
+   * Constructor for the user staking state object.
+   * 
+   * @param userLocalState - user's local state with one staking contract
+   * @param staking - staking contract of interest
+   */
   constructor(userLocalState: {}, staking: Staking) {
     this.totalStaked = userLocalState[STAKING_STRINGS.user_total_staked] || 0
     this.scaledTotalStaked = userLocalState[STAKING_STRINGS.scaled_total_staked] || 0
