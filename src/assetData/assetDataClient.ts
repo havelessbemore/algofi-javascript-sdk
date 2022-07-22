@@ -1,5 +1,5 @@
 // IMPORTS
-const axios = require('axios');
+const fetch = require('node-fetch')
 
 // external
 import { Algodv2 } from "algosdk"
@@ -33,16 +33,18 @@ export default class AssetDataClient {
 
   async loadState() {
     // load prices from amm analytics
-    //try {
-    //  const response = await axios.get(ANALYTICS_ENDPOINT + "/assets")
-    //  for (const assetInfo of response.data.body.assets) {
-    //    this.assets[assetInfo.asset_id] = new Asset(assetInfo.asset_id, assetInfo.name, assetInfo.decimals, assetInfo.price)
-    //  }
-    //  
-    //} catch (error) {
-    //  console.log(error)
-    //  console.log("Error: failed to load assets from analytics endpoint")
-    //}
+    try {
+      const response = await fetch(ANALYTICS_ENDPOINT + "/assets");
+      if (response.ok) {
+        const data = await response.json();
+        for (const assetInfo of data.body.assets) {
+          this.assets[assetInfo.asset_id] = new Asset(assetInfo.asset_id, assetInfo.name, assetInfo.decimals, assetInfo.price)
+        }
+      }
+    } catch (error) {
+      console.log(error)
+      console.log("Error: failed to load assets from analytics endpoint")
+    }
     
     // load prices from oracles (v2 lending)
     for (const [appId, market] of Object.entries(this.algofiClient.lending.v2.markets)) {

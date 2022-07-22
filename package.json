@@ -24,7 +24,7 @@
   },
   "dependencies": {
     "algosdk": "1.16.0",
-    "axios": "^0.27.2",
+    "node-fetch": "^2.6.7",
     "typescript": "^3.9.10"
   },
   "devDependencies": {
