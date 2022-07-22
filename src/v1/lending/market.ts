@@ -279,8 +279,22 @@ export default class Market {
   getMaximumWithdrawAmount(user: AlgofiUser, borrowUtilLimit: number=0.9): AssetAmount {
     let userExcessScalledCollateral = user.lending.netScaledCollateral - user.lending.netScaledBorrow / borrowUtilLimit
     let maximumWithdrawUSD = userExcessScalledCollateral * FIXED_3_SCALE_FACTOR / this.collateralFactor
+    let maximumMarketWithdrawUnderlying = Math.min(
+      Math.floor(this.convertUSDToUnderlying(maximumWithdrawUSD)),
+      user.lending.userMarketStates[this.appId].suppliedAmount.underlying
+    )
+    let maximumMarketWithdrawUSD = this.convertUnderlyingToUSD(maximumMarketWithdrawUnderlying)
+    return new AssetAmount(maximumMarketWithdrawUnderlying, maximumMarketWithdrawUSD)
+  }
+  
+  getMaximumWithdrawBAsset(user: AlgofiUser, borrowUtilLimit: number=0.9): number {
+    let userExcessScalledCollateral = user.lending.netScaledCollateral - user.lending.netScaledBorrow / borrowUtilLimit
+    let maximumWithdrawUSD = userExcessScalledCollateral * FIXED_3_SCALE_FACTOR / this.collateralFactor
     let maximumWithdrawUnderlying = Math.floor(this.convertUSDToUnderlying(maximumWithdrawUSD))
-    return new AssetAmount(maximumWithdrawUnderlying, maximumWithdrawUSD)
+    return Math.min(
+      this.underlyingToBAssetAmount(maximumWithdrawUnderlying),
+      user.lending.userMarketStates[this.appId].bAssetCollateral
+    )
   }
 
   getMaximumBorrowAmount(user: AlgofiUser, borrowUtilLimit: number=0.9): AssetAmount {
@@ -423,11 +437,11 @@ export default class Market {
     // get b asset amount to remove
     let bAssetAmount = Math.min(
       this.underlyingToBAssetAmount(underlyingAmount),
-      user.lending.userMarketStates[this.appId].b_asset_collateral
+      user.lending.userMarketStates[this.appId].bAssetCollateral
     )
 
     if (removeMax) {
-      bAssetAmount = user.lending.userMarketStates[this.appId].b_asset_collateral
+      bAssetAmount = this.getMaximumWithdrawBAsset(user)
     }
 
     const params = await getParams(this.algod)
