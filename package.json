@@ -24,7 +24,7 @@
   },
   "dependencies": {
     "algosdk": "1.16.0",
-    "node-fetch": "^2.6.7",
+    "http": "^0.0.1-security",
     "typescript": "^3.9.10"
   },
   "devDependencies": {
