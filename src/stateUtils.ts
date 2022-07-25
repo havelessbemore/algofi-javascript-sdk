@@ -57,6 +57,8 @@ export async function getLocalStatesFromAccountInfo(accountInfo: object): Promis
           })
         )
         results[appLocalState.id] = localState
+      } else {
+        results[appLocalState.id] = {}
       }
     })
   )
@@ -91,6 +93,8 @@ export async function getLocalStates(algodClient: Algodv2, address: string, addr
           })
         )
         results[appLocalState.id] = localState
+      } else {
+        results[appLocalState.id] = {}
       }
     })
   )
