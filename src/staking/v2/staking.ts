@@ -89,6 +89,61 @@ export default class Staking {
     }
   }
 
+
+  /**
+   * Constructs a series of transactions that opt a user into the staking
+   * contract.
+   * 
+   * @param user - user who is opting in 
+   * @returns a series of transactions that opt a user into the staking
+   * contract.
+   */
+  async getUserOptInTxns(user: AlgofiUser): Promise<Transaction[]> {
+    const params = await getParams(this.algod)
+    const enc = new TextEncoder()
+
+    // unstake transaction
+    const txn0 = algosdk.makeApplicationOptInTxnFromObject({
+      from: user.address,
+      appIndex: this.appId,
+      suggestedParams: params,
+      appArgs: undefined,
+      accounts: undefined,
+      foreignApps: undefined,
+      foreignAssets: undefined,
+      rekeyTo: undefined
+    })
+
+    return [txn0]
+  }
+
+  /**
+   * Constructs a series of transactions that opt a user into the staking
+   * contract.
+   * 
+   * @param user - user who is opting in 
+   * @returns a series of transactions that opt a user into the staking
+   * contract.
+   */
+  async getUserCloseOutTxns(user: AlgofiUser): Promise<Transaction[]> {
+    const params = await getParams(this.algod)
+    const enc = new TextEncoder()
+
+    // unstake transaction
+    const txn0 = algosdk.makeApplicationCloseOutTxnFromObject({
+      from: user.address,
+      appIndex: this.appId,
+      suggestedParams: params,
+      appArgs: [encodeUint64(0)], // don't ignore unclaimed rewards
+      accounts: undefined,
+      foreignApps: undefined,
+      foreignAssets: undefined,
+      rekeyTo: undefined
+    })
+
+    return [txn0]
+  }
+
   /**
    * Constructs a series of transactions to stake user's assets in the staking
    * contract.
@@ -100,11 +155,10 @@ export default class Staking {
    */
   async getStakeTxns(user: AlgofiUser, amount: number): Promise<Transaction[]> {
     const params = await getParams(this.algod)
-    const txns = []
     const enc = new TextEncoder()
 
     // farm ops
-    const farmOpsTxn = makeApplicationNoOpTxnFromObject({
+    const txn0 = makeApplicationNoOpTxnFromObject({
       from: user.address,
       appIndex: this.appId,
       appArgs: [enc.encode(STAKING_STRINGS.farm_ops)],
@@ -116,7 +170,7 @@ export default class Staking {
     })
 
     // sending staking asset
-    const stakeAssetTransferTxn = makeAssetTransferTxnWithSuggestedParamsFromObject({
+    const txn1 = makeAssetTransferTxnWithSuggestedParamsFromObject({
       from: user.address,
       to: this.address,
       assetIndex: this.assetId,
@@ -126,9 +180,9 @@ export default class Staking {
       revocationTarget: undefined
     })
 
+    // stake
     params.fee = 2000
-    // stake transaction
-    const stakeTxn = makeApplicationNoOpTxnFromObject({
+    const txn2 = makeApplicationNoOpTxnFromObject({
       from: user.address,
       appIndex: this.appId,
       appArgs: [enc.encode(STAKING_STRINGS.stake)],
@@ -139,9 +193,7 @@ export default class Staking {
       rekeyTo: undefined
     })
 
-    txns.push(farmOpsTxn, stakeAssetTransferTxn, stakeTxn)
-
-    return assignGroupID(txns)
+    return assignGroupID([txn0, txn1, txn2])
   }
 
   /**
@@ -157,9 +209,21 @@ export default class Staking {
     const params = await getParams(this.algod)
     const enc = new TextEncoder()
 
+    // farm ops
+    const txn0 = makeApplicationNoOpTxnFromObject({
+      from: user.address,
+      appIndex: this.appId,
+      appArgs: [enc.encode(STAKING_STRINGS.farm_ops)],
+      suggestedParams: params,
+      accounts: undefined,
+      foreignAssets: undefined,
+      foreignApps: undefined,
+      rekeyTo: undefined
+    })
+
     params.fee = 3000
-    // unstake transaction
-    const unstakeTxn = algosdk.makeApplicationNoOpTxnFromObject({
+    // unstake
+    const txn1 = algosdk.makeApplicationNoOpTxnFromObject({
       from: user.address,
       appIndex: this.appId,
       appArgs: [enc.encode(STAKING_STRINGS.unstake), encodeUint64(amount)],
@@ -170,7 +234,7 @@ export default class Staking {
       rekeyTo: undefined
     })
 
-    return [unstakeTxn]
+    return assignGroupID([txn0, txn1])
   }
 
   /**
@@ -183,24 +247,30 @@ export default class Staking {
     const params = await getParams(this.algod)
     const enc = new TextEncoder()
 
-    // create a new staking user and loading state
-    const stakingUser = this.stakingClient.getUser(user.address)
-    const localStates = await getLocalStates(this.algod, user.address)
-    await stakingUser.loadState(localStates)
-    const userStakingState = stakingUser.userStakingStates[this.appId]
-
     const txns = []
 
-    // loop through all of the rewards programs and see which ones the user has unrealized rewards in
+    // iterate over all rewards programs on this contract
     for (let i = 0; i < this.rewardsProgramCount; ++i) {
-      const userRewardsProgramState = userStakingState.userRewardsProgramStates[i]
-      const userUnrealizedRewards = userRewardsProgramState.userUnrealizedRewards
 
-      params.fee = 3000
-      //  the case when the user actually has something to redeem
-      if (userUnrealizedRewards > 0) {
-        // claim transaction
-        const claimTxn = makeApplicationNoOpTxnFromObject({
+      // skip rewards programs with 0 unrealized rewards
+      if (user.staking.v2.userStakingStates[this.appId].userRewardsProgramStates[i].userUnrealizedRewards > 0) {
+        
+        // farm ops
+        params.fee = 1000
+        const txn0 = makeApplicationNoOpTxnFromObject({
+          from: user.address,
+          appIndex: this.appId,
+          appArgs: [enc.encode(STAKING_STRINGS.farm_ops)],
+          suggestedParams: params,
+          accounts: undefined,
+          foreignAssets: undefined,
+          foreignApps: undefined,
+          rekeyTo: undefined
+        })
+        
+        // claim rewards
+        params.fee = 3000
+        const txn1 = makeApplicationNoOpTxnFromObject({
           from: user.address,
           appIndex: this.appId,
           appArgs: [enc.encode(STAKING_STRINGS.claim_rewards), encodeUint64(i)],
@@ -210,7 +280,7 @@ export default class Staking {
           foreignApps: [this.boostMultiplierAppId || 1],
           suggestedParams: params
         })
-        txns.push(claimTxn)
+        txns.push(txn0, txn1)
       }
     }
     if (txns.length == 0) {
@@ -220,32 +290,5 @@ export default class Staking {
     } else {
       return assignGroupID(txns)
     }
-  }
-
-  /**
-   * Constructs a series of transactions that opt a user into the staking
-   * contract.
-   * 
-   * @param user - user who is opting in 
-   * @returns a series of transactions that opt a user into the staking
-   * contract.
-   */
-  async getUserOptInTxns(user: AlgofiUser): Promise<Transaction[]> {
-    const params = await getParams(this.algod)
-    const enc = new TextEncoder()
-
-    // unstake transaction
-    const optInTxn = algosdk.makeApplicationOptInTxnFromObject({
-      from: user.address,
-      appIndex: this.appId,
-      suggestedParams: params,
-      appArgs: undefined,
-      accounts: undefined,
-      foreignApps: undefined,
-      foreignAssets: undefined,
-      rekeyTo: undefined
-    })
-
-    return [optInTxn]
   }
 }
