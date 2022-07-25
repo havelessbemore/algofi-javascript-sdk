@@ -1,6 +1,6 @@
 {
-  "name": "@algofi",
-  "version": "0.2.9",
+  "name": "@algofi/js-sdk",
+  "version": "0.0.1",
   "description": "The official Algofi JavaScript SDK",
   "main": "dist/index.js",
   "files": [
@@ -24,7 +24,7 @@
   },
   "dependencies": {
     "algosdk": "1.16.0",
-    "superagent": "^8.0.0",
+    "http": "^0.0.1-security",
     "typescript": "^3.9.10"
   },
   "devDependencies": {
