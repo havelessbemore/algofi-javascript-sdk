@@ -16,7 +16,7 @@ import algosdk, {
 } from "algosdk"
 
 // local
-import { getLocalStates, getAccountBalances, getAccountMinBalance } from "./stateUtils"
+import { getLocalStatesFromAccountInfo, getAccountBalancesFromAccountInfo, getAccountMinBalanceFromAccountInfo } from "./stateUtils"
 import AlgofiClient from "./algofiClient"
 import ParsedTransaction from "./parsedTransaction"
 
@@ -85,21 +85,27 @@ export default class AlgofiUser {
    * class.
    */
   async loadState() {
-    // load balance state
-    this.balances = await getAccountBalances(this.algod, this.address)
-    this.minBalance = await getAccountMinBalance(this.algod, this.address)
+    // load user account info
+    let accountInfo = await this.algod.accountInformation(this.address).do()
 
     // load local states
-    let localStates = await getLocalStates(this.algod, this.address)
+    let localStates = await getLocalStatesFromAccountInfo(accountInfo)
+
+    // load balance state
+    this.balances = await getAccountBalancesFromAccountInfo(accountInfo)
+    this.minBalance = await getAccountMinBalanceFromAccountInfo(accountInfo)
 
     // update protocol user classes
-    await this.lending.loadState(localStates)
+    let loadLendingPromise = this.lending.loadState(localStates)
 
     // update user staking state
-    await this.staking.loadState(localStates)
+    let loadStakingPromise = this.staking.loadState(localStates)
 
     // update user governance state
-    await this.governance.loadState(localStates)
+    let loadGovernancePromise = this.governance.loadState(localStates)
+    
+    // await completion
+    await Promise.all([loadLendingPromise, loadStakingPromise, loadGovernancePromise])
   }
 
   /**

@@ -16,6 +16,6 @@ export default class BaseLendingUser {
   }
 
   async loadState(userLocalStates: {}) {
-    this.v2.loadState(userLocalStates)
+    await this.v2.loadState(userLocalStates)
   }
 }

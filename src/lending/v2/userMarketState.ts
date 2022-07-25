@@ -40,9 +40,16 @@ export class UserMarketRewardsState {
     this.assetID = market.rewardsPrograms[programIndex].assetID
     
     if (this.programNumber == market.rewardsPrograms[programIndex].programNumber) {
-      let rawRewardsIndexBytes = new Uint8Array(Buffer.from(marketState[MARKET_STRINGS.user_latest_rewards_index_prefix + String.fromCharCode.apply(null, encodeUint64(programIndex))], "base64"))
+      let rawRewardsIndexBytes = new Uint8Array(Buffer.from(String(marketState[MARKET_STRINGS.user_latest_rewards_index_prefix + String.fromCharCode.apply(null, encodeUint64(programIndex))]), "base64"))
       this.latestIndex = bytesToBigInt(rawRewardsIndexBytes)
-      let rawUnclaimedRewardsBytes = new Uint8Array(Buffer.from(marketState[MARKET_STRINGS.user_unclaimed_rewards_prefix + String.fromCharCode.apply(null, encodeUint64(programIndex))], "base64"))
+      let rawUnclaimedRewardsBytes = new Uint8Array(
+        Buffer.from(
+          String(marketState[
+            MARKET_STRINGS.user_unclaimed_rewards_prefix + String.fromCharCode.apply(null, encodeUint64(programIndex))
+          ]),
+          "base64"
+        )
+      )
       this.unclaimed = bytesToBigInt(rawUnclaimedRewardsBytes)
     } else {
       this.latestIndex = BigInt(0)

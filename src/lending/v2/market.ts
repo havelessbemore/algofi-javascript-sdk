@@ -80,7 +80,7 @@ export class MarketRewardsProgram {
 
 export default class Market {
   // constants
-  public localMinBalance: number = 414000
+  public localMinBalance: number = 471000
 
   // static
   public algod: Algodv2
@@ -339,7 +339,7 @@ export default class Market {
     let maximumWithdrawUSD = userExcessScalledCollateral * FIXED_3_SCALE_FACTOR / this.collateralFactor
     let maximumMarketWithdrawUnderlying = Math.min(
       Math.floor(this.convertUSDToUnderlying(maximumWithdrawUSD)),
-      user.lending.v2.userMarketStates[this.appId].suppliedAmount.underlying
+      (user.lending.v2.userMarketStates?.[this.appId]?.suppliedAmount.underlying || 0)
     )
     let maximumMarketWithdrawUSD = this.convertUnderlyingToUSD(maximumMarketWithdrawUnderlying)
     return new AssetAmount(maximumMarketWithdrawUnderlying, maximumMarketWithdrawUSD)
