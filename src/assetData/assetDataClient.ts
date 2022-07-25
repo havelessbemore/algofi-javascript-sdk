@@ -33,20 +33,20 @@ export default class AssetDataClient {
 
   async loadState() {
     // load prices from amm analytics
-    request
-       .get(ANALYTICS_ENDPOINT + "/assets")
-       .then(resp => {
-          if (resp.status == 200) {
-            for (const assetInfo of resp.body.assets) {
-              this.assets[assetInfo.asset_id] = new Asset(assetInfo.asset_id, assetInfo.name, assetInfo.decimals, assetInfo.price)
-            }
-          } else {
-            console.log("Bad Response")
-          }
-       })
-       .catch(err => {
-         console.log(err.message)
-       });
+    // request
+    //    .get(ANALYTICS_ENDPOINT + "/assets")
+    //    .then(resp => {
+    //       if (resp.status == 200) {
+    //         for (const assetInfo of resp.body.assets) {
+    //           this.assets[assetInfo.asset_id] = new Asset(assetInfo.asset_id, assetInfo.name, assetInfo.decimals, assetInfo.price)
+    //         }
+    //       } else {
+    //         console.log("Bad Response")
+    //       }
+    //    })
+    //    .catch(err => {
+    //      console.log(err.message)
+    //    });
 
     // load prices from oracles (v2 lending)
     for (const [appId, market] of Object.entries(this.algofiClient.lending.v2.markets)) {

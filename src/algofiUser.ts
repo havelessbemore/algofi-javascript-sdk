@@ -92,8 +92,8 @@ export default class AlgofiUser {
     let localStates = await getLocalStatesFromAccountInfo(accountInfo)
 
     // load balance state
-    let balance = await getAccountBalancesFromAccountInfo(accountInfo)
-    let minBalance = await getAccountMinBalanceFromAccountInfo(accountInfo)
+    this.balances = await getAccountBalancesFromAccountInfo(accountInfo)
+    this.minBalance = await getAccountMinBalanceFromAccountInfo(accountInfo)
 
     // update protocol user classes
     let loadLendingPromise = this.lending.loadState(localStates)

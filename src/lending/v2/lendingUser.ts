@@ -131,12 +131,22 @@ export default class User {
         // rewards
         for (var i = 0; i < 2; i++) {
           let assetId = value.rewardsProgramStates[i].assetID
-          this.netUnclaimedRewards[assetId] = value.rewardsProgramStates[i].realUnclaimed + (this.netUnclaimedRewards[assetId] || 0)
-          this.netRewardsPerYear[assetId] = value.rewardsProgramStates[i].rewardsPerYear + (this.netRewardsPerYear[assetId] || 0)
-          if (market.marketType == MarketType.VAULT) {
-            this.netSupplyRewardsPerYear += this.lendingClient.algofiClient.assetData.toUSD(assetId, value.rewardsProgramStates[i].rewardsPerYear)
-          } else {
-            this.netBorrowRewardsPerYear += this.lendingClient.algofiClient.assetData.toUSD(assetId, value.rewardsProgramStates[i].rewardsPerYear)
+          if (assetId > 0) {
+            this.netUnclaimedRewards[assetId] =
+              value.rewardsProgramStates[i].realUnclaimed + (this.netUnclaimedRewards[assetId] || 0)
+            this.netRewardsPerYear[assetId] =
+              value.rewardsProgramStates[i].rewardsPerYear + (this.netRewardsPerYear[assetId] || 0)
+              if (market.marketType == MarketType.VAULT) {
+                this.netSupplyRewardsPerYear += this.lendingClient.algofiClient.assetData.toUSD(
+                  assetId,
+                  value.rewardsProgramStates[i].rewardsPerYear
+                )
+              } else {
+                this.netBorrowRewardsPerYear += this.lendingClient.algofiClient.assetData.toUSD(
+                  assetId,
+                  value.rewardsProgramStates[i].rewardsPerYear
+                )
+              }
           }
         }
       }
