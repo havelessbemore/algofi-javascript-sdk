@@ -21,7 +21,7 @@ export class UserMarketRewardsState {
   public programNumber: number
   public assetID: number
   public latestIndex: bigint
-  public unclaimed: bigint
+  public unclaimed: number
   
   public realUnclaimed: number
   public rewardsPerYear: number
@@ -42,22 +42,14 @@ export class UserMarketRewardsState {
     if (this.programNumber == market.rewardsPrograms[programIndex].programNumber) {
       let rawRewardsIndexBytes = new Uint8Array(Buffer.from(String(marketState[MARKET_STRINGS.user_latest_rewards_index_prefix + String.fromCharCode.apply(null, encodeUint64(programIndex))]), "base64"))
       this.latestIndex = bytesToBigInt(rawRewardsIndexBytes)
-      let rawUnclaimedRewardsBytes = new Uint8Array(
-        Buffer.from(
-          String(marketState[
-            MARKET_STRINGS.user_unclaimed_rewards_prefix + String.fromCharCode.apply(null, encodeUint64(programIndex))
-          ]),
-          "base64"
-        )
-      )
-      this.unclaimed = bytesToBigInt(rawUnclaimedRewardsBytes)
+      this.unclaimed = marketState[MARKET_STRINGS.user_unclaimed_rewards_prefix + String.fromCharCode.apply(null, encodeUint64(programIndex))]
     } else {
       this.latestIndex = BigInt(0)
-      this.unclaimed = BigInt(0)
+      this.unclaimed = 0
     }
     
     // calculate real unclaimed rewards
-    this.realUnclaimed = Number(this.unclaimed / FIXED_18_SCALE_FACTOR)
+    this.realUnclaimed = this.unclaimed
     
     let userTotal = 0
     let globalTotal = 0

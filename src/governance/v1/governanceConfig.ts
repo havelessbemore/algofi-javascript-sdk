@@ -41,13 +41,9 @@ export default class GovernanceConfig {
 }
 
 export const GovernanceConfigs = {
-         // Mainnet clone2 is launched
-      [Network.MAINNET]: new GovernanceConfig(0, 0, 0, 0, 0),
-      [Network.MAINNET_CLONE]: new GovernanceConfig(0, 0, 0, 0, 0),
-      [Network.MAINNET_CLONE2]: new GovernanceConfig(813977235, 813976876, 813978348, 813973589, 813973490),
-      [Network.MAINNET_CLONE3]: new GovernanceConfig(813977235, 813976876, 813978348, 813973589, 813973490),
-      [Network.TESTNET]: new GovernanceConfig(0, 0, 0, 0, 0)
-    }
+  [Network.MAINNET]: new GovernanceConfig(0, 0, 0, 0, 0),
+  [Network.MAINNET_CLONE3]: new GovernanceConfig(813977235, 813976876, 813978348, 813973589, 813973490),
+}
 
 export class ProposalConfig {
   public appId: number
