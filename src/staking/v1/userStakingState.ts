@@ -47,12 +47,12 @@ export default class UserStakingState {
   async loadState() {
     let storageLocalStates = await getLocalStates(this.algod, this.storageAddress)
 
-    this.totalStaked = storageLocalStates[this.staking.marketAppId][STAKING_STRINGS.user_total_staked]
-    this.rewardsProgramNumber = storageLocalStates[this.staking.managerAppId][STAKING_STRINGS.user_rewards_program_number]
-    this.rewardsCoefficient = storageLocalStates[this.staking.managerAppId][STAKING_STRINGS.user_rewards_coefficient]
+    this.totalStaked = storageLocalStates[this.staking.marketAppId][STAKING_STRINGS.user_total_staked] || 0
+    this.rewardsProgramNumber = storageLocalStates[this.staking.managerAppId][STAKING_STRINGS.user_rewards_program_number] || 0
+    this.rewardsCoefficient = storageLocalStates[this.staking.managerAppId][STAKING_STRINGS.user_rewards_coefficient] || 0
     
-    let pendingRewards = storageLocalStates[this.staking.managerAppId][STAKING_STRINGS.user_pending_rewards]
-    let pendingSecondaryRewards = storageLocalStates[this.staking.managerAppId][STAKING_STRINGS.user_secondary_pending_rewards]
+    let pendingRewards = storageLocalStates[this.staking.managerAppId][STAKING_STRINGS.user_pending_rewards] || 0
+    let pendingSecondaryRewards = storageLocalStates[this.staking.managerAppId][STAKING_STRINGS.user_secondary_pending_rewards] || 0
     
     let unrealizedRewards = 0
     if (this.rewardsProgramNumber == this.staking.rewardsProgramNumber) {
