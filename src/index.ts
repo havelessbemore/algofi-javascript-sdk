@@ -13,6 +13,9 @@ import { MarketType } from "./lending/v2/lendingConfig"
 // asset data
 import AssetConfig from "./assetData/assetConfig"
 
+// staking v2
+import StakingConfig from "./staking/v2/stakingConfig"
+
 // EXPORTS
 export {
   // global
@@ -26,5 +29,7 @@ export {
   TxnLoadMode,
   Base64Encoder,
   // lending v2
-  MarketType
+  MarketType,
+  // staking v2
+  StakingConfig
 }
