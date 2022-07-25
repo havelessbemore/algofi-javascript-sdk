@@ -65,7 +65,11 @@ export default class UserStakingState {
     this.unclaimedRewards = pendingRewards + unrealizedRewards
     this.unclaimedSecondaryRewards = pendingSecondaryRewards + unrealizedSecondaryRewards
     
-    this.rewardsPerYear = this.staking.rewardsPerSecond * (365 * 24 * 60 * 60) * this.totalStaked / this.staking.totalStaked
+    if (this.totalStaked > 0) { 
+      this.rewardsPerYear = this.staking.rewardsPerSecond * (365 * 24 * 60 * 60) * this.totalStaked / this.staking.totalStaked
+    } else {
+      this.rewardsPerYear = 0
+    }
     this.secondaryRewardsPerYear = this.rewardsPerYear * this.staking.rewardsSecondaryRatio / (10**3)
   }
 }
