@@ -12,6 +12,7 @@ export enum StakingType {
 }
 
 export default class StakingConfig {
+  public name: string
   public appId: number
   public assetId: number
   public type: StakingType
@@ -23,7 +24,8 @@ export default class StakingConfig {
    * @param assetId - staking asset id
    * @param type - type
    */
-  constructor(appId: number, assetId: number, type: StakingType) {
+  constructor(name: string, appId: number, assetId: number, type: StakingType) {
+    this.name = name
     this.appId = appId
     this.assetId = assetId
     this.type = type
@@ -31,31 +33,23 @@ export default class StakingConfig {
 }
 
 export const StakingConfigs = {
-  [Network.MAINNET_CLONE]: [
-    new StakingConfig(785597550, 785578010, StakingType.V2),
-    new StakingConfig(785599248, 785579619, StakingType.V2)
-  ],
-  [Network.MAINNET_CLONE2]: [
-    new StakingConfig(805980186, 802871797, StakingType.V2),
-    new StakingConfig(805982398, 802872834, StakingType.V2),
-    new StakingConfig(807135066, 802887476, StakingType.BASSET)
+  [Network.MAINNET]: [
+    new StakingConfig("Algo Lend and Earn", 818206045, 818179690, StakingType.V2),
+    new StakingConfig("USDC Lend and Earn", 818207598, 818182311, StakingType.V2),
+    new StakingConfig("goBTC Lend and Earn", 818207650, 818184214, StakingType.V2),
+    new StakingConfig("goETH Lend and Earn", 818207743, 818188553, StakingType.V2),
+    new StakingConfig("USDT Lend and Earn", 818207873, 818190568, StakingType.V2),
   ],
   [Network.MAINNET_CLONE3]: [
-    new StakingConfig(805980186, 802871797, StakingType.V2),
-    new StakingConfig(805982398, 802872834, StakingType.V2),
-    new StakingConfig(807135066, 802887476, StakingType.BASSET)
+    new StakingConfig("Test Staking 1", 805980186, 802871797, StakingType.V2),
+    new StakingConfig("Test Staking 2", 805982398, 802872834, StakingType.V2),
+    new StakingConfig("Test Staking 3", 807135066, 802887476, StakingType.BASSET)
   ],
-  [Network.TESTNET]: [
-    new StakingConfig(96414588, 96410661, StakingType.V2),
-    new StakingConfig(96418091, 96410672, StakingType.V2)
-  ]
 }
 
 export const rewardsManagerAppId = {
-  [Network.MAINNET_CLONE]: 785584132,
-  [Network.MAINNET_CLONE2]: 805940592,
+  [Network.MAINNET]: 0,
   [Network.MAINNET_CLONE3]: 805940592,
-  [Network.TESTNET]: 94796687
 }
 
 export const STAKING_STRINGS = {

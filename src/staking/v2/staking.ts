@@ -32,6 +32,7 @@ export default class Staking {
   // static
   public algod: Algodv2
   public stakingClient: StakingClient
+  public name: string
   public appId: number
   public address: string
   public assetId: number
@@ -56,6 +57,7 @@ export default class Staking {
   constructor(algod: Algodv2, stakingClient: StakingClient, rewardsManagerAppId: number, stakingConfig: StakingConfig) {
     this.algod = algod
     this.stakingClient = stakingClient
+    this.name = stakingConfig.name
     this.appId = stakingConfig.appId
     this.address = getApplicationAddress(this.appId)
     this.assetId = stakingConfig.assetId
@@ -101,6 +103,18 @@ export default class Staking {
     const txns = []
     const enc = new TextEncoder()
 
+    // farm ops
+    const farmOpsTxn = makeApplicationNoOpTxnFromObject({
+      from: user.address,
+      appIndex: this.appId,
+      appArgs: [enc.encode(STAKING_STRINGS.farm_ops)],
+      suggestedParams: params,
+      accounts: undefined,
+      foreignAssets: undefined,
+      foreignApps: undefined,
+      rekeyTo: undefined
+    })
+
     // sending staking asset
     const stakeAssetTransferTxn = makeAssetTransferTxnWithSuggestedParamsFromObject({
       from: user.address,
@@ -119,13 +133,13 @@ export default class Staking {
       appIndex: this.appId,
       appArgs: [enc.encode(STAKING_STRINGS.stake)],
       suggestedParams: params,
-      foreignApps: [this.boostMultiplierAppId],
+      foreignApps: [this.boostMultiplierAppId || 1],
       accounts: undefined,
       foreignAssets: undefined,
       rekeyTo: undefined
     })
 
-    txns.push(stakeAssetTransferTxn, stakeTxn)
+    txns.push(farmOpsTxn, stakeAssetTransferTxn, stakeTxn)
 
     return assignGroupID(txns)
   }
@@ -151,7 +165,7 @@ export default class Staking {
       appArgs: [enc.encode(STAKING_STRINGS.unstake), encodeUint64(amount)],
       foreignAssets: [this.assetId],
       suggestedParams: params,
-      foreignApps: [this.boostMultiplierAppId],
+      foreignApps: [this.boostMultiplierAppId || 1],
       accounts: undefined,
       rekeyTo: undefined
     })
@@ -193,7 +207,7 @@ export default class Staking {
           foreignAssets: [this.rewardsProgramStates[i].rewardsAssetId],
           accounts: [this.rewardsEscrowAccount],
           rekeyTo: undefined,
-          foreignApps: [this.boostMultiplierAppId],
+          foreignApps: [this.boostMultiplierAppId || 1],
           suggestedParams: params
         })
         txns.push(claimTxn)

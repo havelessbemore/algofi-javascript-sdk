@@ -136,24 +136,36 @@ export default class User {
               value.rewardsProgramStates[i].realUnclaimed + (this.netUnclaimedRewards[assetId] || 0)
             this.netRewardsPerYear[assetId] =
               value.rewardsProgramStates[i].rewardsPerYear + (this.netRewardsPerYear[assetId] || 0)
-              if (market.marketType == MarketType.VAULT) {
-                this.netSupplyRewardsPerYear += this.lendingClient.algofiClient.assetData.toUSD(
-                  assetId,
-                  value.rewardsProgramStates[i].rewardsPerYear
-                )
-              } else {
-                this.netBorrowRewardsPerYear += this.lendingClient.algofiClient.assetData.toUSD(
-                  assetId,
-                  value.rewardsProgramStates[i].rewardsPerYear
-                )
-              }
+            if (market.marketType == MarketType.VAULT) {
+              this.netSupplyRewardsPerYear += this.lendingClient.algofiClient.assetData.toUSD(
+                assetId,
+                value.rewardsProgramStates[i].rewardsPerYear || 0
+              )
+            } else {
+              this.netBorrowRewardsPerYear += this.lendingClient.algofiClient.assetData.toUSD(
+                assetId,
+                value.rewardsProgramStates[i].rewardsPerYear || 0
+              )
+            }
           }
         }
       }
-      this.netSupplyAPR = dollarTotaledSupplyAPR / this.netSupplied
-      this.netBorrowAPR = dollarTotaledBorrowAPR / this.netBorrowed
-      this.netSupplyRewardsAPR = this.netSupplyRewardsPerYear / this.netSupplied
-      this.netBorrowRewardsAPR = this.netBorrowRewardsPerYear / this.netBorrowed
+      
+      if (this.netSupplied > 0) {
+        this.netSupplyAPR = dollarTotaledSupplyAPR / this.netSupplied
+        this.netSupplyRewardsAPR = this.netSupplyRewardsPerYear / this.netSupplied
+      } else {
+        this.netSupplyAPR = 0
+        this.netSupplyRewardsAPR = 0
+      }
+      
+      if (this.netBorrowed > 0) {
+        this.netBorrowAPR = dollarTotaledBorrowAPR / this.netBorrowed
+        this.netBorrowRewardsAPR = this.netBorrowRewardsPerYear / this.netBorrowed
+      } else {
+        this.netBorrowAPR = 0
+        this.netBorrowRewardsAPR = 0
+      }
     } else {
       this.optedInToManager = false
     }
