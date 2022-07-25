@@ -21,7 +21,7 @@ export default class BaseStakingUser {
   }
 
   async loadState(userLocalStates: {}) {
-    this.v1.loadState(userLocalStates)
-    this.v2.loadState(userLocalStates)
+    await this.v1.loadState(userLocalStates)
+    await this.v2.loadState(userLocalStates)
   }
 }
