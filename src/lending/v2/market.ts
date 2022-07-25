@@ -335,8 +335,8 @@ export default class Market {
   // QUOTES
   
   getMaximumWithdrawAmount(user: AlgofiUser, borrowUtilLimit: number=0.9): AssetAmount {
-    let userExcessScalledCollateral = user.lending.v2.netScaledCollateral - user.lending.v2.netScaledBorrow / borrowUtilLimit
-    let maximumWithdrawUSD = userExcessScalledCollateral * FIXED_3_SCALE_FACTOR / this.collateralFactor
+    let userExcessScaledCollateral = user.lending.v2.netScaledCollateral - user.lending.v2.netScaledBorrow / borrowUtilLimit
+    let maximumWithdrawUSD = userExcessScaledCollateral * FIXED_3_SCALE_FACTOR / this.collateralFactor
     let maximumMarketWithdrawUnderlying = Math.min(
       Math.floor(this.convertUSDToUnderlying(maximumWithdrawUSD)),
       (user.lending.v2.userMarketStates?.[this.appId]?.suppliedAmount.underlying || 0)
@@ -346,8 +346,8 @@ export default class Market {
   }
   
   getMaximumWithdrawBAsset(user: AlgofiUser, borrowUtilLimit: number=0.9): number {
-    let userExcessScalledCollateral = user.lending.v2.netScaledCollateral - user.lending.v2.netScaledBorrow / borrowUtilLimit
-    let maximumWithdrawUSD = userExcessScalledCollateral * FIXED_3_SCALE_FACTOR / this.collateralFactor
+    let userExcessScaledCollateral = user.lending.v2.netScaledCollateral - user.lending.v2.netScaledBorrow / borrowUtilLimit
+    let maximumWithdrawUSD = userExcessScaledCollateral * FIXED_3_SCALE_FACTOR / this.collateralFactor
     let maximumWithdrawUnderlying = Math.floor(this.convertUSDToUnderlying(maximumWithdrawUSD))
     return Math.min(
       this.underlyingToBAssetAmount(maximumWithdrawUnderlying),
@@ -356,10 +356,20 @@ export default class Market {
   }
 
   getMaximumBorrowAmount(user: AlgofiUser, borrowUtilLimit: number=0.9): AssetAmount {
-    let userExcessScalledCollateral = user.lending.v2.netScaledCollateral * borrowUtilLimit - user.lending.v2.netScaledBorrow
-    let maximumBorrowUSD = (userExcessScalledCollateral * FIXED_3_SCALE_FACTOR) / this.borrowFactor
+    let userExcessScaledCollateral = user.lending.v2.netScaledCollateral * borrowUtilLimit - user.lending.v2.netScaledBorrow
+    let maximumBorrowUSD = (userExcessScaledCollateral * FIXED_3_SCALE_FACTOR) / this.borrowFactor
     let maximumBorrowUnderlying = Math.floor(this.convertUSDToUnderlying(maximumBorrowUSD))
     return new AssetAmount(maximumBorrowUnderlying, maximumBorrowUSD)
+  }
+
+  getNewBorrowUtilQuote(user: AlgofiUser, collateralDelta: number, borrowDelta: number) : number {
+    let newUserScaledCollateral = user.lending.v2.netScaledCollateral + (this.convertUnderlyingToUSD(collateralDelta) * this.collateralFactor / FIXED_3_SCALE_FACTOR)
+    let newUserScaledBorrow = user.lending.v2.netScaledCollateral + (this.convertUnderlyingToUSD(borrowDelta) * this.borrowFactor / FIXED_3_SCALE_FACTOR)
+    if (newUserScaledBorrow > 0) {
+      return newUserScaledBorrow / newUserScaledCollateral
+    } else {
+      return 0
+    }
   }
 
   // TRANSACTIONS
