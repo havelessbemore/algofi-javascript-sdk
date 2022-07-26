@@ -339,7 +339,7 @@ export default class Market {
     let maximumWithdrawUSD = userExcessScaledCollateral * FIXED_3_SCALE_FACTOR / this.collateralFactor
     let maximumMarketWithdrawUnderlying = Math.min(
       Math.floor(this.convertUSDToUnderlying(maximumWithdrawUSD)),
-      (user.lending.v2.userMarketStates?.[this.appId]?.suppliedAmount.underlying || 0)
+      (user.lending.v2.userMarketStates?.[this.appId]?.suppliedAmount.underlying * Math.pow(10, this.lendingClient.algofiClient.assetData.assetConfigs[this.underlyingAssetId].decimals) || 0)
     )
     let maximumMarketWithdrawUSD = this.convertUnderlyingToUSD(maximumMarketWithdrawUnderlying)
     return new AssetAmount(maximumMarketWithdrawUnderlying, maximumMarketWithdrawUSD)
