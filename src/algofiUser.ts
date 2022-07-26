@@ -44,7 +44,7 @@ export default class AlgofiUser {
   public address: string
 
   // account state
-  public balances = {}
+  public balances: { [key: number]: number } = {}
   public minBalance: number
 
   // transaction state

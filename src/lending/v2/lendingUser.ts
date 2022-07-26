@@ -119,14 +119,15 @@ export default class User {
       let dollarTotaledBorrowAPR = 0
       for (const [key, value] of Object.entries(this.userMarketStates)) {
         let market = this.lendingClient.markets[key]
-        this.netSupplied += value.suppliedAmount.usd
-        this.netBorrowed += value.borrowedAmount.usd
-        this.netScaledCollateral += Number(((value.suppliedAmount.usd * market.collateralFactor) / FIXED_3_SCALE_FACTOR).toFixed(3))
+        // TODO improve efficiency
+        this.netSupplied += value.suppliedAmount.toUSD()
+        this.netBorrowed += value.borrowedAmount.toUSD()
+        this.netScaledCollateral += Number(((value.suppliedAmount.toUSD() * market.collateralFactor) / FIXED_3_SCALE_FACTOR).toFixed(3))
         if (value.borrowShares != 0) { // round up unless exactly 0
-          this.netScaledBorrow += Number(((value.borrowedAmount.usd * market.borrowFactor) / FIXED_3_SCALE_FACTOR).toFixed(3)) + 0.001
+          this.netScaledBorrow += Number(((value.borrowedAmount.toUSD() * market.borrowFactor) / FIXED_3_SCALE_FACTOR).toFixed(3)) + 0.001
         }
-        dollarTotaledSupplyAPR += value.suppliedAmount.usd * market.supplyAPR
-        dollarTotaledBorrowAPR += value.borrowedAmount.usd * market.borrowAPR
+        dollarTotaledSupplyAPR += value.suppliedAmount.toUSD() * market.supplyAPR
+        dollarTotaledBorrowAPR += value.borrowedAmount.toUSD() * market.borrowAPR
         
         // rewards
         for (var i = 0; i < 2; i++) {
@@ -137,15 +138,11 @@ export default class User {
             this.netRewardsPerYear[assetId] =
               value.rewardsProgramStates[i].rewardsPerYear + (this.netRewardsPerYear[assetId] || 0)
             if (market.marketType == MarketType.VAULT) {
-              this.netSupplyRewardsPerYear += this.lendingClient.algofiClient.assetData.toUSD(
-                assetId,
-                value.rewardsProgramStates[i].rewardsPerYear || 0
-              )
+              this.netSupplyRewardsPerYear += this.lendingClient.algofiClient.assetData.getAsset(
+                value.rewardsProgramStates[i].rewardsPerYear, assetId).toUSD()
             } else {
-              this.netBorrowRewardsPerYear += this.lendingClient.algofiClient.assetData.toUSD(
-                assetId,
-                value.rewardsProgramStates[i].rewardsPerYear || 0
-              )
+              this.netBorrowRewardsPerYear += this.lendingClient.algofiClient.assetData.getAsset(
+                value.rewardsProgramStates[i].rewardsPerYear, assetId).toUSD()
             }
           }
         }

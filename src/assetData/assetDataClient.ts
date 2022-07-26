@@ -13,7 +13,8 @@ import { MarketType } from "./../lending/v2/lendingConfig"
 
 // local
 import AssetConfig, { AssetConfigs } from "./assetConfig"
-import Asset from "./asset"
+import AssetData from "./assetData"
+import AssetAmount from "./assetAmount"
 
 // INTERFACE
 
@@ -23,7 +24,7 @@ export default class AssetDataClient {
   public network: Network
   public assetConfigs: { [key: number]: AssetConfig}
 
-  public assets: { [key: number]: Asset } = {}
+  public assets: { [key: number]: AssetData } = {}
 
   constructor(algofiClient: AlgofiClient) {
     this.algofiClient = algofiClient
@@ -39,7 +40,7 @@ export default class AssetDataClient {
     //    .then(resp => {
     //       if (resp.status == 200) {
     //         for (const assetInfo of resp.body.assets) {
-    //           this.assets[assetInfo.asset_id] = new Asset(assetInfo.asset_id, assetInfo.name, assetInfo.decimals, assetInfo.price)
+    //           this.assets[assetInfo.asset_id] = new AssetData(assetInfo.asset_id, assetInfo.name, assetInfo.decimals, assetInfo.price)
     //         }
     //       } else {
     //         console.log("Bad Response")
@@ -53,7 +54,7 @@ export default class AssetDataClient {
     for (const [appId, market] of Object.entries(this.algofiClient.lending.v2.markets)) {
       // load underlying asset
       let underlyingAssetConfig = this.assetConfigs[market.underlyingAssetId]
-      this.assets[underlyingAssetConfig.assetId] = new Asset(
+      this.assets[underlyingAssetConfig.assetId] = new AssetData(
         underlyingAssetConfig.assetId,
         underlyingAssetConfig.name,
         underlyingAssetConfig.decimals,
@@ -62,22 +63,28 @@ export default class AssetDataClient {
       // load b asset
       if (market.marketType != MarketType.VAULT) { // vault b assets are permenantly locked
         let bAssetConfig = this.assetConfigs[market.bAssetId]
-        this.assets[bAssetConfig.assetId] = new Asset(
+        this.assets[bAssetConfig.assetId] = new AssetData(
           bAssetConfig.assetId,
           bAssetConfig.name,
           bAssetConfig.decimals,
-          market.bAssetToAssetAmount(10**bAssetConfig.decimals).usd
+          market.bAssetToUnderlying(10**bAssetConfig.decimals).toUSD()
         )
       }
     }
   }
 
-  toUSD(assetId, amount) {
-    if (assetId in this.assets && this.assets[assetId].price > 0) {
-      return (amount / 10**this.assets[assetId].decimals) * this.assets[assetId].price
-    }
-    console.log("Error: unable to get dollarized price for asset")
-    return 0
+  getAsset(amount: number, assetId: number): AssetAmount {
+    return new AssetAmount(amount, this.assets[assetId])
+  }
+
+  getAssetFromDisplayAmount(displayAmount: number, assetId: number): AssetAmount {
+    const assetData = this.assets[assetId]
+    return new AssetAmount(Math.floor(displayAmount * 10**assetData.decimals), assetData)
+  }
+  
+  getAssetFromUSDAmount(usdAmount: number, assetId): AssetAmount {
+    const assetData = this.assets[assetId]
+    return new AssetAmount(Math.floor(usdAmount * 10**assetData.decimals / assetData.price), assetData)
   }
 
 }

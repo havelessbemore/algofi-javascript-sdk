@@ -9,7 +9,9 @@ import algosdk, {
 
 // global
 import { FIXED_18_SCALE_FACTOR } from "../../globals"
-import AssetAmount from "../../assetAmount"
+
+// assetData
+import AssetAmount from "../../assetData/assetAmount"
 
 // local
 import { MarketType, MARKET_STRINGS } from "./lendingConfig"
@@ -23,7 +25,7 @@ export class UserMarketRewardsState {
   public latestIndex: bigint
   public unclaimed: number
   
-  public realUnclaimed: number
+  public realUnclaimed: number // TODO make these asset amounts perhaps?
   public rewardsPerYear: number
   
   /**
@@ -87,8 +89,8 @@ export default class UserMarketState {
   constructor(marketState: { string: any }, market: Market) {
     this.bAssetCollateral = marketState?.[MARKET_STRINGS.user_active_b_asset_collateral] || 0
     this.borrowShares = marketState?.[MARKET_STRINGS.user_borrow_shares] || 0
-    this.suppliedAmount = market.bAssetToAssetAmount(this.bAssetCollateral)
-    this.borrowedAmount = market.borrowSharesToAssetAmount(this.borrowShares)
+    this.suppliedAmount = market.bAssetToUnderlying(this.bAssetCollateral)
+    this.borrowedAmount = market.borrowSharesToUnderlying(this.borrowShares)
     
     this.rewardsProgramStates = []
     this.rewardsProgramStates.push(new UserMarketRewardsState(marketState, market, this.bAssetCollateral, this.borrowShares, 0))
