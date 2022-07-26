@@ -24,7 +24,7 @@
   },
   "dependencies": {
     "algosdk": "1.16.0",
-    "http": "^0.0.1-security",
+    "superagent": "^8.0.0",
     "typescript": "^3.9.10"
   },
   "devDependencies": {
