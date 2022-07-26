@@ -96,8 +96,30 @@ export default class Manager {
       foreignAssets: undefined,
       rekeyTo: undefined
     })
+    
+    params.fee = 1000
+    const txn1 = algosdk.makeApplicationClearStateTxnFromObject({
+      from: user.lending.v2.storageAddress,
+      appIndex: this.appId,
+      suggestedParams: params,
+      appArgs: undefined,
+      accounts: undefined,
+      foreignApps: undefined,
+      foreignAssets: undefined,
+      rekeyTo: undefined
+    })
+    
+    params.fee = 1000
+    const txn2 = algosdk.makePaymentTxnWithSuggestedParamsFromObject({
+      from: user.lending.v2.storageAddress,
+      to: user.lending.v2.storageAddress,
+      amount: 0,
+      suggestedParams: params,
+      rekeyTo: undefined,
+      closeRemainderTo: user.address
+    })
 
-    return [txn0]
+    return assignGroupID([txn0, txn1, txn2])
   }
 
   /**
