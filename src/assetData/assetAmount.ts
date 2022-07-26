@@ -23,7 +23,7 @@ export default class AssetAmount {
     this.assetData = assetData
   }
   
-  toUSD() {
+  toUSD(): number {
     if (this.assetData.price != 0) {
       return this.amount * this.assetData.price / 10**this.assetData.decimals
     } else {
@@ -32,7 +32,7 @@ export default class AssetAmount {
     }
   }
   
-  toDisplayAmount() {
+  toDisplayAmount(): number {
     return roundDown(this.amount / 10**this.assetData.decimals, this.assetData.decimals) // TODO maybe up?
   }
   
