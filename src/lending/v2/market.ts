@@ -364,7 +364,7 @@ export default class Market {
 
   getNewBorrowUtilQuote(user: AlgofiUser, collateralDelta: number, borrowDelta: number) : number {
     let newUserScaledCollateral = user.lending.v2.netScaledCollateral + (this.convertUnderlyingToUSD(collateralDelta) * this.collateralFactor / FIXED_3_SCALE_FACTOR)
-    let newUserScaledBorrow = user.lending.v2.netScaledCollateral + (this.convertUnderlyingToUSD(borrowDelta) * this.borrowFactor / FIXED_3_SCALE_FACTOR)
+    let newUserScaledBorrow = (user.lending.v2.netScaledBorrow || 0) + (this.convertUnderlyingToUSD(borrowDelta) * this.borrowFactor / FIXED_3_SCALE_FACTOR)
     if (newUserScaledBorrow > 0) {
       return newUserScaledBorrow / newUserScaledCollateral
     } else {
