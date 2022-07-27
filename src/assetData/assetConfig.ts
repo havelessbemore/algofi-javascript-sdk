@@ -29,7 +29,7 @@ export const AssetConfigs = {
     1: new AssetConfig("ALGO", 1, 6),
     818179690: new AssetConfig("AF-BANK-ALGO-STANDARD", 818179690, 6),
     31566704: new AssetConfig("USDC", 31566704, 6),
-    818182311: new AssetConfig("AF-BANK-USDC-STANDARD", 812916935, 6),
+    818182311: new AssetConfig("AF-BANK-USDC-STANDARD", 818182311, 6),
     386192725: new AssetConfig("goBTC", 386192725, 8),
     818184214: new AssetConfig("AF-BANK-GOBTC-STANDARD", 818184214, 6),
     386195940: new AssetConfig("goETH", 386195940, 8),

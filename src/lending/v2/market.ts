@@ -320,21 +320,27 @@ export default class Market {
     let maximumWithdrawUnderlying = this.assetDataClient.getAssetFromUSDAmount(maximumWithdrawUSD, this.underlyingAssetId)
     let maximumMarketWithdrawUnderlying = Math.min(
       maximumWithdrawUnderlying.amount,
-      (user.lending.v2.userMarketStates?.[this.appId]?.suppliedAmount.amount || 0) // TODO this should handle an empty market
+      (user.lending.v2.userMarketStates?.[this.appId]?.suppliedAmount.amount || 0)
     )
-    return this.assetDataClient.getAsset(maximumMarketWithdrawUnderlying, this.underlyingAssetId)
+    // special handling for final withdraw
+    if (user.lending.v2.netScaledBorrow == 0) {
+      maximumMarketWithdrawUnderlying = user.lending.v2.userMarketStates?.[this.appId]?.suppliedAmount.amount || 0
+    }
+    return this.assetDataClient.getAsset(maximumMarketWithdrawUnderlying * 10, this.underlyingAssetId)
   }
   
   getMaximumWithdrawBAsset(user: AlgofiUser, borrowUtilLimit: number=0.9): AssetAmount {
-    let maximumWithdrawUnderlying = this.getMaximumWithdrawAmount(user, borrowUtilLimit)
-    let maximumWithdrawBAsset = Math.min(
-      this.underlyingToBAsset(maximumWithdrawUnderlying).amount,
+    let userExcessScaledCollateral = user.lending.v2.netScaledCollateral - user.lending.v2.netScaledBorrow / borrowUtilLimit
+    let maximumWithdrawUSD = userExcessScaledCollateral * FIXED_3_SCALE_FACTOR / this.collateralFactor
+    let maximumWithdrawBAsset = this.assetDataClient.getAssetFromUSDAmount(maximumWithdrawUSD, this.bAssetId)
+    let maximumMarketWithdrawBAsset = Math.min(
+      maximumWithdrawBAsset.amount,
       user.lending.v2.userMarketStates[this.appId]?.bAssetCollateral || 0
     )
     if (user.lending.v2.netScaledBorrow == 0) {
-      maximumWithdrawBAsset = user.lending.v2.userMarketStates[this.appId]?.bAssetCollateral || 0
+      maximumMarketWithdrawBAsset = user.lending.v2.userMarketStates[this.appId]?.bAssetCollateral || 0
     }
-    return this.assetDataClient.getAsset(maximumWithdrawBAsset, this.bAssetId)
+    return this.assetDataClient.getAsset(maximumMarketWithdrawBAsset, this.bAssetId)
   }
 
   getMaximumBorrowAmount(user: AlgofiUser, borrowUtilLimit: number=0.9): AssetAmount {
