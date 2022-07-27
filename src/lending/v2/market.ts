@@ -348,8 +348,6 @@ export default class Market {
     let newUserScaledCollateral = user.lending.v2.netScaledCollateral + (collateralDelta.toUSD() * this.collateralFactor / FIXED_3_SCALE_FACTOR)
     let newUserScaledBorrow = (user.lending.v2.netScaledBorrow || 0) + (borrowDelta.toUSD() * this.borrowFactor / FIXED_3_SCALE_FACTOR)
     // special handling for final repay
-    console.log(borrowDelta.amount)
-    console.log(user.lending.v2.userMarketStates[this.appId].borrowedAmount.amount)
     if (borrowDelta.amount + user.lending.v2.userMarketStates[this.appId].borrowedAmount.amount <= 0) {
       newUserScaledBorrow -= 0.001
     }
