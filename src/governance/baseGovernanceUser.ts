@@ -23,7 +23,7 @@ export default class BaseLendingUser {
   async loadState(userLocalStates: {}) {
     // disable on mainnet until launched
     if (this.network != Network.MAINNET) {
-      this.v1.loadState(userLocalStates)
+      await this.v1.loadState(userLocalStates)
     }
   }
 }
