@@ -8,6 +8,16 @@ import algosdk, {
   assignGroupID
 } from "algosdk"
 
+// MATH
+
+export function roundDown(amount: number, decimals: number): number {
+  return Math.floor(amount * 10**decimals) / 10**decimals
+}
+
+export function roundUp(amount: number, decimals: number): number {
+  return Math.ceil(amount * 10**decimals) / 10**decimals
+}
+
 // FUNCTIONS
 
 export function concatArrays(arrays: Uint8Array[]) {
