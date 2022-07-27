@@ -339,14 +339,21 @@ export default class Market {
 
   getMaximumBorrowAmount(user: AlgofiUser, borrowUtilLimit: number=0.9): AssetAmount {
     let userExcessScaledCollateral = user.lending.v2.netScaledCollateral * borrowUtilLimit - user.lending.v2.netScaledBorrow
+    // special handling for initial borrow
+    if (user.lending.v2.userMarketStates[this.appId].borrowedAmount.amount == 0) {
+      userExcessScaledCollateral -= 0.001
+    }
     let maximumBorrowUSD = (userExcessScaledCollateral * FIXED_3_SCALE_FACTOR) / this.borrowFactor
-    let maximumBorrowUnderlying = this.assetDataClient.getAssetFromUSDAmount(maximumBorrowUSD, this.underlyingAssetId)
-    return maximumBorrowUnderlying // TODO this should cap when a market is drained of supply?
+    return this.assetDataClient.getAssetFromUSDAmount(maximumBorrowUSD, this.underlyingAssetId)
   }
 
   getNewBorrowUtilQuote(user: AlgofiUser, collateralDelta: AssetAmount, borrowDelta: AssetAmount) : number {
     let newUserScaledCollateral = user.lending.v2.netScaledCollateral + (collateralDelta.toUSD() * this.collateralFactor / FIXED_3_SCALE_FACTOR)
     let newUserScaledBorrow = (user.lending.v2.netScaledBorrow || 0) + (borrowDelta.toUSD() * this.borrowFactor / FIXED_3_SCALE_FACTOR)
+    // special handling for initial borrow
+    if (borrowDelta.amount > 0 && user.lending.v2.userMarketStates[this.appId].borrowedAmount.amount == 0) {
+      newUserScaledBorrow += 0.001
+    }
     // special handling for final repay
     if (borrowDelta.amount + user.lending.v2.userMarketStates[this.appId].borrowedAmount.amount <= 0) {
       newUserScaledBorrow -= 0.001
