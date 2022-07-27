@@ -331,6 +331,9 @@ export default class Market {
       this.underlyingToBAsset(maximumWithdrawUnderlying).amount,
       user.lending.v2.userMarketStates[this.appId].bAssetCollateral
     )
+    if (user.lending.v2.netScaledBorrow == 0) {
+      maximumWithdrawBAsset = user.lending.v2.userMarketStates[this.appId].bAssetCollateral
+    }
     return this.assetDataClient.getAsset(maximumWithdrawBAsset, this.bAssetId)
   }
 
