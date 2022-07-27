@@ -281,7 +281,7 @@ export default class Market {
    * @returns the asset amount that corresponds to the b asset amount that we passed in.
    */
   bAssetToUnderlying(amount: number): AssetAmount {
-    let rawUnderlyingAmount = (this.bAssetCirculation != 0) ? (amount * this.getUnderlyingSupplied()) / this.bAssetCirculation : 0
+    let rawUnderlyingAmount = Math.floor((this.bAssetCirculation != 0) ? (amount * this.getUnderlyingSupplied()) / this.bAssetCirculation : 0)
     return this.assetDataClient.getAsset(rawUnderlyingAmount, this.underlyingAssetId)
   }
 
@@ -294,7 +294,7 @@ export default class Market {
    * borrow shares that we passed in.
    */
   borrowSharesToUnderlying(amount: number): AssetAmount {
-    let rawUnderlyingAmount = (this.borrowShareCirculation != 0) ? (amount * this.underlyingBorrowed) / this.borrowShareCirculation : 0
+    let rawUnderlyingAmount = Math.floor((this.borrowShareCirculation != 0) ? (amount * this.underlyingBorrowed) / this.borrowShareCirculation : 0)
     return this.assetDataClient.getAsset(rawUnderlyingAmount, this.underlyingAssetId)
   }
 
@@ -347,6 +347,12 @@ export default class Market {
   getNewBorrowUtilQuote(user: AlgofiUser, collateralDelta: AssetAmount, borrowDelta: AssetAmount) : number {
     let newUserScaledCollateral = user.lending.v2.netScaledCollateral + (collateralDelta.toUSD() * this.collateralFactor / FIXED_3_SCALE_FACTOR)
     let newUserScaledBorrow = (user.lending.v2.netScaledBorrow || 0) + (borrowDelta.toUSD() * this.borrowFactor / FIXED_3_SCALE_FACTOR)
+    // special handling for final repay
+    console.log(borrowDelta.amount)
+    console.log(user.lending.v2.userMarketStates[this.appId].borrowedAmount.amount)
+    if (borrowDelta.amount + user.lending.v2.userMarketStates[this.appId].borrowedAmount.amount <= 0) {
+      newUserScaledBorrow -= 0.001
+    }
     if (newUserScaledBorrow > 0) {
       return newUserScaledBorrow / newUserScaledCollateral
     } else {
