@@ -24,8 +24,11 @@ import { Base64Encoder } from "../../encoder"
 import { decodeBytes, parseAddressBytes } from "../../utils"
 import { getApplicationGlobalState, getLocalStates, getAccountBalances } from "../../stateUtils"
 import { getParams, getPaymentTxn } from "../../transactionUtils"
-import AssetAmount from "../../assetAmount"
 import AlgofiUser from "../../algofiUser"
+
+// assetData
+import AssetAmount from "../../assetData/assetAmount"
+import AssetDataClient from "../../assetData/assetDataClient"
 
 // local
 import { MarketType, MANAGER_STRINGS, MARKET_STRINGS } from "./lendingConfig"
@@ -85,6 +88,7 @@ export default class Market {
   // static
   public algod: Algodv2
   public lendingClient: LendingClient
+  public assetDataClient: AssetDataClient
   public managerAppId: number
   public appId: number
   public address: string
@@ -133,8 +137,6 @@ export default class Market {
   public impliedBorrowIndex: number
 
   // calculated values
-  public totalSupplied: AssetAmount
-  public totalBorrowed: AssetAmount
   public supplyAPR: number
   public borrowAPR: number
 
@@ -152,6 +154,7 @@ export default class Market {
   constructor(algod: Algodv2, lendingClient: LendingClient, managerAppId: number, marketConfig: MarketConfig) {
     this.algod = algod
     this.lendingClient = lendingClient
+    this.assetDataClient = lendingClient.algofiClient.assetData
     this.managerAppId = managerAppId
     this.appId = marketConfig.appId
     this.address = getApplicationAddress(this.appId)
@@ -210,18 +213,7 @@ export default class Market {
     this.impliedBorrowIndex = state[MARKET_STRINGS.implied_borrow_index]
 
     // calculated values
-    this.totalSupplied = new AssetAmount(
-      this.getUnderlyingSupplied() /
-        Math.pow(10, this.lendingClient.algofiClient.assetData.assetConfigs[this.underlyingAssetId].decimals),
-      this.convertUnderlyingToUSD(this.getUnderlyingSupplied())
-    )
-
-    this.totalBorrowed = new AssetAmount(
-      this.underlyingBorrowed / Math.pow(10, this.lendingClient.algofiClient.assetData.assetConfigs[this.underlyingAssetId].decimals),
-      this.convertUnderlyingToUSD(this.underlyingBorrowed)
-    )
-
-    let [supplyAPR, borrowAPR] = this.getAPRs(this.totalSupplied.underlying, this.totalBorrowed.underlying)
+    let [supplyAPR, borrowAPR] = this.getAPRs(this.getUnderlyingSupplied(), this.underlyingBorrowed)
     this.supplyAPR = supplyAPR
     this.borrowAPR = borrowAPR
 
@@ -247,6 +239,14 @@ export default class Market {
     }
   }
 
+  getTotalSupplied(): AssetAmount {
+    return this.assetDataClient.getAsset(this.getUnderlyingSupplied(), this.underlyingAssetId)
+  }
+  
+  getTotalBorrowed(): AssetAmount {
+    return this.assetDataClient.getAsset(this.underlyingBorrowed, this.underlyingAssetId)
+  }
+
   /**
    * Gets supply and borrow aprs for a market.
    * 
@@ -269,20 +269,9 @@ export default class Market {
   }
 
   // CONVERSIONS
-
-  /**
-   * Converts the underlying asset to its value in USD.
-   * 
-   * @param amount - amount of the underlying asset
-   * @returns the dollarized value for that amount of the asset
-   * governance from the user.
-   */
-  convertUnderlyingToUSD(amount: number): number {
-    return (amount * this.oracle.rawPrice) / (this.oracle.scaleFactor * FIXED_3_SCALE_FACTOR)
-  }
   
-  convertUSDToUnderlying(amount: number): number {
-    return (amount * this.oracle.scaleFactor * FIXED_3_SCALE_FACTOR) / (this.oracle.rawPrice)
+  private convertUnderlyingToUSD(amount: number) {
+    return (amount * this.oracle.rawPrice) / (this.oracle.scaleFactor * FIXED_3_SCALE_FACTOR)
   }
 
   /**
@@ -291,15 +280,9 @@ export default class Market {
    * @param amount - the amount of the b asset we want to convert
    * @returns the asset amount that corresponds to the b asset amount that we passed in.
    */
-  bAssetToAssetAmount(amount: number): AssetAmount {
-    if (amount == 0) {
-      return new AssetAmount(0, 0)
-    }
-    let rawUnderlyingAmount = (amount * this.getUnderlyingSupplied()) / this.bAssetCirculation
-    let underlyingAmount =
-      rawUnderlyingAmount / Math.pow(10, this.lendingClient.algofiClient.assetData.assetConfigs[this.underlyingAssetId].decimals)
-    let usdAmount = this.convertUnderlyingToUSD(rawUnderlyingAmount)
-    return new AssetAmount(underlyingAmount, usdAmount)
+  bAssetToUnderlying(amount: number): AssetAmount {
+    let rawUnderlyingAmount = (this.bAssetCirculation != 0) ? (amount * this.getUnderlyingSupplied()) / this.bAssetCirculation : 0
+    return this.assetDataClient.getAsset(rawUnderlyingAmount, this.underlyingAssetId)
   }
 
   /**
@@ -310,15 +293,9 @@ export default class Market {
    * @returns the amount of the underlying that is represented by the amount of
    * borrow shares that we passed in.
    */
-  borrowSharesToAssetAmount(amount: number): AssetAmount {
-    if (amount == 0) {
-      return new AssetAmount(0, 0)
-    }
-    let rawUnderlyingAmount = (amount * this.underlyingBorrowed) / this.borrowShareCirculation
-    let underlyingAmount =
-      rawUnderlyingAmount / Math.pow(10, this.lendingClient.algofiClient.assetData.assetConfigs[this.underlyingAssetId].decimals)
-    let usdAmount = this.convertUnderlyingToUSD(rawUnderlyingAmount)
-    return new AssetAmount(underlyingAmount, usdAmount)
+  borrowSharesToUnderlying(amount: number): AssetAmount {
+    let rawUnderlyingAmount = (this.borrowShareCirculation != 0) ? (amount * this.underlyingBorrowed) / this.borrowShareCirculation : 0
+    return this.assetDataClient.getAsset(rawUnderlyingAmount, this.underlyingAssetId)
   }
 
   /**
@@ -328,8 +305,11 @@ export default class Market {
    * @returns the corresponding amount of the b asset for the underlying that we
    * passed in.
    */
-  underlyingToBAssetAmount(amount: number): number {
-    return Math.floor((amount * this.bAssetCirculation) / this.getUnderlyingSupplied())
+  underlyingToBAsset(underlyingAmount: AssetAmount): AssetAmount {
+    return this.assetDataClient.getAsset(
+      Math.floor((underlyingAmount.amount * this.bAssetCirculation) / this.getUnderlyingSupplied()),
+      this.bAssetId
+    )
   }
 
   // QUOTES
@@ -337,34 +317,36 @@ export default class Market {
   getMaximumWithdrawAmount(user: AlgofiUser, borrowUtilLimit: number=0.9): AssetAmount {
     let userExcessScaledCollateral = user.lending.v2.netScaledCollateral - user.lending.v2.netScaledBorrow / borrowUtilLimit
     let maximumWithdrawUSD = userExcessScaledCollateral * FIXED_3_SCALE_FACTOR / this.collateralFactor
+    let maximumWithdrawUnderlying = this.assetDataClient.getAssetFromUSDAmount(maximumWithdrawUSD, this.underlyingAssetId)
     let maximumMarketWithdrawUnderlying = Math.min(
-      Math.floor(this.convertUSDToUnderlying(maximumWithdrawUSD)),
-      (user.lending.v2.userMarketStates?.[this.appId]?.suppliedAmount.underlying || 0)
+      maximumWithdrawUnderlying.amount,
+      (user.lending.v2.userMarketStates?.[this.appId]?.suppliedAmount.amount || 0) // TODO this should handle an empty market
     )
-    let maximumMarketWithdrawUSD = this.convertUnderlyingToUSD(maximumMarketWithdrawUnderlying)
-    return new AssetAmount(maximumMarketWithdrawUnderlying, maximumMarketWithdrawUSD)
+    return this.assetDataClient.getAsset(maximumMarketWithdrawUnderlying, this.underlyingAssetId)
   }
   
-  getMaximumWithdrawBAsset(user: AlgofiUser, borrowUtilLimit: number=0.9): number {
-    let userExcessScaledCollateral = user.lending.v2.netScaledCollateral - user.lending.v2.netScaledBorrow / borrowUtilLimit
-    let maximumWithdrawUSD = userExcessScaledCollateral * FIXED_3_SCALE_FACTOR / this.collateralFactor
-    let maximumWithdrawUnderlying = Math.floor(this.convertUSDToUnderlying(maximumWithdrawUSD))
-    return Math.min(
-      this.underlyingToBAssetAmount(maximumWithdrawUnderlying),
+  getMaximumWithdrawBAsset(user: AlgofiUser, borrowUtilLimit: number=0.9): AssetAmount {
+    let maximumWithdrawUnderlying = this.getMaximumWithdrawAmount(user, borrowUtilLimit)
+    let maximumWithdrawBAsset = Math.min(
+      this.underlyingToBAsset(maximumWithdrawUnderlying).amount,
       user.lending.v2.userMarketStates[this.appId].bAssetCollateral
     )
+    if (user.lending.v2.netScaledBorrow == 0) {
+      maximumWithdrawBAsset = user.lending.v2.userMarketStates[this.appId].bAssetCollateral
+    }
+    return this.assetDataClient.getAsset(maximumWithdrawBAsset, this.bAssetId)
   }
 
   getMaximumBorrowAmount(user: AlgofiUser, borrowUtilLimit: number=0.9): AssetAmount {
     let userExcessScaledCollateral = user.lending.v2.netScaledCollateral * borrowUtilLimit - user.lending.v2.netScaledBorrow
     let maximumBorrowUSD = (userExcessScaledCollateral * FIXED_3_SCALE_FACTOR) / this.borrowFactor
-    let maximumBorrowUnderlying = Math.floor(this.convertUSDToUnderlying(maximumBorrowUSD))
-    return new AssetAmount(maximumBorrowUnderlying, maximumBorrowUSD)
+    let maximumBorrowUnderlying = this.assetDataClient.getAssetFromUSDAmount(maximumBorrowUSD, this.underlyingAssetId)
+    return maximumBorrowUnderlying // TODO this should cap when a market is drained of supply?
   }
 
-  getNewBorrowUtilQuote(user: AlgofiUser, collateralDelta: number, borrowDelta: number) : number {
-    let newUserScaledCollateral = user.lending.v2.netScaledCollateral + (this.convertUnderlyingToUSD(collateralDelta) * this.collateralFactor / FIXED_3_SCALE_FACTOR)
-    let newUserScaledBorrow = (user.lending.v2.netScaledBorrow || 0) + (this.convertUnderlyingToUSD(borrowDelta) * this.borrowFactor / FIXED_3_SCALE_FACTOR)
+  getNewBorrowUtilQuote(user: AlgofiUser, collateralDelta: AssetAmount, borrowDelta: AssetAmount) : number {
+    let newUserScaledCollateral = user.lending.v2.netScaledCollateral + (collateralDelta.toUSD() * this.collateralFactor / FIXED_3_SCALE_FACTOR)
+    let newUserScaledBorrow = (user.lending.v2.netScaledBorrow || 0) + (borrowDelta.toUSD() * this.borrowFactor / FIXED_3_SCALE_FACTOR)
     if (newUserScaledBorrow > 0) {
       return newUserScaledBorrow / newUserScaledCollateral
     } else {
@@ -417,7 +399,7 @@ export default class Market {
    * @param underlyingAmount - how much of the underlying the user wants to mint
    * @returns a series of transactions that mint b assets for the user.
    */
-  async getMintTxns(user: AlgofiUser, underlyingAmount: number): Promise<Transaction[]> {
+  async getMintTxns(user: AlgofiUser, underlyingAmount: AssetAmount): Promise<Transaction[]> {
     if (this.marketType == MarketType.VAULT) {
       throw "Mint action not supported by vault market"
     }
@@ -432,7 +414,7 @@ export default class Market {
     )
 
     // payment
-    const txn0 = getPaymentTxn(params, user.address, this.address, this.underlyingAssetId, underlyingAmount)
+    const txn0 = getPaymentTxn(params, user.address, this.address, this.underlyingAssetId, underlyingAmount.amount)
 
     // application call
     params.fee = 3000
@@ -459,7 +441,7 @@ export default class Market {
    * @returns a series of transactions that adds underlying collateral for the
    * user.
    */
-  async getAddUnderlyingCollateralTxns(user: AlgofiUser, underlyingAmount: number): Promise<Transaction[]> {
+  async getAddUnderlyingCollateralTxns(user: AlgofiUser, underlyingAmount: AssetAmount): Promise<Transaction[]> {
     const params = await getParams(this.algod)
     const transactions = []
 
@@ -471,7 +453,7 @@ export default class Market {
 
     // payment
     const targetAddress = this.marketType != MarketType.VAULT ? this.address : user.lending.v2.storageAddress
-    const txn0 = getPaymentTxn(params, user.address, targetAddress, this.underlyingAssetId, underlyingAmount)
+    const txn0 = getPaymentTxn(params, user.address, targetAddress, this.underlyingAssetId, underlyingAmount.amount)
 
     // application call
     params.fee = 2000
@@ -497,7 +479,7 @@ export default class Market {
    * @param bAssetAmount - the amount of b assets to add
    * @returns a series of transactions that adds b asset collateral for a user.
    */
-  async getAddBAssetCollateralTxns(user: AlgofiUser, bAssetAmount: number): Promise<Transaction[]> {
+  async getAddBAssetCollateralTxns(user: AlgofiUser, bAssetAmount: AssetAmount): Promise<Transaction[]> {
     if (this.marketType == MarketType.VAULT) {
       throw "Add b asset collateral action not supported by vault market"
     }
@@ -512,7 +494,7 @@ export default class Market {
     )
 
     // payment
-    const txn0 = getPaymentTxn(params, user.address, this.address, this.bAssetId, bAssetAmount)
+    const txn0 = getPaymentTxn(params, user.address, this.address, this.bAssetId, bAssetAmount.amount)
 
     // application call
     params.fee = 2000
@@ -540,17 +522,17 @@ export default class Market {
    */
   async getRemoveUnderlyingCollateralTxns(
     user: AlgofiUser,
-    underlyingAmount: number,
+    underlyingAmount: AssetAmount,
     removeMax: boolean = false
   ): Promise<Transaction[]> {
     // get b asset amount to remove
     let bAssetAmount = Math.min(
-      this.underlyingToBAssetAmount(underlyingAmount),
+      this.underlyingToBAsset(underlyingAmount).amount,
       user.lending.v2.userMarketStates[this.appId].bAssetCollateral
     )
 
     if (removeMax) {
-      bAssetAmount = this.getMaximumWithdrawBAsset(user)
+      bAssetAmount = this.getMaximumWithdrawBAsset(user).amount
     }
 
     const params = await getParams(this.algod)
@@ -584,7 +566,7 @@ export default class Market {
    * @returns a series of transactions that remove underlying b asset
    * collateral for a user.
    */
-  async getRemoveBAssetCollateralTxns(user: AlgofiUser, bAssetAmount: number): Promise<Transaction[]> {
+  async getRemoveBAssetCollateralTxns(user: AlgofiUser, bAssetAmount: AssetAmount): Promise<Transaction[]> {
     if (this.marketType == MarketType.VAULT) {
       throw "Remove b asset collateral action not supported by vault market"
     }
@@ -600,7 +582,7 @@ export default class Market {
       from: user.address,
       appIndex: this.appId,
       suggestedParams: params,
-      appArgs: [TEXT_ENCODER.encode(MARKET_STRINGS.remove_b_asset_collateral), encodeUint64(bAssetAmount)],
+      appArgs: [TEXT_ENCODER.encode(MARKET_STRINGS.remove_b_asset_collateral), encodeUint64(bAssetAmount.amount)],
       accounts: [user.lending.v2.storageAddress],
       foreignApps: [this.managerAppId],
       foreignAssets: [this.bAssetId],
@@ -617,7 +599,7 @@ export default class Market {
    * @param bAssetAmount - the amount of b asset we want to burn 
    * @returns a series of transactions that represent a burning of b assets.
    */
-  async getBurnTxns(user: AlgofiUser, bAssetAmount: number): Promise<Transaction[]> {
+  async getBurnTxns(user: AlgofiUser, bAssetAmount: AssetAmount): Promise<Transaction[]> {
     if (this.marketType == MarketType.VAULT) {
       throw "Burn action not supported by vault market"
     }
@@ -632,7 +614,7 @@ export default class Market {
     )
 
     // payment
-    const txn0 = getPaymentTxn(params, user.address, this.address, this.bAssetId, bAssetAmount)
+    const txn0 = getPaymentTxn(params, user.address, this.address, this.bAssetId, bAssetAmount.amount)
 
     // application call
     params.fee = 3000
@@ -659,7 +641,7 @@ export default class Market {
    * @returns a series of transactions that allow a user to borrow some amount
    * of underlying from the market.
    */
-  async getBorrowTxns(user: AlgofiUser, underlyingAmount: number): Promise<Transaction[]> {
+  async getBorrowTxns(user: AlgofiUser, underlyingAmount: AssetAmount): Promise<Transaction[]> {
     if (this.marketType == MarketType.VAULT) {
       throw "Borrow action not supported by vault market"
     }
@@ -675,7 +657,7 @@ export default class Market {
       from: user.address,
       appIndex: this.appId,
       suggestedParams: params,
-      appArgs: [TEXT_ENCODER.encode(MARKET_STRINGS.borrow), encodeUint64(underlyingAmount)],
+      appArgs: [TEXT_ENCODER.encode(MARKET_STRINGS.borrow), encodeUint64(underlyingAmount.amount)],
       accounts: [user.lending.v2.storageAddress],
       foreignApps: [this.managerAppId],
       foreignAssets: [this.underlyingAssetId],
@@ -696,14 +678,14 @@ export default class Market {
    */
   async getRepayBorrowTxns(
     user: AlgofiUser,
-    underlyingAmount: number,
+    underlyingAmount: AssetAmount,
     repayMax: boolean = false
   ): Promise<Transaction[]> {
     if (this.marketType == MarketType.VAULT) {
       throw "Repay borrow action not supported by vault market"
     }
 
-    let repayAmount = underlyingAmount
+    let repayAmount = underlyingAmount.amount
     if (repayMax) {
       if (this.underlyingAssetId == ALGO_ASSET_ID) {
         repayAmount = Math.min(Math.ceil(repayAmount * 1.001), user.balances[ALGO_ASSET_ID] - user.minBalance - 100000)

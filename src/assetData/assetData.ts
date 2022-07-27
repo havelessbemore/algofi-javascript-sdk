@@ -1,6 +1,6 @@
 // INTERFACE
 
-export default class Asset {
+export default class AssetData {
   public assetId: number
   public name: string
   public decimals: number

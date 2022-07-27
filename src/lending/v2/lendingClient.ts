@@ -84,4 +84,20 @@ export default class LendingClient {
     return (appId in this.markets || appId == this.manager.appId)
   }
 
+  getTotalSupplied(): number {
+    let totalSupplied = 0
+    for (const [appId, market] of Object.entries(this.markets)) {
+      totalSupplied += market.getTotalSupplied().toUSD()
+    }
+    return totalSupplied
+  }
+  
+  getTotalBorrowed(): number {
+    let totalBorrowed = 0
+    for (const [appId, market] of Object.entries(this.markets)) {
+      totalBorrowed += market.getTotalBorrowed().toUSD()
+    }
+    return totalBorrowed
+  }
+
 }
