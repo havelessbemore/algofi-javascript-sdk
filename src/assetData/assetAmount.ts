@@ -4,7 +4,7 @@
 import AssetData from "./assetData"
 
 // global
-import { roundDown } from "../utils"
+import { roundUp, roundDown } from "../utils"
 
 // INTERFACE
 
@@ -32,8 +32,12 @@ export default class AssetAmount {
     }
   }
 
-  toDisplayAmount(): number {
-    return roundDown(this.amount / 10**this.assetData.decimals, this.assetData.decimals) // TODO maybe up?
+  toDisplayAmount(roundResultUp: boolean = false): number {
+    if (roundResultUp) {
+      return roundUp(this.amount / 10**this.assetData.decimals, this.assetData.decimals)
+    } else {
+      return roundDown(this.amount / 10**this.assetData.decimals, this.assetData.decimals)
+    }
   }
   
   
