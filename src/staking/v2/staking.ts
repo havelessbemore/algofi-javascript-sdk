@@ -22,6 +22,10 @@ import { STAKING_STRINGS } from "./stakingConfig"
 import AlgofiUser from "../../algofiUser"
 import { decodeBytes, parseAddressBytes, formatPrefixState } from "../../utils"
 
+// asset data
+import AssetDataClient from "../../assetData/assetDataClient"
+import AssetAmount from "../../assetData/assetAmount"
+
 // local
 import StakingClient from "./stakingClient"
 import StakingConfig from "./stakingConfig"
@@ -32,6 +36,7 @@ export default class Staking {
   // static
   public algod: Algodv2
   public stakingClient: StakingClient
+  public assetDataClient: AssetDataClient
   public name: string
   public appId: number
   public address: string
@@ -57,6 +62,7 @@ export default class Staking {
   constructor(algod: Algodv2, stakingClient: StakingClient, rewardsManagerAppId: number, stakingConfig: StakingConfig) {
     this.algod = algod
     this.stakingClient = stakingClient
+    this.assetDataClient = stakingClient.algofiClient.assetData
     this.name = stakingConfig.name
     this.appId = stakingConfig.appId
     this.address = getApplicationAddress(this.appId)
@@ -85,10 +91,13 @@ export default class Staking {
     const formattedState = formatPrefixState(globalState)
 
     for (let i = 0; i < this.rewardsProgramCount; ++i) {
-      this.rewardsProgramStates[i] = new RewardsProgramState(formattedState, i)
+      this.rewardsProgramStates[i] = new RewardsProgramState(this, formattedState, i)
     }
   }
 
+  getTotalStaked(): AssetAmount {
+    return this.assetDataClient.getAsset(this.totalStaked, this.assetId)
+  }
 
   /**
    * Constructs a series of transactions that opt a user into the staking

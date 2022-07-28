@@ -12,6 +12,9 @@ export const FIXED_18_SCALE_FACTOR = BigInt(1000000000000000000)
 
 export const ALGO_ASSET_ID = 1
 
+export const SECONDS_PER_DAY = 86400
+export const SECONDS_PER_YEAR = SECONDS_PER_DAY * 365
+
 // requires NoOp, ApplicationCall, No Rekey, No CloseRemainderTo (assits ledger users)
 export const PERMISSIONLESS_SENDER_LOGIC_SIG = new LogicSigAccount(
   new Uint8Array([

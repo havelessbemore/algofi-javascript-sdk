@@ -17,6 +17,7 @@ import {
   FIXED_3_SCALE_FACTOR,
   FIXED_6_SCALE_FACTOR,
   ALGO_ASSET_ID,
+  SECONDS_PER_YEAR,
   PERMISSIONLESS_SENDER_LOGIC_SIG,
   TEXT_ENCODER
 } from "../../globals"
@@ -44,6 +45,8 @@ const DONT_CALC_USER_POSITION = false
 // HELPER CLASSES
 
 export class MarketRewardsProgram {
+  // clients
+  public market: Market
   // state
   public programNumber: number
   public rewardsPerSecond: number
@@ -58,7 +61,8 @@ export class MarketRewardsProgram {
    * @param state - state of the market rewards program on chain
    * @param programIndex - the index of the rewards program
    */
-  constructor(state: {}, programIndex: number) {
+  constructor(market: Market, state: {}, programIndex: number) {
+    this.market = market
     let rewardsStateBytes = Buffer.from(
       state[MARKET_STRINGS.rewards_program_state_prefix + String.fromCharCode.apply(null, encodeUint64(programIndex))],
       "base64"
@@ -76,6 +80,24 @@ export class MarketRewardsProgram {
       )
     )
     this.index = bytesToBigInt(rawRewardsIndexBytes)
+  }
+
+  getAnnualRewards(): AssetAmount {
+    return this.market.assetDataClient.getAsset(this.rewardsPerSecond * SECONDS_PER_YEAR, this.assetID)
+  }
+
+  getSupplyRewardsAPR(): number {
+    if (this.assetID == 0 || this.market.marketType != MarketType.VAULT) {
+      return 0
+    }
+    return this.getAnnualRewards().toUSD() / this.market.getTotalSupplied().toUSD()
+  }
+
+  getBorrowRewardsAPR(): number {
+    if (this.assetID == 0 || this.market.marketType == MarketType.VAULT) {
+      return 0
+    }
+    return this.getAnnualRewards().toUSD() / this.market.getTotalBorrowed().toUSD()
   }
 }
 
@@ -219,8 +241,9 @@ export default class Market {
 
     // rewards
     this.rewardsPrograms = []
-    this.rewardsPrograms.push(new MarketRewardsProgram(state, 0))
-    this.rewardsPrograms.push(new MarketRewardsProgram(state, 1))
+    for (var idx = 0; idx < 2; idx++) {
+      this.rewardsPrograms.push(new MarketRewardsProgram(this, state, idx))
+    }
     this.rewardsEscrowAccount = parseAddressBytes(state[MARKET_STRINGS.rewards_escrow_account])
   }
 
@@ -239,12 +262,30 @@ export default class Market {
     }
   }
 
+  // GETTERS (post asset data load)
+
   getTotalSupplied(): AssetAmount {
     return this.assetDataClient.getAsset(this.getUnderlyingSupplied(), this.underlyingAssetId)
   }
-  
+
   getTotalBorrowed(): AssetAmount {
     return this.assetDataClient.getAsset(this.underlyingBorrowed, this.underlyingAssetId)
+  }
+
+  getSupplyRewardsAPR(): number {
+    let supplyRewardsAPR = 0
+    for (const rewardsProgram of this.rewardsPrograms) {
+      supplyRewardsAPR += rewardsProgram.getSupplyRewardsAPR()
+    }
+    return supplyRewardsAPR
+  }
+
+  getBorrowRewardsAPR(): number {
+    let borrowRewardsAPR = 0
+    for (const rewardsProgram of this.rewardsPrograms) {
+      borrowRewardsAPR += rewardsProgram.getBorrowRewardsAPR()
+    }
+    return borrowRewardsAPR
   }
 
   /**

@@ -34,10 +34,10 @@ export default class StakingConfig {
 
 export const StakingConfigs = {
   [Network.MAINNET]: [
-    new StakingConfig("Algo Lend and Earn", 818206045, 818179690, StakingType.BASSET),
+    // new StakingConfig("Algo Lend and Earn", 818206045, 818179690, StakingType.BASSET),
     new StakingConfig("USDC Lend and Earn", 818207598, 818182311, StakingType.BASSET),
-    new StakingConfig("goBTC Lend and Earn", 818207650, 818184214, StakingType.BASSET),
-    new StakingConfig("goETH Lend and Earn", 818207743, 818188553, StakingType.BASSET),
+    // new StakingConfig("goBTC Lend and Earn", 818207650, 818184214, StakingType.BASSET),
+    // new StakingConfig("goETH Lend and Earn", 818207743, 818188553, StakingType.BASSET),
     new StakingConfig("USDT Lend and Earn", 818207873, 818190568, StakingType.BASSET),
   ],
   [Network.MAINNET_CLONE3]: [
