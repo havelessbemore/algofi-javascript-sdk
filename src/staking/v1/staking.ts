@@ -21,6 +21,11 @@ import { getApplicationGlobalState, getLocalStates, getAccountBalances } from ".
 import { getParams, getPaymentTxn } from "../../transactionUtils"
 import AlgofiUser from "../../algofiUser"
 import { decodeBytes, parseAddressBytes, formatPrefixState } from "../../utils"
+import { SECONDS_PER_YEAR } from "../../globals"
+
+// asset data
+import AssetDataClient from "../../assetData/assetDataClient"
+import AssetAmount from "../../assetData/assetAmount"
 
 // local
 import { STAKING_STRINGS } from "./stakingConfig"
@@ -32,6 +37,7 @@ export default class Staking {
   // static
   public algod: Algodv2
   public stakingClient: StakingClient
+  public assetDataClient: AssetDataClient
   public managerAppId: number
   public marketAppId: number
   public oracleAppId: number
@@ -64,6 +70,7 @@ export default class Staking {
   constructor(algod: Algodv2, stakingClient: StakingClient, stakingConfig: StakingConfig) {
     this.algod = algod
     this.stakingClient = stakingClient
+    this.assetDataClient = stakingClient.algofiClient.assetData
     this.managerAppId = stakingConfig.managerAppId
     this.marketAppId = stakingConfig.marketAppId
     this.managerAddress = getApplicationAddress(this.managerAppId)
@@ -91,7 +98,22 @@ export default class Staking {
     this.rewardsSecondaryAssetId = managerGlobalState[STAKING_STRINGS.rewards_secondary_asset_id]
     this.rewardsSecondaryRatio = managerGlobalState[STAKING_STRINGS.rewards_secondary_ratio]
   }
-  
+
+  // GETTERS (require assetData to be loaded)
+  getTotalStaked(): AssetAmount {
+    return this.assetDataClient.getAsset(this.totalStaked, this.assetId)
+  }
+
+  getRewardsAPR(): number {
+    const annualRewards = this.assetDataClient.getAsset(this.rewardsPerSecond * SECONDS_PER_YEAR, this.rewardsAssetId)
+    return annualRewards.toUSD() / (this.getTotalStaked().toUSD() || 1)
+  }
+
+  getSecondaryRewardsAPR(): number {
+    const annualSecondaryRewards = this.assetDataClient.getAsset(Math.floor(this.rewardsPerSecond * SECONDS_PER_YEAR * this.rewardsSecondaryRatio / 1000), this.rewardsAssetId)
+    return annualSecondaryRewards.toUSD() / (this.getTotalStaked().toUSD() || 1)
+  }
+
   /**
    * Constructs a series of transactions to opt a user into the staking
    * contract.
