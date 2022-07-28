@@ -320,27 +320,33 @@ export default class Market {
     let maximumWithdrawUnderlying = this.assetDataClient.getAssetFromUSDAmount(maximumWithdrawUSD, this.underlyingAssetId)
     let maximumMarketWithdrawUnderlying = Math.min(
       maximumWithdrawUnderlying.amount,
-      (user.lending.v2.userMarketStates?.[this.appId]?.suppliedAmount.amount || 0) // TODO this should handle an empty market
+      (user.lending.v2.userMarketStates?.[this.appId]?.suppliedAmount.amount || 0)
     )
-    return this.assetDataClient.getAsset(maximumMarketWithdrawUnderlying, this.underlyingAssetId)
+    // special handling for final withdraw
+    if (user.lending.v2.netScaledBorrow == 0) {
+      maximumMarketWithdrawUnderlying = user.lending.v2.userMarketStates?.[this.appId]?.suppliedAmount.amount || 0
+    }
+    return this.assetDataClient.getAsset(maximumMarketWithdrawUnderlying * 10, this.underlyingAssetId)
   }
   
   getMaximumWithdrawBAsset(user: AlgofiUser, borrowUtilLimit: number=0.9): AssetAmount {
-    let maximumWithdrawUnderlying = this.getMaximumWithdrawAmount(user, borrowUtilLimit)
-    let maximumWithdrawBAsset = Math.min(
-      this.underlyingToBAsset(maximumWithdrawUnderlying).amount,
-      user.lending.v2.userMarketStates[this.appId].bAssetCollateral
+    let userExcessScaledCollateral = user.lending.v2.netScaledCollateral - user.lending.v2.netScaledBorrow / borrowUtilLimit
+    let maximumWithdrawUSD = userExcessScaledCollateral * FIXED_3_SCALE_FACTOR / this.collateralFactor
+    let maximumWithdrawBAsset = this.assetDataClient.getAssetFromUSDAmount(maximumWithdrawUSD, this.bAssetId)
+    let maximumMarketWithdrawBAsset = Math.min(
+      maximumWithdrawBAsset.amount,
+      user.lending.v2.userMarketStates[this.appId]?.bAssetCollateral || 0
     )
     if (user.lending.v2.netScaledBorrow == 0) {
-      maximumWithdrawBAsset = user.lending.v2.userMarketStates[this.appId].bAssetCollateral
+      maximumMarketWithdrawBAsset = user.lending.v2.userMarketStates[this.appId]?.bAssetCollateral || 0
     }
-    return this.assetDataClient.getAsset(maximumWithdrawBAsset, this.bAssetId)
+    return this.assetDataClient.getAsset(maximumMarketWithdrawBAsset, this.bAssetId)
   }
 
   getMaximumBorrowAmount(user: AlgofiUser, borrowUtilLimit: number=0.9): AssetAmount {
     let userExcessScaledCollateral = user.lending.v2.netScaledCollateral * borrowUtilLimit - user.lending.v2.netScaledBorrow
     // special handling for initial borrow
-    if (user.lending.v2.userMarketStates[this.appId].borrowedAmount.amount == 0) {
+    if (user.lending.v2.userMarketStates[this.appId]?.borrowedAmount.amount || 0 == 0) {
       userExcessScaledCollateral -= 0.001
     }
     let maximumBorrowUSD = (userExcessScaledCollateral * FIXED_3_SCALE_FACTOR) / this.borrowFactor
@@ -351,11 +357,11 @@ export default class Market {
     let newUserScaledCollateral = user.lending.v2.netScaledCollateral + (collateralDelta.toUSD() * this.collateralFactor / FIXED_3_SCALE_FACTOR)
     let newUserScaledBorrow = (user.lending.v2.netScaledBorrow || 0) + (borrowDelta.toUSD() * this.borrowFactor / FIXED_3_SCALE_FACTOR)
     // special handling for initial borrow
-    if (borrowDelta.amount > 0 && user.lending.v2.userMarketStates[this.appId].borrowedAmount.amount == 0) {
+    if (borrowDelta.amount > 0 && user.lending.v2.userMarketStates[this.appId]?.borrowedAmount.amount || 0 == 0) {
       newUserScaledBorrow += 0.001
     }
     // special handling for final repay
-    if (borrowDelta.amount + user.lending.v2.userMarketStates[this.appId].borrowedAmount.amount <= 0) {
+    if (borrowDelta.amount + user.lending.v2.userMarketStates[this.appId]?.borrowedAmount.amount || 0 <= 0) {
       newUserScaledBorrow -= 0.001
     }
     if (newUserScaledBorrow > 0) {

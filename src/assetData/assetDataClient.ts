@@ -45,21 +45,39 @@ export default class AssetDataClient {
     }
     
     // load prices from amm analytics
-    // request
-    //    .get(ANALYTICS_ENDPOINT + "/assets")
-    //    .then(resp => {
-    //       if (resp.status == 200) {
-    //         for (const assetInfo of resp.body.assets) {
-    //           this.assets[assetInfo.asset_id] = new AssetData(assetInfo.asset_id, assetInfo.name, assetInfo.decimals, assetInfo.price)
-    //         }
-    //       } else {
-    //         console.log("Bad Response")
-    //       }
-    //    })
-    //    .catch(err => {
-    //      console.log(err.message)
-    //    });
+    request
+      .get(ANALYTICS_ENDPOINT + "/assets")
+      .then(resp => {
+         if (resp.status == 200) {
+           for (const assetInfo of resp.body) {
+             this.assets[assetInfo.asset_id] = new AssetData(assetInfo.asset_id, assetInfo.name, assetInfo.decimals, assetInfo.price)
+           }
+         } else {
+           console.log("Bad Response")
+         }
+      })
+      .catch(err => {
+        console.log(err.message)
+      });
 
+    // load lp prices from amm analytics
+    request
+      .get(ANALYTICS_ENDPOINT + "/ammLPTokens")
+      .then(resp => {
+         if (resp.status == 200) {
+           for (const assetInfo of resp.body) {
+             this.assets[assetInfo.asset_id] = new AssetData(assetInfo.asset_id, assetInfo.name, assetInfo.decimals, assetInfo.price)
+           }
+         } else {
+           console.log("Bad Response")
+         }
+      })
+      .catch(err => {
+        console.log(err.message)
+      });
+  }
+
+  async loadLendingAssetState() {
     // load prices from oracles (v2 lending)
     for (const [appId, market] of Object.entries(this.algofiClient.lending.v2.markets)) {
       // load underlying asset
