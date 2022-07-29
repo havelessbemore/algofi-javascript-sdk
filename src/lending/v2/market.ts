@@ -334,8 +334,10 @@ export default class Market {
    * @returns the amount of the underlying that is represented by the amount of
    * borrow shares that we passed in.
    */
-  borrowSharesToUnderlying(amount: number): AssetAmount {
-    let rawUnderlyingAmount = Math.floor((this.borrowShareCirculation != 0) ? (amount * this.underlyingBorrowed) / this.borrowShareCirculation : 0)
+  borrowSharesToUnderlying(amount: number, roundResultUp: boolean = false): AssetAmount {
+    let rawUnderlyingAmount = (roundResultUp) ?
+      Math.ceil((this.borrowShareCirculation != 0) ? (amount * this.underlyingBorrowed) / this.borrowShareCirculation : 0) :
+      Math.floor((this.borrowShareCirculation != 0) ? (amount * this.underlyingBorrowed) / this.borrowShareCirculation : 0)
     return this.assetDataClient.getAsset(rawUnderlyingAmount, this.underlyingAssetId)
   }
 
@@ -398,11 +400,11 @@ export default class Market {
     let newUserScaledCollateral = user.lending.v2.netScaledCollateral + (collateralDelta.toUSD() * this.collateralFactor / FIXED_3_SCALE_FACTOR)
     let newUserScaledBorrow = (user.lending.v2.netScaledBorrow || 0) + (borrowDelta.toUSD() * this.borrowFactor / FIXED_3_SCALE_FACTOR)
     // special handling for initial borrow
-    if (borrowDelta.amount > 0 && user.lending.v2.userMarketStates[this.appId]?.borrowedAmount.amount || 0 == 0) {
+    if ((borrowDelta.amount > 0) && ((user.lending.v2.userMarketStates[this.appId]?.borrowedAmount.amount || 0) == 0)) {
       newUserScaledBorrow += 0.001
     }
     // special handling for final repay
-    if (borrowDelta.amount + user.lending.v2.userMarketStates[this.appId]?.borrowedAmount.amount || 0 <= 0) {
+    if ((borrowDelta.amount + user.lending.v2.userMarketStates[this.appId]?.borrowedAmount.amount || 0) <= 0) {
       newUserScaledBorrow -= 0.001
     }
     if (newUserScaledBorrow > 0) {

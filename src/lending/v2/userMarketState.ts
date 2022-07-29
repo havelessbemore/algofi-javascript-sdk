@@ -17,6 +17,10 @@ import AssetAmount from "../../assetData/assetAmount"
 import { MarketType, MARKET_STRINGS } from "./lendingConfig"
 import Market from "./market"
 
+// CONSTANTS
+
+const ROUND_UP: boolean = true
+
 // HELPER CLASSES
 
 export class UserMarketRewardsState {
@@ -90,7 +94,7 @@ export default class UserMarketState {
     this.bAssetCollateral = marketState?.[MARKET_STRINGS.user_active_b_asset_collateral] || 0
     this.borrowShares = marketState?.[MARKET_STRINGS.user_borrow_shares] || 0
     this.suppliedAmount = market.bAssetToUnderlying(this.bAssetCollateral)
-    this.borrowedAmount = market.borrowSharesToUnderlying(this.borrowShares)
+    this.borrowedAmount = market.borrowSharesToUnderlying(this.borrowShares, ROUND_UP)
     
     this.rewardsProgramStates = []
     this.rewardsProgramStates.push(new UserMarketRewardsState(marketState, market, this.bAssetCollateral, this.borrowShares, 0))
