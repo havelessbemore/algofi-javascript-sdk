@@ -1,5 +1,5 @@
 # algofi-javascript-sdk
-Official Javscript SDK for the Algofi Protocol
+Official JavaScript SDK for the Algofi Protocol
 
 ## Documentation
 https://algofiorg.github.io/algofi-javascript-sdk
