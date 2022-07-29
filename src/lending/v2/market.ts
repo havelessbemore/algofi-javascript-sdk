@@ -367,7 +367,7 @@ export default class Market {
     if (user.lending.v2.netScaledBorrow == 0) {
       maximumMarketWithdrawUnderlying = user.lending.v2.userMarketStates?.[this.appId]?.suppliedAmount.amount || 0
     }
-    return this.assetDataClient.getAsset(maximumMarketWithdrawUnderlying * 10, this.underlyingAssetId)
+    return this.assetDataClient.getAsset(maximumMarketWithdrawUnderlying, this.underlyingAssetId)
   }
   
   getMaximumWithdrawBAsset(user: AlgofiUser, borrowUtilLimit: number=0.9): AssetAmount {
