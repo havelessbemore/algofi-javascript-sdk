@@ -36,14 +36,17 @@ export default class AssetDataClient {
   async loadState() {
     // load configured assets
     for (const [assetId, assetConfig] of Object.entries(this.assetConfigs)) {
+      if (assetConfig.assetId in this.assets) { // do not overwrite already loaded data
+        continue
+      }
       this.assets[assetConfig.assetId] = new AssetData(
         assetConfig.assetId,
         assetConfig.name,
         assetConfig.decimals,
-        undefined
+        assetConfig.defaultPrice
       )
     }
-    
+
     // load prices from amm analytics
     request
       .get(ANALYTICS_ENDPOINT + "/assets")

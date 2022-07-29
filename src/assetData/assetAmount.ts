@@ -24,12 +24,11 @@ export default class AssetAmount {
   }
 
   toUSD(): number {
-    if (this.assetData.price != 0) {
-      return this.amount * this.assetData.price / 10**this.assetData.decimals
-    } else {
-      console.log("Error: unable to get dollarized price for asset")
+    if (!this.assetData.price || this.assetData.price == 0) {
+      console.log("Error: unable to get dollarized price for asset:", this.assetData)
       return 0
     }
+    return this.amount * this.assetData.price / 10**this.assetData.decimals
   }
 
   toDisplayAmount(roundResultUp: boolean = false): number {

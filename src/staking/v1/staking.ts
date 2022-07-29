@@ -105,11 +105,17 @@ export default class Staking {
   }
 
   getRewardsAPR(): number {
+    if (this.rewardsAssetId == 0) {
+      return 0
+    }
     const annualRewards = this.assetDataClient.getAsset(this.rewardsPerSecond * SECONDS_PER_YEAR, this.rewardsAssetId)
     return annualRewards.toUSD() / (this.getTotalStaked().toUSD() || 1)
   }
 
   getSecondaryRewardsAPR(): number {
+    if (this.rewardsSecondaryAssetId == 0) {
+      return 0
+    }
     const annualSecondaryRewards = this.assetDataClient.getAsset(Math.floor(this.rewardsPerSecond * SECONDS_PER_YEAR * this.rewardsSecondaryRatio / 1000), this.rewardsSecondaryAssetId)
     return annualSecondaryRewards.toUSD() / (this.getTotalStaked().toUSD() || 1)
   }
