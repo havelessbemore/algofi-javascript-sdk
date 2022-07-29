@@ -19,7 +19,7 @@ export default class StakingClient {
   public algod: Algodv2
   public network: Network
   public stakingConfigs: StakingConfig[]
-  public stakingContracts: { [key: number]: Staking }
+  public stakingContracts: { [key: number]: Staking } = {}
 
   /**
    * Constructor for the staking client.
@@ -38,17 +38,14 @@ export default class StakingClient {
    * store their state in the object.
    */
   async loadState() {
-    const newStakingContracts = await Promise.all(
+    await Promise.all(
       this.stakingConfigs.map(async config => {
-        const newStaking = new Staking(this.algod, this, rewardsManagerAppId[this.network], config)
-        await newStaking.loadState()
-        return { [config.appId]: newStaking }
+        if (!(config.appId in this.stakingContracts)) {
+           this.stakingContracts[config.appId] = new Staking(this.algod, this, rewardsManagerAppId[this.network], config)
+        }
+        await this.stakingContracts[config.appId].loadState()
       })
     )
-    this.stakingContracts = newStakingContracts.reduce((acc, value) => {
-      acc = { ...acc, ...value }
-      return acc
-    }, {})
   }
 
   /**
