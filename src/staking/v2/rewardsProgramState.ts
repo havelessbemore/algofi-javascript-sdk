@@ -3,11 +3,15 @@
 // external
 import { bytesToBigInt } from "algosdk"
 
+// global
+import { SECONDS_PER_YEAR } from "../../globals"
+
 // local
 import { STAKING_STRINGS } from "./stakingConfig"
 import Staking from "./staking"
 
 export default class RewardsProgramState {
+  staking: Staking
   rewardsProgramIndex: number
   rewardsProgramCounter: number
   rewardsAssetId: number
@@ -22,7 +26,8 @@ export default class RewardsProgramState {
    * @param stakingState - formatted staking state
    * @param rewardsProgramIndex - index of rewards program 
    */
-  constructor(stakingState: {}, rewardsProgramIndex: number) {
+  constructor(staking, stakingState: {}, rewardsProgramIndex: number) {
+    this.staking = staking
     this.rewardsProgramIndex = rewardsProgramIndex
     this.rewardsProgramCounter =
       stakingState[STAKING_STRINGS.rewards_program_counter_prefix + this.rewardsProgramIndex.toString()] || 0
@@ -43,9 +48,15 @@ export default class RewardsProgramState {
       this.rewardsCoefficient = bigInt
     }
   }
+
+  getAPR(): number {
+    let rewardsPerYear = this.staking.assetDataClient.getAsset(this.rewardsPerSecond * SECONDS_PER_YEAR, this.rewardsAssetId)
+    return rewardsPerYear.toUSD() / (this.staking.getTotalStaked().toUSD() || 1)
+  }
 }
 
 export class UserRewardsProgramState {
+  staking: Staking
   rewardsProgramIndex: number
   userRewardsProgramCounter: number
   userRewardsCoefficient: bigint
@@ -66,6 +77,7 @@ export class UserRewardsProgramState {
     staking: Staking,
     userScaledTotalStaked: number
   ) {
+    this.staking = staking
     this.rewardsProgramIndex = rewardsProgramIndex
     this.userRewardsProgramCounter =
       formattedUserLocalState[

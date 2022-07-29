@@ -37,7 +37,7 @@ export default class StakingConfig {
 export const StakingConfigs = {
   [Network.MAINNET]: [
     // Staking
-    new StakingConfig("STBL Staking", 482625868, 482608867, 465865291, 451327550),
+    // new StakingConfig("STBL Staking", 482625868, 482608867, 465865291, 451327550),
     new StakingConfig("DEFLY Staking", 641500474, 641499935, 470842789, 451327550),
     new StakingConfig("OPUL Staking", 674527132, 674526408, 287867876, 451327550),
     // Tinyman Farming
