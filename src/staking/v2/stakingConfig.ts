@@ -34,22 +34,13 @@ export default class StakingConfig {
 
 export const StakingConfigs = {
   [Network.MAINNET]: [
-    // new StakingConfig("Algo Lend and Earn", 818206045, 818179690, StakingType.BASSET),
-    new StakingConfig("USDC Lend and Earn", 818207598, 818182311, StakingType.BASSET),
-    // new StakingConfig("goBTC Lend and Earn", 818207650, 818184214, StakingType.BASSET),
-    // new StakingConfig("goETH Lend and Earn", 818207743, 818188553, StakingType.BASSET),
-    new StakingConfig("USDT Lend and Earn", 818207873, 818190568, StakingType.BASSET),
-  ],
-  [Network.MAINNET_CLONE3]: [
-    new StakingConfig("Test Staking 1", 805980186, 802871797, StakingType.V2),
-    new StakingConfig("Test Staking 2", 805982398, 802872834, StakingType.V2),
-    new StakingConfig("Test Staking 3", 807135066, 802887476, StakingType.BASSET)
-  ],
+    new StakingConfig("USDC Lend and Earn", 821882730, 818182311, StakingType.BASSET),
+    new StakingConfig("USDT Lend and Earn", 821882927, 818190568, StakingType.BASSET),
+  ]
 }
 
 export const rewardsManagerAppId = {
-  [Network.MAINNET]: 0,
-  [Network.MAINNET_CLONE3]: 805940592,
+  [Network.MAINNET]: 0
 }
 
 export const STAKING_STRINGS = {
