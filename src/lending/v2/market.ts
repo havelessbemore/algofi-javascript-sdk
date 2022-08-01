@@ -26,6 +26,7 @@ import { decodeBytes, parseAddressBytes } from "../../utils"
 import { getApplicationGlobalState, getLocalStates, getAccountBalances } from "../../stateUtils"
 import { getParams, getPaymentTxn } from "../../transactionUtils"
 import AlgofiUser from "../../algofiUser"
+import { roundUp, roundDown } from "../../utils"
 
 // assetData
 import AssetAmount from "../../assetData/assetAmount"
@@ -358,7 +359,7 @@ export default class Market {
   // QUOTES
   
   getMaximumWithdrawAmount(user: AlgofiUser, borrowUtilLimit: number=0.9): AssetAmount {
-    let userExcessScaledCollateral = user.lending.v2.netScaledCollateral - user.lending.v2.netScaledBorrow / borrowUtilLimit
+    let userExcessScaledCollateral = user.lending.v2.netScaledCollateral - roundUp(user.lending.v2.netScaledBorrow / borrowUtilLimit, 3)
     let maximumWithdrawUSD = userExcessScaledCollateral * FIXED_3_SCALE_FACTOR / this.collateralFactor
     let maximumWithdrawUnderlying = this.assetDataClient.getAssetFromUSDAmount(maximumWithdrawUSD, this.underlyingAssetId)
     let maximumMarketWithdrawUnderlying = Math.min(
@@ -373,7 +374,7 @@ export default class Market {
   }
   
   getMaximumWithdrawBAsset(user: AlgofiUser, borrowUtilLimit: number=0.9): AssetAmount {
-    let userExcessScaledCollateral = user.lending.v2.netScaledCollateral - user.lending.v2.netScaledBorrow / borrowUtilLimit
+    let userExcessScaledCollateral = user.lending.v2.netScaledCollateral - roundUp(user.lending.v2.netScaledBorrow / borrowUtilLimit, 3)
     let maximumWithdrawUSD = userExcessScaledCollateral * FIXED_3_SCALE_FACTOR / this.collateralFactor
     let maximumWithdrawBAsset = this.assetDataClient.getAssetFromUSDAmount(maximumWithdrawUSD, this.bAssetId)
     let maximumMarketWithdrawBAsset = Math.min(
