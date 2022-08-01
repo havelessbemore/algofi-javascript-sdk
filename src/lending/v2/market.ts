@@ -407,10 +407,13 @@ export default class Market {
     if ((borrowDelta.amount + user.lending.v2.userMarketStates[this.appId]?.borrowedAmount.amount || 0) <= 0) {
       newUserScaledBorrow -= 0.001
     }
-    if (newUserScaledBorrow > 0) {
-      return newUserScaledBorrow / newUserScaledCollateral
-    } else {
+    
+    if (newUserScaledBorrow <= 0) {
       return 0
+    } else if (newUserScaledCollateral <= 0) {
+      return Infinity
+    } else {
+      return newUserScaledBorrow / newUserScaledCollateral
     }
   }
 
