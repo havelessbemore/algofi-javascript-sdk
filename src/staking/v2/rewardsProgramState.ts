@@ -110,7 +110,7 @@ export class UserRewardsProgramState {
     const userCoefficient = this.userRewardsCoefficient
 
     this.userUnrealizedRewards = this.userUnclaimedRewards + Number(
-      (globalCoefficient - userCoefficient) * BigInt(userScaledTotalStaked) + BigInt(this.userUnclaimedRewards)
+      ((globalCoefficient - userCoefficient) * BigInt(userScaledTotalStaked) / FIXED_18_SCALE_FACTOR) + BigInt(this.userUnclaimedRewards)
     )
   }
 }
