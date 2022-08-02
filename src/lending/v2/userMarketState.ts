@@ -66,7 +66,7 @@ export class UserMarketRewardsState {
       userTotal = borrowShares
       globalTotal = market.borrowShareCirculation
     }
-    this.realUnclaimed += Number((market.rewardsPrograms[programIndex].index - this.latestIndex) * BigInt(userTotal) / FIXED_18_SCALE_FACTOR)
+    this.realUnclaimed += Number((market.rewardsPrograms[programIndex].projectedIndex - this.latestIndex) * BigInt(userTotal) / FIXED_18_SCALE_FACTOR)
     
     // calculate rewards per year at current reate
     this.rewardsPerYear = market.rewardsPrograms[programIndex].rewardsPerSecond *(365*24*60*60) * userTotal / globalTotal

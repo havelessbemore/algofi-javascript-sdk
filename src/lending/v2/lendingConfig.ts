@@ -76,6 +76,7 @@ export const MARKET_STRINGS = {
   implied_borrow_index: "ibi",
 
   // rewards
+  rewards_latest_time: "rlt",
   rewards_admin_prefix: "ra_",
   rewards_program_state_prefix: "rps_",
   rewards_index_prefix: "ri_",

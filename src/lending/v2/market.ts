@@ -16,6 +16,7 @@ import algosdk, {
 import {
   FIXED_3_SCALE_FACTOR,
   FIXED_6_SCALE_FACTOR,
+  FIXED_18_SCALE_FACTOR,
   ALGO_ASSET_ID,
   SECONDS_PER_YEAR,
   PERMISSIONLESS_SENDER_LOGIC_SIG,
@@ -55,6 +56,7 @@ export class MarketRewardsProgram {
   public issued: number
   public claimed: number
   public index: bigint
+  public projectedIndex: bigint
 
   /**
    * Constructs a market rewards program class
@@ -81,6 +83,14 @@ export class MarketRewardsProgram {
       )
     )
     this.index = bytesToBigInt(rawRewardsIndexBytes)
+
+    if (market.marketType == MarketType.VAULT) {
+     this.projectedIndex = this.index +
+      BigInt((Math.floor((Date.now() / 1000)) - market.rewardsLatestTime) * this.rewardsPerSecond) * FIXED_18_SCALE_FACTOR / BigInt(market.activeBAssetCollateral)
+    } else {
+     this.projectedIndex = this.index +
+      BigInt((Math.floor((Date.now() / 1000)) - market.rewardsLatestTime) * this.rewardsPerSecond) * FIXED_18_SCALE_FACTOR / BigInt(market.borrowShareCirculation)
+    }
   }
 
   getAnnualRewards(): AssetAmount {
@@ -163,6 +173,8 @@ export default class Market {
   public supplyAPR: number
   public borrowAPR: number
 
+  // rewards
+  public rewardsLatestTime: number
   public rewardsPrograms = []
   public rewardsEscrowAccount: string
 
@@ -232,6 +244,7 @@ export default class Market {
 
     // interest
     this.latestTime = state[MARKET_STRINGS.latest_time]
+    this.rewardsLatestTime = state[MARKET_STRINGS.rewards_latest_time]
     this.borrowIndex = state[MARKET_STRINGS.borrow_index]
     this.impliedBorrowIndex = state[MARKET_STRINGS.implied_borrow_index]
 

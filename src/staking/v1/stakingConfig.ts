@@ -60,6 +60,8 @@ export const StakingConfigs = {
 }
 
 export const STAKING_STRINGS = {
+  latest_rewards_time: "lrt",
+
   rewards_program_number: "nrp",
   
   user_storage_address: "usa",

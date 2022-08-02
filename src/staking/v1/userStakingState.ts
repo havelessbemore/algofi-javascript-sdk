@@ -56,9 +56,9 @@ export default class UserStakingState {
     
     let unrealizedRewards = 0
     if (this.rewardsProgramNumber == this.staking.rewardsProgramNumber) {
-      unrealizedRewards = (this.staking.rewardsCoefficient - this.rewardsCoefficient) * this.totalStaked / (10**14)
+      unrealizedRewards = (this.staking.projectedRewardsCoefficient - this.rewardsCoefficient) * this.totalStaked / (10**14)
     } else {
-      unrealizedRewards = (this.staking.rewardsCoefficient) * this.totalStaked / (10**14)
+      unrealizedRewards = (this.staking.projectedRewardsCoefficient) * this.totalStaked / (10**14)
     }
     let unrealizedSecondaryRewards = unrealizedRewards * this.staking.rewardsSecondaryRatio / (10**3)
   
