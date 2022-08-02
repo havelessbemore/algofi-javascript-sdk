@@ -55,27 +55,7 @@ export const StakingConfigs = {
     new StakingConfig("Algofi STBL-goBTC LP Staking", 635863793, 635860537, 635846733, 451327550),
     new StakingConfig("Algofi STBL-goETH LP Staking", 635866213, 635864509, 635854339, 451327550),
     new StakingConfig("Algofi STBL-OPUL LP Staking", 637795072, 637793356, 637802380, 451327550),
-  ],
-  [Network.MAINNET_CLONE3]: [
-    // Staking
-    new StakingConfig("STBL Staking", 482625868, 482608867, 465865291, 451327550),
-    new StakingConfig("DEFLY Staking", 641500474, 641499935, 470842789, 451327550),
-    new StakingConfig("OPUL Staking", 674527132, 674526408, 287867876, 451327550),
-    // Tinyman Farming
-    new StakingConfig("Tinyman v1 STBL-USDC LP Staking", 485247444, 485244022, 467020179, 451327550),
-    new StakingConfig("Tinyman v1.1 STBL-USDC LP Staking", 553869413, 553866305, 552737686, 451327550),
-    // Algofi Farming
-    new StakingConfig("Algofi STBL-ALGO LP Staking", 611804624, 611801333, 607645566, 451327550),
-    new StakingConfig("Algofi STBL-USDC LP Staking", 611869320, 611867642, 609172718, 451327550),
-    new StakingConfig("Algofi STBL-USDC Nano LP Staking", 661193019, 661192413, 658337286, 451327550),
-    new StakingConfig("Algofi USDC-USDT Nano LP Staking", 661247364, 661207804, 659678778, 451327550),
-    new StakingConfig("Algofi STBL-USDT Nano LP Staking", 661204747, 661199805, 659677515, 451327550),
-    new StakingConfig("Algofi STBL-XET LP Staking", 635813909, 635812850, 635256863, 451327550),
-    new StakingConfig("Algofi STBL-ZONE LP Staking", 647785804, 647785158, 647801343, 451327550),
-    new StakingConfig("Algofi STBL-DEFLY LP Staking", 639747739, 639747119, 624956449, 451327550),
-    new StakingConfig("Algofi STBL-goBTC LP Staking", 635863793, 635860537, 635846733, 451327550),
-    new StakingConfig("Algofi STBL-goETH LP Staking", 635866213, 635864509, 635854339, 451327550),
-    new StakingConfig("Algofi STBL-OPUL LP Staking", 637795072, 637793356, 637802380, 451327550),
+    new StakingConfig("Algofi STBL-goMINT LP Staking", 764407972, 764406975, 764421152, 451327550),
   ],
 }
 
