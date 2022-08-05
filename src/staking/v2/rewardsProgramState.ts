@@ -108,11 +108,6 @@ export class UserRewardsProgramState {
     // calc user unrealized rewards (global coefficient on rewards program - user rewards coefficient on rewards program) * userTotalScaledStaked
     const globalCoefficient = staking.rewardsProgramStates[this.rewardsProgramIndex].projectedRewardsCoefficient
     const userCoefficient = this.userRewardsCoefficient
-    console.log("BigInt(this.userUnclaimedRewards)", BigInt(this.userUnclaimedRewards));
-    console.log("globalCoefficient", globalCoefficient);
-    console.log("userCoefficient", userCoefficient);
-    console.log("userScaledTotalStaked", userScaledTotalStaked);
-    console.log("(globalCoefficient - userCoefficient) * BigInt(userScaledTotalStaked) / FIXED_18_SCALE_FACTOR) ", (globalCoefficient - userCoefficient) * BigInt(userScaledTotalStaked) / FIXED_18_SCALE_FACTOR);
     this.userUnrealizedRewards = this.userUnclaimedRewards + Number(
       ((globalCoefficient - userCoefficient) * BigInt(userScaledTotalStaked) / FIXED_18_SCALE_FACTOR) + BigInt(this.userUnclaimedRewards)
     )
