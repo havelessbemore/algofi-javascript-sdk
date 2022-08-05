@@ -1,4 +1,7 @@
 # algofi-javascript-sdk
+
+[![CircleCI](https://dl.circleci.com/status-badge/img/gh/Algofiorg/algofi-javascript-sdk/tree/main.svg?style=svg)](https://dl.circleci.com/status-badge/redirect/gh/Algofiorg/algofi-javascript-sdk/tree/main)
+
 Official JavaScript SDK for the Algofi Protocol
 
 ## Documentation
