@@ -44,7 +44,7 @@ export default class Staking {
   public latestTime: number
 
   public rewardsEscrowAccount: string
-  public boostMultiplierAppId: number
+  public votingEscrowAppId: number
   public totalStaked: number
   public scaledTotalStaked: number
   public rewardsManagerAppId: number
@@ -80,7 +80,7 @@ export default class Staking {
 
     this.latestTime = globalState[STAKING_STRINGS.latest_time]
     this.rewardsEscrowAccount = parseAddressBytes(globalState[STAKING_STRINGS.rewards_escrow_account])
-    this.boostMultiplierAppId = globalState[STAKING_STRINGS.boost_multiplier_app_id]
+    this.votingEscrowAppId = globalState[STAKING_STRINGS.voting_escrow_app_id]
     this.totalStaked = globalState[STAKING_STRINGS.total_staked]
     this.scaledTotalStaked = globalState[STAKING_STRINGS.scaled_total_staked]
     this.rewardsManagerAppId = globalState[STAKING_STRINGS.rewards_manager_app_id]
@@ -196,7 +196,7 @@ export default class Staking {
       appIndex: this.appId,
       appArgs: [enc.encode(STAKING_STRINGS.stake)],
       suggestedParams: params,
-      foreignApps: [this.boostMultiplierAppId || 1],
+      foreignApps: [this.votingEscrowAppId || 1],
       accounts: undefined,
       foreignAssets: undefined,
       rekeyTo: undefined
@@ -238,7 +238,7 @@ export default class Staking {
       appArgs: [enc.encode(STAKING_STRINGS.unstake), encodeUint64(amount)],
       foreignAssets: [this.assetId],
       suggestedParams: params,
-      foreignApps: [this.boostMultiplierAppId || 1],
+      foreignApps: [this.votingEscrowAppId || 1],
       accounts: undefined,
       rekeyTo: undefined
     })
@@ -286,7 +286,7 @@ export default class Staking {
           foreignAssets: [this.rewardsProgramStates[i].rewardsAssetId],
           accounts: [this.rewardsEscrowAccount],
           rekeyTo: undefined,
-          foreignApps: [this.boostMultiplierAppId || 1],
+          foreignApps: [this.votingEscrowAppId || 1],
           suggestedParams: params
         })
         txns.push(txn0, txn1)
