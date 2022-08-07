@@ -264,45 +264,6 @@ export default class Market {
   // GETTERS
 
   /**
-   * Gets the underlying supplied for a market.
-   * 
-   * @returns the underlying supplied for a market.
-   */
-  getUnderlyingSupplied(): number {
-    if (this.marketType == MarketType.STBL) {
-      return this.underlyingCash
-    } else {
-      return this.underlyingBorrowed + this.underlyingCash - this.underlyingReserves
-    }
-  }
-
-  // GETTERS (post asset data load)
-
-  getTotalSupplied(): AssetAmount {
-    return this.assetDataClient.getAsset(this.getUnderlyingSupplied(), this.underlyingAssetId)
-  }
-
-  getTotalBorrowed(): AssetAmount {
-    return this.assetDataClient.getAsset(this.underlyingBorrowed, this.underlyingAssetId)
-  }
-
-  getSupplyRewardsAPR(): number {
-    let supplyRewardsAPR = 0
-    for (const rewardsProgram of this.rewardsPrograms) {
-      supplyRewardsAPR += rewardsProgram.getSupplyRewardsAPR()
-    }
-    return supplyRewardsAPR
-  }
-
-  getBorrowRewardsAPR(): number {
-    let borrowRewardsAPR = 0
-    for (const rewardsProgram of this.rewardsPrograms) {
-      borrowRewardsAPR += rewardsProgram.getBorrowRewardsAPR()
-    }
-    return borrowRewardsAPR
-  }
-
-  /**
    * Gets supply and borrow aprs for a market.
    * 
    * @param totalSupplied - the total supplied for the market
@@ -322,6 +283,59 @@ export default class Market {
     let supplyAPR = borrowAPR * borrowUtilization * (1 - this.reserveFactor / FIXED_3_SCALE_FACTOR)
     return [supplyAPR, borrowAPR]
   }
+
+    /**
+   * Gets the underlying supplied for a market.
+   * 
+   * @param isProjected - bool if the underlying supply is projected based on deltaT
+   * @returns the underlying supplied for a market.
+   */
+    getUnderlyingSupplied(isProjected: boolean = false): number {
+      if (this.marketType == MarketType.STBL) {
+        return this.underlyingCash
+      } else {
+        if (isProjected) {
+          let [_, borrowAPR] = this.getAPRs(this.getUnderlyingSupplied(), this.underlyingBorrowed);
+          const currentTime = Math.floor(Date.now() / 1000);
+          const deltaT = currentTime - this.latestTime;
+          const interestTick = Math.floor((deltaT * borrowAPR * 1e6 * 1e6) / SECONDS_PER_YEAR);
+          const nextBorrowIndexTerm = Math.floor((this.borrowIndex * interestTick) / 1e12);
+          const newBorrowIndex = this.borrowIndex + nextBorrowIndexTerm;
+          const underlyingBorrowWithInterest = Math.floor((this.underlyingBorrowed * newBorrowIndex) / this.impliedBorrowIndex);
+          const underlyingInterestToReserve = Math.floor(((underlyingBorrowWithInterest - this.underlyingBorrowed) * this.reserveFactor) / 1e3);
+          const newUnderlyingSupplied = this.underlyingCash + underlyingBorrowWithInterest - (this.underlyingReserves + underlyingInterestToReserve);
+          return newUnderlyingSupplied;
+        } else {
+          return this.underlyingBorrowed + this.underlyingCash - this.underlyingReserves
+        }
+      }
+    }
+  
+    // GETTERS (post asset data load)
+  
+    getTotalSupplied(): AssetAmount {
+      return this.assetDataClient.getAsset(this.getUnderlyingSupplied(), this.underlyingAssetId)
+    }
+  
+    getTotalBorrowed(): AssetAmount {
+      return this.assetDataClient.getAsset(this.underlyingBorrowed, this.underlyingAssetId)
+    }
+  
+    getSupplyRewardsAPR(): number {
+      let supplyRewardsAPR = 0
+      for (const rewardsProgram of this.rewardsPrograms) {
+        supplyRewardsAPR += rewardsProgram.getSupplyRewardsAPR()
+      }
+      return supplyRewardsAPR
+    }
+  
+    getBorrowRewardsAPR(): number {
+      let borrowRewardsAPR = 0
+      for (const rewardsProgram of this.rewardsPrograms) {
+        borrowRewardsAPR += rewardsProgram.getBorrowRewardsAPR()
+      }
+      return borrowRewardsAPR
+    }
 
   // CONVERSIONS
   
@@ -359,14 +373,23 @@ export default class Market {
    * Converts the underlying asset to b assets.
    * 
    * @param amount - the amount of underlying we want to convert
+   * @param isProjected - bool if user wishes to project the b asset to underlying exchange
    * @returns the corresponding amount of the b asset for the underlying that we
    * passed in.
    */
-  underlyingToBAsset(underlyingAmount: AssetAmount): AssetAmount {
-    return this.assetDataClient.getAsset(
-      Math.floor((underlyingAmount.amount * this.bAssetCirculation) / this.getUnderlyingSupplied()),
-      this.bAssetId
-    )
+  underlyingToBAsset(underlyingAmount: AssetAmount, isProjected: boolean = false): AssetAmount {    
+    if (isProjected) {
+      const newUnderlyingSupplied = this.getUnderlyingSupplied(isProjected=true);
+      return this.assetDataClient.getAsset(
+        Math.floor((underlyingAmount.amount * this.bAssetCirculation) / newUnderlyingSupplied),
+        this.bAssetId
+      )
+    } else {
+      return this.assetDataClient.getAsset(
+        Math.floor((underlyingAmount.amount * this.bAssetCirculation) / this.getUnderlyingSupplied()),
+        this.bAssetId
+      )
+    }
   }
 
   // QUOTES
