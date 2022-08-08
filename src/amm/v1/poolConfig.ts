@@ -27,6 +27,6 @@ export const PoolConfigs = {
     new PoolConfig(1, 2, 3, PoolType.MOVING_RATIO_NANO),
   ],
   [Network.TESTNET]: [
-    new PoolConfig(1, 2, 3, PoolType.MOVING_RATIO_NANO),
+    new PoolConfig(104240801, 104207173, 104217422, PoolType.MOVING_RATIO_NANO),
   ],
 }

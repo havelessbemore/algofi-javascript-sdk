@@ -310,6 +310,10 @@ export default class Market {
    * @returns a list containing both the supply and borrow apr.
    */
   getAPRs(totalSupplied: number, totalBorrowed: number): [number, number] {
+    if (this.marketType == MarketType.STBL) {
+      return [this.baseInterestRate / FIXED_6_SCALE_FACTOR, this.baseInterestRate / FIXED_6_SCALE_FACTOR]
+    }
+    
     let borrowUtilization = totalBorrowed / totalSupplied || 0
     let borrowAPR = this.baseInterestRate / FIXED_6_SCALE_FACTOR
     borrowAPR += (borrowUtilization * this.baseInterestSlope) / FIXED_6_SCALE_FACTOR

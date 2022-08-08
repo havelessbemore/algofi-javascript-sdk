@@ -41,7 +41,7 @@ export default class LendingClient {
     // DO NOT LOAD STATE FOR ALL POOLS AT STARTUP, THERE ARE TOO MANY
     for (const poolConfig of this.poolConfigs) {
       this.pools[poolConfig.appId] = new Pool(this.algod, this, poolConfig)
-      if (poolConfig.poolType == PoolType.LENDING_NANO) {
+      if (poolConfig.poolType == PoolType.MOVING_RATIO_NANO) {
         this.pools[poolConfig.appId].loadState()
       }
     }

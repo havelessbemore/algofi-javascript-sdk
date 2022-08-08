@@ -38,12 +38,12 @@ export const StakingConfigs = {
     new StakingConfig("USDT Lend and Earn", 821882927, 818190568, StakingType.BASSET),
   ],
   [Network.TESTNET]: [
-    new StakingConfig("USDC Lend and Earn", 821882730, 818182311, StakingType.BASSET),
   ]
 }
 
 export const rewardsManagerAppId = {
-  [Network.MAINNET]: 0
+  [Network.MAINNET]: 0,
+  [Network.TESTNET]: 0
 }
 
 export const STAKING_STRINGS = {
