@@ -58,4 +58,7 @@ export const AssetConfigs = {
     635854339 : new AssetConfig("AF-STBL-goETH-0.25%-LP", 635854339, 6, undefined),
     637802380 : new AssetConfig("AF-STBL-OPUL-0.75%-LP", 637802380, 6, undefined),
   },
+  [Network.TESTNET]: {
+    1: new AssetConfig("ALGO", 1, 6, undefined),
+  }
 }

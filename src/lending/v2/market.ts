@@ -84,7 +84,7 @@ export class MarketRewardsProgram {
     )
     this.index = bytesToBigInt(rawRewardsIndexBytes)
 
-    if (market.marketType == MarketType.VAULT) {
+    if (market.marketType == MarketType.VAULT || market.marketType == MarketType.LP) {
      this.projectedIndex = this.index +
       BigInt((Math.floor((Date.now() / 1000)) - market.rewardsLatestTime) * this.rewardsPerSecond) * FIXED_18_SCALE_FACTOR / BigInt(market.activeBAssetCollateral)
     } else {
@@ -98,14 +98,14 @@ export class MarketRewardsProgram {
   }
 
   getSupplyRewardsAPR(): number {
-    if (this.assetID == 0 || this.market.marketType != MarketType.VAULT) {
+    if (this.assetID == 0 || (this.market.marketType != MarketType.VAULT && this.market.marketType != MarketType.LP)) {
       return 0
     }
     return this.getAnnualRewards().toUSD() / this.market.getTotalSupplied().toUSD()
   }
 
   getBorrowRewardsAPR(): number {
-    if (this.assetID == 0 || this.market.marketType == MarketType.VAULT) {
+    if (this.assetID == 0 || (this.market.marketType == MarketType.VAULT || this.market.marketType == MarketType.LP)) {
       return 0
     }
     return this.getAnnualRewards().toUSD() / this.market.getTotalBorrowed().toUSD()
@@ -721,6 +721,8 @@ export default class Market {
   async getBorrowTxns(user: AlgofiUser, underlyingAmount: AssetAmount): Promise<Transaction[]> {
     if (this.marketType == MarketType.VAULT) {
       throw "Borrow action not supported by vault market"
+    } else if (this.marketType == MarketType.LP) {
+      throw "Borrow action not supported by lp market"
     }
 
     const params = await getParams(this.algod)
@@ -760,6 +762,8 @@ export default class Market {
   ): Promise<Transaction[]> {
     if (this.marketType == MarketType.VAULT) {
       throw "Repay borrow action not supported by vault market"
+    } else if (this.marketType == MarketType.LP) {
+      throw "Repay borrow action not supported by lp market"
     }
 
     let repayAmount = underlyingAmount.amount

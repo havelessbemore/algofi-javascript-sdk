@@ -59,7 +59,7 @@ export class UserMarketRewardsState {
     
     let userTotal = 0
     let globalTotal = 0
-    if (market.marketType == MarketType.VAULT) {
+    if (market.marketType == MarketType.VAULT || market.marketType == MarketType.LP) {
       userTotal = bAssetCollateral
       globalTotal = market.bAssetCirculation
     } else {

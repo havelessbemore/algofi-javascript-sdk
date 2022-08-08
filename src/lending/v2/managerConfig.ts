@@ -20,5 +20,5 @@ export default class ManagerConfig {
 
 export const ManagerConfigs = {
   [Network.MAINNET]: new ManagerConfig(818176933),
-  [Network.MAINNET_CLONE3]: new ManagerConfig(812891680),
+  [Network.TESTNET]: new ManagerConfig(0),
 }

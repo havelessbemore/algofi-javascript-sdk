@@ -36,6 +36,9 @@ export const StakingConfigs = {
   [Network.MAINNET]: [
     new StakingConfig("USDC Lend and Earn", 821882730, 818182311, StakingType.BASSET),
     new StakingConfig("USDT Lend and Earn", 821882927, 818190568, StakingType.BASSET),
+  ],
+  [Network.TESTNET]: [
+    new StakingConfig("USDC Lend and Earn", 821882730, 818182311, StakingType.BASSET),
   ]
 }
 

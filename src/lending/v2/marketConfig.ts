@@ -38,13 +38,7 @@ export const MarketConfigs = {
     new MarketConfig(818188286, 386195940, 818188553, MarketType.STANDARD), // goETH
     new MarketConfig(818190205, 312769, 818190568, MarketType.STANDARD), // USDT
   ],
-  [Network.MAINNET_CLONE3]: [
-    new MarketConfig(812905712, 1, 812910520, MarketType.STANDARD), // ALGO
-    new MarketConfig(812916046, 812915205, 812916935, MarketType.STANDARD), // USDC
-    new MarketConfig(812930890, 812930638, 812931295, MarketType.STANDARD), // USDT
-    new MarketConfig(812935796, 812932283, 812936076, MarketType.STBL), // STBL2
-    new MarketConfig(812919965, 812919854, 812920370, MarketType.STANDARD), // GOBTC
-    new MarketConfig(812923132, 812922836, 812924856, MarketType.STANDARD), // GOETH
-    new MarketConfig(812928007, 1, 812928844, MarketType.VAULT) // vALGO
+  [Network.TESTNET]: [
+    new MarketConfig(1, 1, 1, MarketType.STANDARD)
   ],
 }

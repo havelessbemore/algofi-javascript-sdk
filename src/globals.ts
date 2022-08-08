@@ -57,5 +57,5 @@ export const ANALYTICS_ENDPOINT = "https://api.algofi.org"
 
 export enum Network {
   MAINNET = 0,
-  MAINNET_CLONE3 = 4,
+  TESTNET = 1,
 }

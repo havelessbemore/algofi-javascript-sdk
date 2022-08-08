@@ -19,6 +19,14 @@ import BaseStakingClient from "./staking/baseStakingClient"
 // governance
 import BaseGovernanceClient from "./governance/baseGovernanceClient"
 
+// amm
+import BaseAMMClient from "./amm/baseAMMClient"
+
+// interfaces
+// - lending pool interface
+import LendingPoolInterfaceConfig, { LendingPoolInterfaceConfigs } from "./interfaces/lendingPoolInterfaceConfig"
+import LendingPoolInterface from "./interfaces/lendingPoolInterface"
+
 // INTERFACE
 
 export default class AlgofiClient {
@@ -34,6 +42,9 @@ export default class AlgofiClient {
 
   // governance
   public governance: BaseGovernanceClient
+
+  // amm
+  public amm: BaseAMMClient
 
   // asset data
   public assetData: AssetDataClient
@@ -58,7 +69,10 @@ export default class AlgofiClient {
 
     // governance
     this.governance = new BaseGovernanceClient(this)
-    
+
+    // amm
+    this.amm = new BaseAMMClient(this)
+
     // assetData
     this.assetData = new AssetDataClient(this)
   }
@@ -79,8 +93,11 @@ export default class AlgofiClient {
     // governance
     let loadGovernancePromise = this.governance.loadState()
 
+    // amm
+    let loadAMMPromise = this.amm.loadState()
+
     // wait for all to complete
-    await Promise.all([loadLendingPromise, loadStakingPromise, loadGovernancePromise, assetDataPromise])
+    await Promise.all([loadLendingPromise, loadStakingPromise, loadGovernancePromise, loadAMMPromise, assetDataPromise])
 
     // load asset data lending state (lending load must complete first)
     await this.assetData.loadLendingAssetState()

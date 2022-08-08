@@ -3,7 +3,8 @@
 export enum MarketType {
   STANDARD = 0,
   STBL = 1,
-  VAULT = 2
+  VAULT = 2,
+  LP = 3
 }
 
 // STRING CONSTANTS
