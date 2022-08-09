@@ -85,11 +85,11 @@ export class MarketRewardsProgram {
     this.index = bytesToBigInt(rawRewardsIndexBytes)
 
     if (market.marketType == MarketType.VAULT || market.marketType == MarketType.LP) {
-     this.projectedIndex = this.index +
-      BigInt((Math.floor((Date.now() / 1000)) - market.rewardsLatestTime) * this.rewardsPerSecond) * FIXED_18_SCALE_FACTOR / BigInt(market.activeBAssetCollateral)
+     this.projectedIndex = this.index + ((market.activeBAssetCollateral > 0) ?
+      BigInt((Math.floor((Date.now() / 1000)) - market.rewardsLatestTime) * this.rewardsPerSecond) * FIXED_18_SCALE_FACTOR / BigInt(market.activeBAssetCollateral) : BigInt(0))
     } else {
-     this.projectedIndex = this.index +
-      BigInt((Math.floor((Date.now() / 1000)) - market.rewardsLatestTime) * this.rewardsPerSecond) * FIXED_18_SCALE_FACTOR / BigInt(market.borrowShareCirculation)
+     this.projectedIndex = this.index + ((market.borrowShareCirculation > 0) ?
+      BigInt((Math.floor((Date.now() / 1000)) - market.rewardsLatestTime) * this.rewardsPerSecond) * FIXED_18_SCALE_FACTOR / BigInt(market.borrowShareCirculation) : BigInt(0))
     }
   }
 
