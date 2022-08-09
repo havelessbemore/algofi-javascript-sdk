@@ -35,7 +35,7 @@ export const LendingPoolInterfaceConfigs = {
     new LendingPoolInterfaceConfig(1, 2, 3, 4, 5, 6), // bUSDC / bSTBL2
   ],
   [Network.TESTNET]: [
-    new LendingPoolInterfaceConfig(104240801, 104207076, 104213311, 104238373, 104228342, 104240608), // bUSDC / bSTBL2
+    new LendingPoolInterfaceConfig(104413645, 104207076, 104213311, 104238373, 104228342, 104240608), // bUSDC / bSTBL2
   ],
 }
 

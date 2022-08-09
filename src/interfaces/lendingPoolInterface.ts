@@ -23,7 +23,7 @@ import {
   TEXT_ENCODER
 } from "../globals"
 import { Base64Encoder } from "../encoder"
-import { decodeBytes, parseAddressBytes } from "../utils"
+import { decodeBytes, parseAddressBytes, composeTransactions } from "../utils"
 import { getApplicationGlobalState, getLocalStates, getAccountBalances } from "../stateUtils"
 import { getParams, getPaymentTxn } from "../transactionUtils"
 import AlgofiClient from "../algofiClient"
@@ -91,6 +91,16 @@ export default class LendingPoolInterface {
   }
 
   // QUOTES
+
+  getEmptyPoolQuote(asset1Amount: number, asset2Amount: number): PoolQuote {
+    let bAsset1PooledAmount = this.market1.underlyingToBAsset(this.algofiClient.assetData.getAsset(asset1Amount, this.market1.underlyingAssetId)).amount
+    let bAsset2PooledAmount = this.market2.underlyingToBAsset(this.algofiClient.assetData.getAsset(asset2Amount, this.market2.underlyingAssetId)).amount
+    let poolQuote = this.pool.getEmptyPoolQuote(bAsset1PooledAmount, bAsset2PooledAmount)
+    let lpsIssued = poolQuote.lpDelta
+    let numIter =poolQuote.iterations
+
+    return new PoolQuote(PoolQuoteType.POOL, -1 * asset1Amount, -1 * asset2Amount, lpsIssued, numIter)
+  }
 
   getPoolQuote(assetId: number, amount: number): PoolQuote {
     let asset1PooledAmount = 0
@@ -176,14 +186,14 @@ export default class LendingPoolInterface {
       bAsset1SwapAmount = this.market1.underlyingToBAsset(swapOutAssetAmount).amount
       let poolQuote = this.pool.getSwapForExactQuote(this.market1.bAssetId, bAsset1SwapAmount)
       bAsset2SwapAmount = poolQuote.asset2Delta
-      asset2SwapAmount = -1 * this.market2.bAssetToUnderlying(bAsset2SwapAmount).amount
+      asset2SwapAmount = Math.floor(this.market2.bAssetToUnderlying(bAsset2SwapAmount).amount * 1.001)
       numIter = poolQuote.iterations
     } else {
       asset2SwapAmount = swapOutAmount
       bAsset2SwapAmount = this.market2.underlyingToBAsset(swapOutAssetAmount).amount
       let poolQuote = this.pool.getSwapForExactQuote(this.market2.bAssetId, bAsset2SwapAmount)
       bAsset1SwapAmount = poolQuote.asset1Delta
-      asset1SwapAmount = -1 * this.market1.bAssetToUnderlying(bAsset1SwapAmount).amount
+      asset1SwapAmount = Math.floor(this.market1.bAssetToUnderlying(bAsset1SwapAmount).amount * 1.001)
       numIter = poolQuote.iterations
     }
     
@@ -204,7 +214,7 @@ export default class LendingPoolInterface {
     let additionalPermissionlessFees = 26000 + quote.iterations * 1000 + (addToUserCollateral ? 3000 : 1000)
     
     // OPT IN TO LP (optional)
-    if (!addToUserCollateral && user.isOptedInToAsset(this.lpMarket.underlyingAssetId)) {
+    if (!user.isOptedInToAsset(this.lpMarket.underlyingAssetId)) {
       transactions.push(getPaymentTxn(params, user.address, user.address, this.lpMarket.underlyingAssetId, 0))
     }
     
@@ -214,7 +224,7 @@ export default class LendingPoolInterface {
     // SEND ASSET 2
     transactions.push(getPaymentTxn(params, user.address, this.address, this.market2.underlyingAssetId, -1 * quote.asset2Delta))
     
-    // POOL STEP 1
+    // POOL STEP 9
     params.fee = 1000 + additionalPermissionlessFees
     transactions.push(
       algosdk.makeApplicationNoOpTxnFromObject({
@@ -342,21 +352,32 @@ export default class LendingPoolInterface {
 
   async getBurnTxns(
     user: AlgofiUser,
-    quote: PoolQuote
+    quote: PoolQuote,
+    removeFromMarket: boolean = true,
+    removeMax: boolean = false
   ): Promise<Transaction[]> {
     const params  = await getParams(this.algod)
     const transactions = []
     
-    let additionalPermissionlessFees = 15000 + quote.iterations * 1000 
+    let additionalPermissionlessFees = 18000 + quote.iterations * 1000 
 
     // OPT IN TO ASSET1 (optional)
-    if (user.isOptedInToAsset(this.market1.underlyingAssetId)) {
+    if (!user.isOptedInToAsset(this.market1.underlyingAssetId)) {
       transactions.push(getPaymentTxn(params, user.address, user.address, this.market1.underlyingAssetId, 0))
     }
     
     // OPT IN TO ASSET2 (optional)
-    if (user.isOptedInToAsset(this.market2.underlyingAssetId)) {
+    if (!user.isOptedInToAsset(this.market2.underlyingAssetId)) {
       transactions.push(getPaymentTxn(params, user.address, user.address, this.market2.underlyingAssetId, 0))
+    }
+    
+    if (removeFromMarket) {
+      let removeFromMarketTransactions = await this.lpMarket.getRemoveUnderlyingCollateralTxns(
+        user, this.algofiClient.assetData.getAsset(-1 * quote.lpDelta, this.lpMarket.underlyingAssetId), removeMax)
+      for (const txn of removeFromMarketTransactions) {
+        txn.group = undefined
+        transactions.push(txn)
+      }
     }
     
     // SEND LP ASSET
@@ -442,22 +463,23 @@ export default class LendingPoolInterface {
     const params  = await getParams(this.algod)
     const transactions = []
     
-    let additionalPermissionlessFees = 15000 + quote.iterations * 1000 
+    let additionalPermissionlessFees = (quote.quoteType == PoolQuoteType.SWAP_EXACT_FOR ? 17000 : 24000) + quote.iterations * 1000 
 
     // OPT IN TO ASSET1 (optional)
-    if (user.isOptedInToAsset(this.market1.underlyingAssetId)) {
+    if (!user.isOptedInToAsset(this.market1.underlyingAssetId)) {
       transactions.push(getPaymentTxn(params, user.address, user.address, this.market1.underlyingAssetId, 0))
     }
     
     // OPT IN TO ASSET2 (optional)
-    if (user.isOptedInToAsset(this.market2.underlyingAssetId)) {
+    if (!user.isOptedInToAsset(this.market2.underlyingAssetId)) {
       transactions.push(getPaymentTxn(params, user.address, user.address, this.market2.underlyingAssetId, 0))
     }
     
-    let inputIsAsset1 = (quote.asset2Delta < 0)
+    let inputIsAsset1 = (quote.asset1Delta < 0)
     let convertedSwapArg = inputIsAsset1 ? 
       this.market2.underlyingToBAsset(this.algofiClient.assetData.getAsset(swapArg, this.market2.underlyingAssetId)).amount :
       this.market1.underlyingToBAsset(this.algofiClient.assetData.getAsset(swapArg, this.market1.underlyingAssetId)).amount
+    console.log("MIN OUT = ", convertedSwapArg)
     
     // SEND ASSET
     if (inputIsAsset1) {

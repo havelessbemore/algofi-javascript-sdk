@@ -23,9 +23,7 @@ import BaseGovernanceClient from "./governance/baseGovernanceClient"
 import BaseAMMClient from "./amm/baseAMMClient"
 
 // interfaces
-// - lending pool interface
-import LendingPoolInterfaceConfig, { LendingPoolInterfaceConfigs } from "./interfaces/lendingPoolInterfaceConfig"
-import LendingPoolInterface from "./interfaces/lendingPoolInterface"
+import InterfaceClient from "./interfaces/interfaceClient"
 
 // INTERFACE
 
@@ -48,6 +46,9 @@ export default class AlgofiClient {
 
   // asset data
   public assetData: AssetDataClient
+
+  // interfaces
+  public interfaces: InterfaceClient
 
   /**
    * Constructor for the algofi client class
@@ -75,6 +76,9 @@ export default class AlgofiClient {
 
     // assetData
     this.assetData = new AssetDataClient(this)
+    
+    // interfaces
+    this.interfaces = new InterfaceClient(this)
   }
 
   /**
@@ -101,6 +105,9 @@ export default class AlgofiClient {
 
     // load asset data lending state (lending load must complete first)
     await this.assetData.loadLendingAssetState()
+
+    // load interfaces (interfaces should have no local state and should purely load off of other algofi client data)
+    await this.interfaces.loadState()
   }
 
   /**

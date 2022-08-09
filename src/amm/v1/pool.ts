@@ -170,7 +170,7 @@ export default class Pool {
   
   scaleAsset1(input: number): number {
     if (this.poolType == PoolType.MOVING_RATIO_NANO) {
-      return input * this.getTargetRatio() / FIXED_12_SCALE_FACTOR
+      return Math.floor(input * this.getTargetRatio() / FIXED_12_SCALE_FACTOR)
     } else {
       return input
     }
@@ -178,7 +178,7 @@ export default class Pool {
   
   unscaleAsset1(input: number): number {
     if (this.poolType == PoolType.MOVING_RATIO_NANO) {
-      return input * FIXED_12_SCALE_FACTOR / this.getTargetRatio()
+      return Math.floor(input * FIXED_12_SCALE_FACTOR / this.getTargetRatio())
     } else {
       return input
     }
@@ -196,7 +196,6 @@ export default class Pool {
     } else {
       [lpsIssued, numIter]  = [Math.sqrt(asset1PooledAmount * asset2PooledAmount), 0]
     }
-    return 
     
     return new PoolQuote(PoolQuoteType.EMPTY_POOL, -1 * asset1PooledAmount, -1 * asset2PooledAmount, Number(lpsIssued), numIter)
   }
