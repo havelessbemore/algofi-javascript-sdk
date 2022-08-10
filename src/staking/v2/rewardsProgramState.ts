@@ -53,8 +53,12 @@ export default class RewardsProgramState {
       this.rewardsCoefficient = bigInt
     }
 
-    this.projectedRewardsCoefficient = this.rewardsCoefficient +
-      BigInt((Math.floor(Date.now() / 1000) - staking.latestTime) * this.rewardsPerSecond) * FIXED_18_SCALE_FACTOR / BigInt(staking.scaledTotalStaked)
+    if (staking.scaledTotalStaked > 0) {
+      this.projectedRewardsCoefficient = this.rewardsCoefficient +
+        BigInt((Math.floor(Date.now() / 1000) - staking.latestTime) * this.rewardsPerSecond) * FIXED_18_SCALE_FACTOR / BigInt(staking.scaledTotalStaked)
+    } else {
+      this.projectedRewardsCoefficient = this.rewardsCoefficient
+    }
   }
 
   getAPR(): number {

@@ -3,20 +3,20 @@
 // global
 import AlgofiClient from "../algofiClient"
 
-// v2 (aliased)
-import V2LendingClient from "./v2/lendingClient"
+// v1 (aliased)
+import V1AMMClient from "./v1/ammClient"
 
 // INTERFACE
 
 export default class BaseLendingClient {
-  public v2: V2LendingClient
+  public v1: V1AMMClient
 
   constructor(algofiClient: AlgofiClient) {
-    this.v2 = new V2LendingClient(algofiClient)
+    this.v1 = new V1AMMClient(algofiClient)
   }
 
   async loadState() {
-    await this.v2.loadState()
+    await this.v1.loadState()
   }
 
 }

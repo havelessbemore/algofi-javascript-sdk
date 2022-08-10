@@ -57,6 +57,7 @@ export const StakingConfigs = {
     new StakingConfig("Algofi STBL-OPUL LP Staking", 637795072, 637793356, 637802380, 451327550),
     new StakingConfig("Algofi STBL-goMINT LP Staking", 764407972, 764406975, 764421152, 451327550),
   ],
+  [Network.TESTNET]: []
 }
 
 export const STAKING_STRINGS = {

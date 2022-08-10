@@ -58,4 +58,20 @@ export const AssetConfigs = {
     635854339 : new AssetConfig("AF-STBL-goETH-0.25%-LP", 635854339, 6, undefined),
     637802380 : new AssetConfig("AF-STBL-OPUL-0.75%-LP", 637802380, 6, undefined),
   },
+  [Network.TESTNET]: {
+    1: new AssetConfig("ALGO", 1, 6, undefined),
+    104193939: new AssetConfig("AF-BANK-ALGO-STANDARD", 104193939, 6, undefined),
+    104194013: new AssetConfig("USDC", 104194013, 6, undefined),
+    104207173: new AssetConfig("AF-BANK-USDC-STANDARD", 104207173, 6, undefined),
+    104207287: new AssetConfig("goBTC", 104207287, 8, undefined),
+    104207503: new AssetConfig("AF-BANK-GOBTC-STANDARD", 104207503, 6, undefined),
+    104207533: new AssetConfig("goETH", 104207533, 8, undefined),
+    104207983: new AssetConfig("AF-BANK-GOETH-STANDARD", 104207983, 6, undefined),
+    104208050: new AssetConfig("USDT", 104208050, 6, undefined),
+    104222974: new AssetConfig("AF-BANK-USDT-STANDARD", 104222974, 6, undefined),
+    104210500: new AssetConfig("STBL2", 104210500, 6, undefined),
+    104217422: new AssetConfig("AF-BANK-STBL2-STABLE", 104217422, 6, undefined),
+    104228491: new AssetConfig("AF-bUSDC-bSTBL2-NANO-LP", 104228491, 6, undefined),
+    104238470: new AssetConfig("AF-BANK-AF-bUSDC-bSTBL2-NANO-LP-LP", 104238470, 6, undefined),
+  }
 }

@@ -38,13 +38,13 @@ export const MarketConfigs = {
     new MarketConfig(818188286, 386195940, 818188553, MarketType.STANDARD), // goETH
     new MarketConfig(818190205, 312769, 818190568, MarketType.STANDARD), // USDT
   ],
-  [Network.MAINNET_CLONE3]: [
-    new MarketConfig(812905712, 1, 812910520, MarketType.STANDARD), // ALGO
-    new MarketConfig(812916046, 812915205, 812916935, MarketType.STANDARD), // USDC
-    new MarketConfig(812930890, 812930638, 812931295, MarketType.STANDARD), // USDT
-    new MarketConfig(812935796, 812932283, 812936076, MarketType.STBL), // STBL2
-    new MarketConfig(812919965, 812919854, 812920370, MarketType.STANDARD), // GOBTC
-    new MarketConfig(812923132, 812922836, 812924856, MarketType.STANDARD), // GOETH
-    new MarketConfig(812928007, 1, 812928844, MarketType.VAULT) // vALGO
+  [Network.TESTNET]: [
+    new MarketConfig(104193717, 1, 104193939, MarketType.STANDARD), // ALGO
+    new MarketConfig(104207076, 104194013, 104207173, MarketType.STANDARD), // USDC
+    new MarketConfig(104209685, 104208050, 104222974, MarketType.STANDARD), // USDT
+    new MarketConfig(104207403, 104207287, 104207503, MarketType.STANDARD), // goBTC
+    new MarketConfig(104207719, 104207533, 104207983, MarketType.STANDARD), // goETH
+    new MarketConfig(104213311, 104210500, 104217422, MarketType.STBL), // STBL2
+    new MarketConfig(104238373, 104228491, 104238470, MarketType.LP) // bUSDC-bSTBL2 LP
   ],
 }

@@ -42,7 +42,7 @@ export default class GovernanceConfig {
 
 export const GovernanceConfigs = {
   [Network.MAINNET]: new GovernanceConfig(0, 0, 0, 0, 0),
-  [Network.MAINNET_CLONE3]: new GovernanceConfig(813977235, 813976876, 813978348, 813973589, 813973490),
+  [Network.TESTNET]: new GovernanceConfig(0, 0, 0, 0, 0)
 }
 
 export class ProposalConfig {

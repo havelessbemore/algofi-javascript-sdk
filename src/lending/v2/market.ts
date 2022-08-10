@@ -84,12 +84,12 @@ export class MarketRewardsProgram {
     )
     this.index = bytesToBigInt(rawRewardsIndexBytes)
 
-    if (market.marketType == MarketType.VAULT) {
-     this.projectedIndex = this.index +
-      BigInt((Math.floor((Date.now() / 1000)) - market.rewardsLatestTime) * this.rewardsPerSecond) * FIXED_18_SCALE_FACTOR / BigInt(market.activeBAssetCollateral)
+    if (market.marketType == MarketType.VAULT || market.marketType == MarketType.LP) {
+     this.projectedIndex = this.index + ((market.activeBAssetCollateral > 0) ?
+      BigInt((Math.floor((Date.now() / 1000)) - market.rewardsLatestTime) * this.rewardsPerSecond) * FIXED_18_SCALE_FACTOR / BigInt(market.activeBAssetCollateral) : BigInt(0))
     } else {
-     this.projectedIndex = this.index +
-      BigInt((Math.floor((Date.now() / 1000)) - market.rewardsLatestTime) * this.rewardsPerSecond) * FIXED_18_SCALE_FACTOR / BigInt(market.borrowShareCirculation)
+     this.projectedIndex = this.index + ((market.borrowShareCirculation > 0) ?
+      BigInt((Math.floor((Date.now() / 1000)) - market.rewardsLatestTime) * this.rewardsPerSecond) * FIXED_18_SCALE_FACTOR / BigInt(market.borrowShareCirculation) : BigInt(0))
     }
   }
 
@@ -98,14 +98,14 @@ export class MarketRewardsProgram {
   }
 
   getSupplyRewardsAPR(): number {
-    if (this.assetID == 0 || this.market.marketType != MarketType.VAULT) {
+    if (this.assetID == 0 || (this.market.marketType != MarketType.VAULT && this.market.marketType != MarketType.LP)) {
       return 0
     }
     return this.getAnnualRewards().toUSD() / this.market.getTotalSupplied().toUSD()
   }
 
   getBorrowRewardsAPR(): number {
-    if (this.assetID == 0 || this.market.marketType == MarketType.VAULT) {
+    if (this.assetID == 0 || (this.market.marketType == MarketType.VAULT || this.market.marketType == MarketType.LP)) {
       return 0
     }
     return this.getAnnualRewards().toUSD() / this.market.getTotalBorrowed().toUSD()
@@ -271,6 +271,10 @@ export default class Market {
    * @returns a list containing both the supply and borrow apr.
    */
   getAPRs(totalSupplied: number, totalBorrowed: number): [number, number] {
+    if (this.marketType == MarketType.STBL) {
+      return [this.baseInterestRate / FIXED_6_SCALE_FACTOR, this.baseInterestRate / FIXED_6_SCALE_FACTOR]
+    }
+    
     let borrowUtilization = totalBorrowed / totalSupplied || 0
     let borrowAPR = this.baseInterestRate / FIXED_6_SCALE_FACTOR
     borrowAPR += (borrowUtilization * this.baseInterestSlope) / FIXED_6_SCALE_FACTOR
@@ -744,6 +748,8 @@ export default class Market {
   async getBorrowTxns(user: AlgofiUser, underlyingAmount: AssetAmount): Promise<Transaction[]> {
     if (this.marketType == MarketType.VAULT) {
       throw "Borrow action not supported by vault market"
+    } else if (this.marketType == MarketType.LP) {
+      throw "Borrow action not supported by lp market"
     }
 
     const params = await getParams(this.algod)
@@ -783,6 +789,8 @@ export default class Market {
   ): Promise<Transaction[]> {
     if (this.marketType == MarketType.VAULT) {
       throw "Repay borrow action not supported by vault market"
+    } else if (this.marketType == MarketType.LP) {
+      throw "Repay borrow action not supported by lp market"
     }
 
     let repayAmount = underlyingAmount.amount
