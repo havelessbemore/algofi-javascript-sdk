@@ -186,14 +186,14 @@ export default class LendingPoolInterface {
       bAsset1SwapAmount = this.market1.underlyingToBAsset(swapOutAssetAmount).amount
       let poolQuote = this.pool.getSwapForExactQuote(this.market1.bAssetId, bAsset1SwapAmount)
       bAsset2SwapAmount = poolQuote.asset2Delta
-      asset2SwapAmount = Math.floor(this.market2.bAssetToUnderlying(bAsset2SwapAmount).amount * 1.001)
+      asset2SwapAmount = this.market2.bAssetToUnderlying(bAsset2SwapAmount).amount
       numIter = poolQuote.iterations
     } else {
       asset2SwapAmount = swapOutAmount
       bAsset2SwapAmount = this.market2.underlyingToBAsset(swapOutAssetAmount).amount
       let poolQuote = this.pool.getSwapForExactQuote(this.market2.bAssetId, bAsset2SwapAmount)
       bAsset1SwapAmount = poolQuote.asset1Delta
-      asset1SwapAmount = Math.floor(this.market1.bAssetToUnderlying(bAsset1SwapAmount).amount * 1.001)
+      asset1SwapAmount = this.market1.bAssetToUnderlying(bAsset1SwapAmount).amount
       numIter = poolQuote.iterations
     }
     
@@ -458,7 +458,7 @@ export default class LendingPoolInterface {
   async getSwapTxns(
     user: AlgofiUser,
     quote: PoolQuote,
-    swapArg: number
+    maxSlippage: number = 0.005
   ): Promise<Transaction[]> {
     const params  = await getParams(this.algod)
     const transactions = []
@@ -476,17 +476,20 @@ export default class LendingPoolInterface {
     }
     
     let inputIsAsset1 = (quote.asset1Delta < 0)
-    let convertedSwapArg = inputIsAsset1 ? 
-      this.market2.underlyingToBAsset(this.algofiClient.assetData.getAsset(swapArg, this.market2.underlyingAssetId)).amount :
-      this.market1.underlyingToBAsset(this.algofiClient.assetData.getAsset(swapArg, this.market1.underlyingAssetId)).amount
-    console.log("MIN OUT = ", convertedSwapArg)
+    let inputAsset = inputIsAsset1 ? this.market1.underlyingAssetId : this.market2.underlyingAssetId
+    let inputAmount = inputIsAsset1 ? -1 * quote.asset1Delta : -1 * quote.asset2Delta
+    let minBAssetOutputAmount = inputIsAsset1 ? 
+      this.market2.underlyingToBAsset(this.algofiClient.assetData.getAsset(quote.asset2Delta, this.market2.underlyingAssetId)).amount :
+      this.market1.underlyingToBAsset(this.algofiClient.assetData.getAsset(quote.asset1Delta, this.market1.underlyingAssetId)).amount
+    
+    if (quote.quoteType == PoolQuoteType.SWAP_EXACT_FOR) {
+      minBAssetOutputAmount = Math.floor(minBAssetOutputAmount * (1 - maxSlippage))
+    } else {
+      inputAmount = Math.ceil(inputAmount * (1 + maxSlippage))
+    }
     
     // SEND ASSET
-    if (inputIsAsset1) {
-      transactions.push(getPaymentTxn(params, user.address, this.address, this.market1.underlyingAssetId, -1 * quote.asset1Delta))
-    } else {
-      transactions.push(getPaymentTxn(params, user.address, this.address, this.market2.underlyingAssetId, -1 * quote.asset2Delta))
-    }
+    transactions.push(getPaymentTxn(params, user.address, this.address, inputAsset, inputAmount))
     
     // SWAP STEP 1
     params.fee = 1000 + additionalPermissionlessFees
@@ -537,7 +540,7 @@ export default class LendingPoolInterface {
           quote.quoteType == PoolQuoteType.SWAP_EXACT_FOR ?
             TEXT_ENCODER.encode(LENDING_POOL_INTERFACE_STRINGS.swap_exact_for) :
             TEXT_ENCODER.encode(LENDING_POOL_INTERFACE_STRINGS.swap_for_exact),
-          encodeUint64(convertedSwapArg)
+          encodeUint64(minBAssetOutputAmount)
         ],
         accounts: [this.pool.address],
         foreignApps: [this.poolAppId, this.pool.managerAppId],
@@ -582,21 +585,4 @@ export default class LendingPoolInterface {
 
     return assignGroupID(transactions)
   }
-
-  async getSwapExactForTxns(
-    user: AlgofiUser,
-    quote: PoolQuote,
-    minAmountToReceive: number
-  ): Promise<Transaction[]> {
-    return await this.getSwapTxns(user, quote, minAmountToReceive)
-  }
-
-  async getSwapForExactTxns(
-    user: AlgofiUser,
-    quote: PoolQuote,
-    amountToReceive: number
-  ): Promise<Transaction[]> {
-    return await this.getSwapTxns(user, quote, amountToReceive)
-  }
-
 }
