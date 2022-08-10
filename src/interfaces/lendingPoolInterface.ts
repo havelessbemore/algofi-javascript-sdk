@@ -200,6 +200,22 @@ export default class LendingPoolInterface {
     return new PoolQuote(PoolQuoteType.SWAP_FOR_EXACT, asset1SwapAmount, asset2SwapAmount, 0, numIter)
   }
 
+  getZapQuote(asset1Amount: number, asset2Amount: number): PoolQuote {
+    let bAsset1Amount = this.market1.underlyingToBAsset(this.algofiClient.assetData.getAsset(asset1Amount, this.market1.underlyingAssetId)).amount
+    let bAsset2Amount = this.market1.underlyingToBAsset(this.algofiClient.assetData.getAsset(asset2Amount, this.market2.underlyingAssetId)).amount
+    let quote = this.pool.getZapQuote(bAsset1Amount, bAsset2Amount)
+
+    return new PoolQuote(
+      PoolQuoteType.ZAP,
+      this.market1.bAssetToUnderlying(quote.asset1Delta).amount,
+      this.market2.bAssetToUnderlying(quote.asset2Delta).amount,
+      quote.lpDelta,
+      quote.iterations,
+      this.market1.bAssetToUnderlying(quote.zapAsset1Swap).amount,
+      this.market2.bAssetToUnderlying(quote.zapAsset2Swap).amount,
+    )
+  }
+
   // TRANSACTION GETTERS
 
   async getPoolTxns(
@@ -584,5 +600,21 @@ export default class LendingPoolInterface {
     )
 
     return assignGroupID(transactions)
+  }
+
+  async getZapTxns(
+    user: AlgofiUser,
+    quote: PoolQuote,
+    maxSlippage: number = 0.005,
+    addToUserCollateral: boolean = true
+  ): Promise<Transaction[]> {
+    let swapQuote = new PoolQuote(PoolQuoteType.SWAP_EXACT_FOR, quote.zapAsset1Swap, quote.zapAsset2Swap, 0, Math.ceil(quote.iterations / 2)) 
+    let swapTxns = await this.getSwapTxns(user, swapQuote, maxSlippage)
+   
+    let poolQuote = new PoolQuote(PoolQuoteType.POOL, quote.asset1Delta, quote.asset2Delta, quote.lpDelta, Math.floor(quote.iterations / 2))
+    let poolMaxSlippage = Math.floor(1000000 * maxSlippage)
+    let poolTxns = await this.getPoolTxns(user, poolQuote, poolMaxSlippage, addToUserCollateral)
+
+    return composeTransactions([swapTxns])
   }
 }

@@ -47,7 +47,8 @@ export enum PoolQuoteType {
   POOL = 1,
   BURN = 2,
   SWAP_EXACT_FOR = 3,
-  SWAP_FOR_EXACT = 4
+  SWAP_FOR_EXACT = 4,
+  ZAP = 5
 }
 
 export class PoolQuote {
@@ -56,13 +57,25 @@ export class PoolQuote {
   public asset2Delta: number
   public lpDelta: number
   public iterations: number
+  public zapAsset1Swap: number
+  public zapAsset2Swap: number
   
-  constructor(quoteType: PoolQuoteType, asset1Delta: number, asset2Delta: number, lpDelta: number, iterations: number) {
+  constructor(
+    quoteType: PoolQuoteType,
+    asset1Delta: number,
+    asset2Delta: number,
+    lpDelta: number,
+    iterations: number,
+    zapAsset1Swap: number = 0,
+    zapAsset2Swap: number = 0
+  ) {
     this.quoteType = quoteType
     this.asset1Delta = asset1Delta
     this.asset2Delta = asset2Delta
     this.lpDelta = lpDelta
     this.iterations = iterations
+    this.zapAsset1Swap = zapAsset1Swap
+    this.zapAsset2Swap = zapAsset2Swap
   }
 }
 
@@ -181,6 +194,22 @@ export default class Pool {
       return Math.floor(input * FIXED_12_SCALE_FACTOR / this.getTargetRatio())
     } else {
       return input
+    }
+  }
+  
+  binarySearch(lower, upper, objective) {
+    if (lower > upper) return lower
+    let mid = Math.floor(lower + (upper - lower) / 2)
+    let midVal = objective(mid)
+    let upperVal = objective(upper)
+    let lowerVal = objective(lower)
+    
+    if (midVal < 0) {
+      return this.binarySearch(mid + 1, upper, objective)
+    } else if (midVal > 0) {
+      return this.binarySearch(lower, mid - 1, objective)
+    } else {
+      return mid
     }
   }
   
@@ -316,6 +345,55 @@ export default class Pool {
       return new PoolQuote(PoolQuoteType.SWAP_FOR_EXACT, swapOutAmount, -1 * swapInAmount, 0, numIter)
     } else {
       return new PoolQuote(PoolQuoteType.SWAP_FOR_EXACT, -1 * swapInAmount, swapOutAmount, 0, numIter)
+    }
+  }
+  
+  getZapQuote(asset1Amount: number, asset2Amount:number) {
+    if (asset1Amount == 0 && asset2Amount == 0) {
+      return new PoolQuote(PoolQuoteType.ZAP, 0, 0, 0, 0)
+    }
+    
+    let asset1ImpliedLPTokens = Math.floor(asset1Amount * this.lpCirculation / this.balance1)
+    let asset2ImpliedLPTokens = Math.floor(asset2Amount * this.lpCirculation / this.balance2)
+    
+    let excessAsset1Amount = 0
+    let excessAsset2Amount = 0
+    
+    if (asset1ImpliedLPTokens > asset2ImpliedLPTokens) { // asset2 constrained
+      excessAsset1Amount = asset1Amount - Math.floor(asset2ImpliedLPTokens * this.balance1 / this.lpCirculation)
+    } else { // asset1 constrained
+      excessAsset2Amount = asset2Amount - Math.floor(asset1ImpliedLPTokens * this.balance2 / this.lpCirculation)
+    }
+    
+    // calculate swap amounts
+    if (asset1ImpliedLPTokens > asset2ImpliedLPTokens) {
+      let objective = function (dx) {
+        let dy = this.getSwapExactForQuote(this.asset1Id, dx).asset2Delta
+        return  (asset2Amount + dy) / (this.balance2 - dy) - (asset1Amount - dx) / (this.balance1 + dx) // new ratio must equal new input ratio
+      }.bind(this)
+      let swapInAmt = this.binarySearch(0, asset1Amount, objective)
+      let swapQuote = this.getSwapExactForQuote(this.asset1Id, swapInAmt)
+      let swapOutAmt = swapQuote.asset2Delta
+      let poolQuote = this.getPoolQuote(asset1Amount - swapInAmt, asset2Amount + swapOutAmt)
+      poolQuote.quoteType = PoolQuoteType.ZAP
+      poolQuote.zapAsset1Swap = -1 * swapInAmt
+      poolQuote.zapAsset2Swap = swapOutAmt
+      poolQuote.iterations += swapQuote.iterations
+      return poolQuote
+    } else {
+      let objective = function (dy) {
+        let dx = this.getSwapExactForQuote(this.asset2Id, dy).asset1Delta
+        return (asset1Amount + dx) / (this.balance1 - dx) -  (asset2Amount - dy) / (this.balance2 + dy) // new ratio must equal new input ratio
+      }.bind(this)
+      let swapInAmt = this.binarySearch(0, asset2Amount, objective)
+      let swapQuote = this.getSwapExactForQuote(this.asset2Id, swapInAmt)
+      let swapOutAmt = swapQuote.asset1Delta
+      let poolQuote = this.getPoolQuote(asset1Amount + swapOutAmt, asset2Amount - swapInAmt)
+      poolQuote.quoteType = PoolQuoteType.ZAP
+      poolQuote.zapAsset2Swap = -1 * swapInAmt
+      poolQuote.zapAsset1Swap = swapOutAmt
+      poolQuote.iterations += swapQuote.iterations
+      return poolQuote
     }
   }
 }
