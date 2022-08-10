@@ -116,7 +116,7 @@ export default class LendingPoolInterface {
       asset1PooledAmount = assetAmount.amount
       bAsset1PooledAmount = this.market1.underlyingToBAsset(assetAmount).amount
       let poolQuote = this.pool.getPoolQuote(this.market1.bAssetId, bAsset1PooledAmount)
-      bAsset2PooledAmount = poolQuote.asset2Delta
+      bAsset2PooledAmount = -1 * poolQuote.asset2Delta
       asset2PooledAmount = this.market2.bAssetToUnderlying(bAsset2PooledAmount).amount
       lpsIssued = poolQuote.lpDelta
       numIter =poolQuote.iterations
@@ -124,7 +124,7 @@ export default class LendingPoolInterface {
       asset2PooledAmount = assetAmount.amount
       bAsset2PooledAmount = this.market2.underlyingToBAsset(assetAmount).amount
       let poolQuote = this.pool.getPoolQuote(this.market2.bAssetId, bAsset2PooledAmount)
-      bAsset1PooledAmount = poolQuote.asset1Delta
+      bAsset1PooledAmount = -1 * poolQuote.asset1Delta
       asset1PooledAmount = this.market1.bAssetToUnderlying(bAsset1PooledAmount).amount
       lpsIssued = poolQuote.lpDelta
       numIter =poolQuote.iterations
@@ -227,7 +227,7 @@ export default class LendingPoolInterface {
     const params  = await getParams(this.algod)
     const transactions = []
     
-    let additionalPermissionlessFees = 26000 + quote.iterations * 1000 + (addToUserCollateral ? 3000 : 1000)
+    let additionalPermissionlessFees = 27000 + quote.iterations * 1000 + (addToUserCollateral ? 3000 : 1000)
     
     // OPT IN TO LP (optional)
     if (!user.isOptedInToAsset(this.lpMarket.underlyingAssetId)) {
@@ -240,7 +240,7 @@ export default class LendingPoolInterface {
     // SEND ASSET 2
     transactions.push(getPaymentTxn(params, user.address, this.address, this.market2.underlyingAssetId, -1 * quote.asset2Delta))
     
-    // POOL STEP 9
+    // POOL STEP 1
     params.fee = 1000 + additionalPermissionlessFees
     transactions.push(
       algosdk.makeApplicationNoOpTxnFromObject({
@@ -615,6 +615,6 @@ export default class LendingPoolInterface {
     let poolMaxSlippage = Math.floor(1000000 * maxSlippage)
     let poolTxns = await this.getPoolTxns(user, poolQuote, poolMaxSlippage, addToUserCollateral)
 
-    return composeTransactions([swapTxns])
+    return composeTransactions([swapTxns, poolTxns])
   }
 }

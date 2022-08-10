@@ -383,12 +383,12 @@ export default class Pool {
     } else {
       let objective = function (dy) {
         let dx = this.getSwapExactForQuote(this.asset2Id, dy).asset1Delta
-        return (asset1Amount + dx) / (this.balance1 - dx) -  (asset2Amount - dy) / (this.balance2 + dy) // new ratio must equal new input ratio
+        return (asset1Amount + dx) / (this.balance1 - dx) - (asset2Amount - dy) / (this.balance2 + dy) // new ratio must equal new input ratio
       }.bind(this)
       let swapInAmt = this.binarySearch(0, asset2Amount, objective)
       let swapQuote = this.getSwapExactForQuote(this.asset2Id, swapInAmt)
       let swapOutAmt = swapQuote.asset1Delta
-      let poolQuote = this.getPoolQuote(asset1Amount + swapOutAmt, asset2Amount - swapInAmt)
+      let poolQuote = this.getPoolQuote(asset1Amount + Math.floor(swapOutAmt * 0.99), asset2Amount - swapInAmt)
       poolQuote.quoteType = PoolQuoteType.ZAP
       poolQuote.zapAsset2Swap = -1 * swapInAmt
       poolQuote.zapAsset1Swap = swapOutAmt
