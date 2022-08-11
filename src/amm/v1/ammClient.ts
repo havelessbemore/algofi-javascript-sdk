@@ -12,7 +12,7 @@ import AlgofiUser from "../../algofiUser"
 // local
 import { PoolType } from "./ammConfig"
 import ManagerConfig, { ManagerConfigs } from "./managerConfig"
-import PoolConfig, { PoolConfigs } from "./poolConfig"
+import PoolConfig from "./poolConfig"
 import Pool from "./pool"
 
 // INTERFACE
@@ -22,17 +22,16 @@ export default class AMMClient {
   public algod: Algodv2
   public network: Network
   public managerAppId: number
-  public poolConfigs: PoolConfig[]
   public pools: { [key: number]: Pool } = {} // appId -> pool
   public assetPoolMap : { [key: number]: Pool[] } = {} // asset -> pools
   public poolMap: { [key: number] : { [key: number] : { [key: number] : Pool } } } = {} // asset1, asset2, type -> pool
+  public lpPoolMap: { [key: number]: Pool } = {} // lp asset id -> pool
 
   constructor(algofiClient: AlgofiClient) {
     this.algofiClient = algofiClient
     this.algod = this.algofiClient.algod
     this.network = this.algofiClient.network
     this.managerAppId = ManagerConfigs[this.network].appId
-    this.poolConfigs = PoolConfigs[this.network]
   }
 
   async loadState() {
@@ -42,8 +41,10 @@ export default class AMMClient {
       .then(resp => {
          if (resp.status == 200) {
            for (const poolInfo of resp.body) {
-              let config = new PoolConfig(poolInfo.app_id, poolInfo.asset1_id, poolInfo.asset2_id, PoolType[poolInfo.type as keyof typeof PoolType])
+              let config = new PoolConfig(poolInfo.app_id, poolInfo.asset1_id, poolInfo.asset2_id, poolInfo.lp_asset_id, PoolType[poolInfo.type as keyof typeof PoolType])
+              // pools
               this.pools[config.appId] = new Pool(this.algod, this, config)
+              // assetPoolMap
               if (!(config.asset1Id in this.assetPoolMap)) {
                 this.assetPoolMap[config.asset1Id] = []
               }
@@ -52,6 +53,7 @@ export default class AMMClient {
               }
               this.assetPoolMap[config.asset1Id].push(this.pools[config.appId])
               this.assetPoolMap[config.asset2Id].push(this.pools[config.appId])
+              // poolMap
               if (!(config.asset1Id in this.poolMap)) {
                 this.poolMap[config.asset1Id] = {}
               }
@@ -59,6 +61,8 @@ export default class AMMClient {
                 this.poolMap[config.asset1Id][config.asset2Id] = {}
               }
               this.poolMap[config.asset1Id][config.asset2Id][config.poolType] = this.pools[config.appId]
+              // lpPoolMap
+              this.lpPoolMap[config.lpAssetId] = this.pools[config.appId]
            }
          } else {
            console.log("Bad Response")
@@ -67,28 +71,6 @@ export default class AMMClient {
       .catch(err => {
         console.log(err.message)
       });
-    
-    // load hard coded pools (TODO we can kill this and drive all off the api eventually)
-    for (const config of this.poolConfigs) {
-      if (!(config.appId in this.pools)) {
-        this.pools[config.appId] = new Pool(this.algod, this, config)
-        if (!(config.asset1Id in this.assetPoolMap)) {
-          this.assetPoolMap[config.asset1Id] = []
-        }
-        if (!(config.asset2Id in this.assetPoolMap)) {
-          this.assetPoolMap[config.asset2Id] = []
-        }
-        this.assetPoolMap[config.asset1Id].push(this.pools[config.appId])
-        this.assetPoolMap[config.asset2Id].push(this.pools[config.appId])
-        if (!(config.asset1Id in this.poolMap)) {
-          this.poolMap[config.asset1Id] = {}
-        }
-        if (!(config.asset2Id in this.poolMap[config.asset1Id])) {
-          this.poolMap[config.asset1Id][config.asset2Id] = {}
-        }
-        this.poolMap[config.asset1Id][config.asset2Id][config.poolType] = this.pools[config.appId]
-      }
-    }
   }
   
   async getPool(assetAId: number, assetBId: number, poolType: PoolType) {
@@ -112,7 +94,7 @@ export default class AMMClient {
       throw new Error("pool not found")
     }
 
-    let pool = new Pool(this.algod, this, new PoolConfig(0, asset1Id, asset2Id, poolType))
+    let pool = new Pool(this.algod, this, new PoolConfig(0, asset1Id, asset2Id, 0, poolType))
     await pool.loadState()
     return pool
   }
