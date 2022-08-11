@@ -17,6 +17,10 @@ import AssetAmount from "./assetData/assetAmount"
 // staking v2
 import StakingConfig from "./staking/v2/stakingConfig"
 
+// amm
+import Pool, { PoolQuoteType, PoolQuote } from "./amm/v1/pool"
+import { PoolType } from "./amm/v1/ammConfig"
+
 // EXPORTS
 export {
   // global
@@ -34,5 +38,10 @@ export {
   // lending v2
   MarketType,
   // staking v2
-  StakingConfig
+  StakingConfig,
+  // amm
+  Pool,
+  PoolType,
+  PoolQuote,
+  PoolQuoteType
 }

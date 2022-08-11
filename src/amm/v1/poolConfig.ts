@@ -24,9 +24,12 @@ export default class PoolConfig {
 
 export const PoolConfigs = {
   [Network.MAINNET]: [
-    new PoolConfig(1, 2, 3, PoolType.MOVING_RATIO_NANO),
+    new PoolConfig(658337046, 31566704, 465865291, PoolType.NANO),
+    new PoolConfig(659677335, 312769, 465865291, PoolType.NANO),
+    new PoolConfig(659678644, 312769, 31566704, PoolType.NANO),
   ],
   [Network.TESTNET]: [
     new PoolConfig(104228342, 104207173, 104217422, PoolType.MOVING_RATIO_NANO),
   ],
 }
+

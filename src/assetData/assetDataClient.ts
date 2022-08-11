@@ -6,7 +6,7 @@ import request from 'superagent';
 
 // global
 import AlgofiClient from "./../algofiClient"
-import { Network, ANALYTICS_ENDPOINT } from "./../globals"
+import { Network, getAnalyticsEndpoint, getNetworkName } from "./../globals"
 
 // lending
 import { MarketType } from "./../lending/v2/lendingConfig"
@@ -49,7 +49,7 @@ export default class AssetDataClient {
 
     // load prices from amm analytics
     request
-      .get(ANALYTICS_ENDPOINT + "/assets")
+      .get(getAnalyticsEndpoint(this.network) + "/assets?network=" + getNetworkName(this.network))
       .then(resp => {
          if (resp.status == 200) {
            for (const assetInfo of resp.body) {
@@ -65,7 +65,7 @@ export default class AssetDataClient {
 
     // load lp prices from amm analytics
     request
-      .get(ANALYTICS_ENDPOINT + "/ammLPTokens")
+      .get(getAnalyticsEndpoint(this.network) + "/ammLPTokens?network=" + getNetworkName(this.network))
       .then(resp => {
          if (resp.status == 200) {
            for (const assetInfo of resp.body) {

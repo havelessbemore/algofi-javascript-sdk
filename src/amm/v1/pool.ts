@@ -4,6 +4,7 @@
 import algosdk, {
   Algodv2,
   Transaction,
+  LogicSigAccount,
   getApplicationAddress,
   encodeUint64,
   decodeUint64,
@@ -24,7 +25,7 @@ import {
   TEXT_ENCODER
 } from "../../globals"
 import { Base64Encoder } from "../../encoder"
-import { decodeBytes, parseAddressBytes } from "../../utils"
+import { decodeBytes, parseAddressBytes, composeTransactions } from "../../utils"
 import { getApplicationGlobalState, getLocalStates, getAccountBalances } from "../../stateUtils"
 import { getParams, getPaymentTxn } from "../../transactionUtils"
 import AlgofiUser from "../../algofiUser"
@@ -35,7 +36,15 @@ import AssetAmount from "../../assetData/assetAmount"
 import AssetDataClient from "../../assetData/assetDataClient"
 
 // local
-import { PoolType, POOL_STRINGS, getSwapFee } from "./ammConfig"
+import { generateLogicSig } from "./logicSigGenerator"
+import {
+  PoolType,
+  POOL_STRINGS,
+  getSwapFee,
+  getValidatorIndex,
+  getPoolApprovalProgram,
+  getPoolClearStateProgram
+} from "./ammConfig"
 import PoolConfig from "./poolConfig"
 import AMMClient from "./ammClient"
 import { getD, getY } from "./stableswapMath"
@@ -91,6 +100,7 @@ export default class Pool {
   public asset2Id: number
   public poolType: PoolType
   
+  public logicSig: LogicSigAccount
   public address: string
 
   public managerAppId: number
@@ -124,11 +134,32 @@ export default class Pool {
     this.asset1Id = poolConfig.asset1Id
     this.asset2Id = poolConfig.asset2Id
     this.poolType = poolConfig.poolType
-
-    this.address = getApplicationAddress(this.appId)
   }
 
   async loadState() {
+    // attempt to load app id if missing
+    if (this.appId == 0) {
+      let managerAppId: number = this.ammClient.managerAppId
+      
+      this.logicSig = new LogicSigAccount(
+        generateLogicSig(
+          this.asset1Id,
+          this.asset2Id,
+          managerAppId,
+          getValidatorIndex(this.poolType)
+        )
+      )
+      
+      let logicSigStates = getLocalStates(this.algod, this.logicSig.address())
+      if (managerAppId in logicSigStates) {
+        this.appId = logicSigStates[managerAppId][POOL_STRINGS.registered_pool_id]
+      } else {
+        return
+      }
+    }
+    
+    this.address = getApplicationAddress(this.appId)
+    
     let state = await getApplicationGlobalState(this.algod, this.appId)
 
     // parameters
@@ -153,6 +184,10 @@ export default class Pool {
     }
     
     this.swapFee = getSwapFee(this.poolType)
+  }
+  
+  isCreated(): boolean {
+    return this.appId != 0
   }
   
   // HELPER FUNCTIONS
@@ -395,5 +430,309 @@ export default class Pool {
       poolQuote.iterations += swapQuote.iterations
       return poolQuote
     }
+  }
+  
+  // TRANSACTION GETTERS
+  
+  async getCreatePoolTxns(
+    user: AlgofiUser
+  ): Promise<Transaction[]> {
+    if (this.isCreated()) {
+      throw new Error("Pool already active cannot generate create pool txn")
+    }
+    if (this.poolType === PoolType.NANO || this.poolType == PoolType.MOVING_RATIO_NANO) {
+      throw new Error("Nanoswap pool cannot generate create pool txn")
+    }
+    const params  = await getParams(this.algod)
+    const transactions = []
+
+    let approvalProgram = getPoolApprovalProgram(this.ammClient.network, this.poolType)
+    let clearStateProgram = getPoolClearStateProgram(this.ammClient.network)
+
+    transactions.push(
+      algosdk.makeApplicationCreateTxnFromObject({
+        from: user.address,
+        suggestedParams: params,
+        approvalProgram: approvalProgram,
+        clearProgram: clearStateProgram,
+        numLocalInts: 0,
+        numLocalByteSlices: 0,
+        numGlobalInts: 60,
+        numGlobalByteSlices: 4,
+        extraPages: 3,
+        onComplete: algosdk.OnApplicationComplete.NoOpOC,
+        appArgs: [
+          encodeUint64(this.asset1Id),
+          encodeUint64(this.asset2Id),
+          encodeUint64(getValidatorIndex(this.poolType))
+        ],
+        accounts: undefined,
+        foreignApps: [this.ammClient.managerAppId],
+        foreignAssets: undefined,
+        rekeyTo: undefined
+      })
+    )
+
+    return assignGroupID(transactions)
+  }
+  
+  async getInitializePoolTxns(
+    user: AlgofiUser,
+    poolAppId: number
+  ): Promise<Transaction[]> {
+    if (this.isCreated()) {
+      throw new Error("Pool already active cannot generate initialize pool txn")
+    }
+    const params  = await getParams(this.algod)
+    const transactions = []
+
+    // fund manager
+    transactions.push(getPaymentTxn(params, user.address, getApplicationAddress(this.ammClient.managerAppId), ALGO_ASSET_ID, 400000))
+
+    // fund logic sig
+    transactions.push(getPaymentTxn(params, user.address, this.logicSig.address(), ALGO_ASSET_ID, 450000))
+
+    // opt logic sig into manager
+    params.fee = 2000
+    transactions.push(
+      algosdk.makeApplicationOptInTxnFromObject({
+        from: this.logicSig.address(),
+        appIndex: this.ammClient.managerAppId,
+        suggestedParams: params,
+        appArgs: [
+          encodeUint64(this.asset1Id),
+          encodeUint64(this.asset2Id),
+          encodeUint64(getValidatorIndex(this.poolType))
+        ],
+        accounts: [
+          getApplicationAddress(poolAppId)
+        ],
+        foreignApps: [
+          poolAppId
+        ],
+        foreignAssets: undefined,
+        rekeyTo: undefined
+      })
+    )
+    
+    // initialize pool
+    params.fee = 4000
+    transactions.push(
+      algosdk.makeApplicationNoOpTxnFromObject({
+        from: user.address,
+        appIndex: poolAppId,
+        suggestedParams: params,
+        appArgs: [TEXT_ENCODER.encode(POOL_STRINGS.initialize_pool)],
+        accounts: undefined,
+        foreignApps: [this.ammClient.managerAppId],
+        foreignAssets: this.asset1Id === 1 ? [this.asset2Id] : [this.asset1Id, this.asset2Id],
+        rekeyTo: undefined
+      })
+    )
+
+    return assignGroupID(transactions)
+  }
+  
+  async getPoolTxns(
+    user: AlgofiUser,
+    quote: PoolQuote,
+    maximumSlippage: number,
+    addToUserCollateral: boolean = true
+  ): Promise<Transaction[]> {
+    const params  = await getParams(this.algod)
+    const transactions = []
+    
+    if (!user.isOptedInToAsset(this.lpAssetId)) {
+      transactions.push(getPaymentTxn(params, user.address, user.address, this.lpAssetId, 0))
+    }
+    
+    transactions.push(getPaymentTxn(params, user.address, user.address, this.asset1Id, -1 * quote.asset1Delta))
+    
+    transactions.push(getPaymentTxn(params, user.address, user.address, this.asset2Id, -1 * quote.asset2Delta))
+    
+    params.fee = 3000 + 1000 * quote.iterations
+    transactions.push(
+      algosdk.makeApplicationNoOpTxnFromObject({
+        from: user.address,
+        appIndex: this.appId,
+        suggestedParams: params,
+        appArgs: [
+          TEXT_ENCODER.encode(POOL_STRINGS.pool),
+          encodeUint64(maximumSlippage)
+        ],
+        accounts: undefined,
+        foreignApps: [this.ammClient.managerAppId],
+        foreignAssets: [this.lpAssetId],
+        rekeyTo: undefined
+      })
+    )
+    
+    params.fee = 1000
+    transactions.push(
+      algosdk.makeApplicationNoOpTxnFromObject({
+        from: user.address,
+        appIndex: this.appId,
+        suggestedParams: params,
+        appArgs: [
+          TEXT_ENCODER.encode(POOL_STRINGS.redeem_pool_asset1_residual),
+        ],
+        accounts: undefined,
+        foreignApps: [this.ammClient.managerAppId],
+        foreignAssets: undefined,
+        rekeyTo: undefined
+      })
+    )
+    
+    params.fee = 1000
+    transactions.push(
+      algosdk.makeApplicationNoOpTxnFromObject({
+        from: user.address,
+        appIndex: this.appId,
+        suggestedParams: params,
+        appArgs: [
+          TEXT_ENCODER.encode(POOL_STRINGS.redeem_pool_asset2_residual),
+        ],
+        accounts: undefined,
+        foreignApps: undefined,
+        foreignAssets: [this.asset2Id],
+        rekeyTo: undefined
+      })
+    )
+    
+    return assignGroupID(transactions)
+  }
+  
+  async getBurnTxns(
+    user: AlgofiUser,
+    quote: PoolQuote
+  ): Promise<Transaction[]> {
+    const params  = await getParams(this.algod)
+    const transactions = []
+    
+    if (!user.isOptedInToAsset(this.asset1Id)) {
+      transactions.push(getPaymentTxn(params, user.address, user.address, this.asset1Id, 0))
+    }
+    
+    if (!user.isOptedInToAsset(this.asset2Id)) {
+      transactions.push(getPaymentTxn(params, user.address, user.address, this.asset2Id, 0))
+    }
+    
+    transactions.push(getPaymentTxn(params, user.address, user.address, this.lpAssetId, -1 * quote.lpDelta))
+    
+    params.fee = 2000 + 1000 * quote.iterations
+    transactions.push(
+      algosdk.makeApplicationNoOpTxnFromObject({
+        from: user.address,
+        appIndex: this.appId,
+        suggestedParams: params,
+        appArgs: [
+          TEXT_ENCODER.encode(POOL_STRINGS.burn_asset1_out),
+        ],
+        accounts: undefined,
+        foreignApps: [this.ammClient.managerAppId],
+        foreignAssets: undefined,
+        rekeyTo: undefined
+      })
+    )
+    
+    params.fee = 2000
+    transactions.push(
+      algosdk.makeApplicationNoOpTxnFromObject({
+        from: user.address,
+        appIndex: this.appId,
+        suggestedParams: params,
+        appArgs: [
+          TEXT_ENCODER.encode(POOL_STRINGS.burn_asset2_out),
+        ],
+        accounts: undefined,
+        foreignApps: undefined,
+        foreignAssets: [this.asset2Id],
+        rekeyTo: undefined
+      })
+    )
+    
+    return assignGroupID(transactions)
+  }
+  
+  async getSwapTxns(
+    user: AlgofiUser,
+    quote: PoolQuote,
+    maxSlippage: number = 0.005
+  ): Promise<Transaction[]> {
+    const params  = await getParams(this.algod)
+    const transactions = []
+    
+    let inputIsAsset1 = quote.asset1Delta < 0
+    let inputAmount = inputIsAsset1 ? quote.asset1Delta : quote.asset2Delta
+    let inputAssetId = inputIsAsset1 ? this.asset1Id : this.asset2Id
+    let outputAssetId = inputIsAsset1 ? this.asset2Id : this.asset1Id
+    let minOutputAmount = inputIsAsset1 ? quote.asset2Delta : quote.asset1Delta
+    
+    if (quote.quoteType == PoolQuoteType.SWAP_EXACT_FOR) {
+      minOutputAmount = Math.floor(minOutputAmount * (1 - maxSlippage))
+    } else {
+      inputAmount = Math.ceil(inputAmount * (1 + maxSlippage))
+    }
+    
+    if (!user.isOptedInToAsset(outputAssetId)) {
+      transactions.push(getPaymentTxn(params, user.address, user.address, outputAssetId, 0))
+    }
+    
+    transactions.push(getPaymentTxn(params, user.address, user.address, inputAssetId, -1 * inputAmount))
+    
+    params.fee = 2000 + 1000 * quote.iterations
+    transactions.push(
+      algosdk.makeApplicationNoOpTxnFromObject({
+        from: user.address,
+        appIndex: this.appId,
+        suggestedParams: params,
+        appArgs: [
+          quote.quoteType == PoolQuoteType.SWAP_EXACT_FOR ?
+            TEXT_ENCODER.encode(POOL_STRINGS.swap_exact_for) :
+            TEXT_ENCODER.encode(POOL_STRINGS.swap_for_exact),
+          encodeUint64(minOutputAmount)
+        ],
+        accounts: undefined,
+        foreignApps: [this.ammClient.managerAppId],
+        foreignAssets: [outputAssetId],
+        rekeyTo: undefined
+      })
+    )
+    
+    if (quote.quoteType == PoolQuoteType.SWAP_FOR_EXACT) {
+      params.fee = 2000
+      transactions.push(
+        algosdk.makeApplicationNoOpTxnFromObject({
+          from: user.address,
+          appIndex: this.appId,
+          suggestedParams: params,
+          appArgs: [
+            TEXT_ENCODER.encode(POOL_STRINGS.redeem_swap_residual),
+          ],
+          accounts: undefined,
+          foreignApps: undefined,
+          foreignAssets: [inputAssetId],
+          rekeyTo: undefined
+        })
+      )
+    }
+
+    return assignGroupID(transactions)
+  }
+  
+  async getZapTxns(
+    user: AlgofiUser,
+    quote: PoolQuote,
+    maxSlippage: number = 0.005,
+    addToUserCollateral: boolean = true
+  ): Promise<Transaction[]> {
+    let swapQuote = new PoolQuote(PoolQuoteType.SWAP_EXACT_FOR, quote.zapAsset1Swap, quote.zapAsset2Swap, 0, Math.ceil(quote.iterations / 2)) 
+    let swapTxns = await this.getSwapTxns(user, swapQuote, maxSlippage)
+   
+    let poolQuote = new PoolQuote(PoolQuoteType.POOL, quote.asset1Delta, quote.asset2Delta, quote.lpDelta, Math.floor(quote.iterations / 2))
+    let poolMaxSlippage = Math.floor(1000000 * maxSlippage)
+    let poolTxns = await this.getPoolTxns(user, poolQuote, poolMaxSlippage, addToUserCollateral)
+
+    return composeTransactions([swapTxns, poolTxns])
   }
 }

@@ -74,7 +74,7 @@ export async function getLocalStatesFromAccountInfo(accountInfo: object): Promis
  *
  * @return  {dict<number,dict{string:any}>}  dictionary of user local states
  */
-export async function getLocalStates(algodClient: Algodv2, address: string, addressFields: string[] = []): Promise<{}> {
+export async function getLocalStates(algodClient: Algodv2, address: string): Promise<{}> {
   let results = {}
 
   let accountInfo = await algodClient.accountInformation(address).do()
