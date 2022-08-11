@@ -88,6 +88,7 @@ export default class LendingPoolInterface {
     this.market2 = this.algofiClient.lending.v2.markets[this.market2AppId]
     this.lpMarket = this.algofiClient.lending.v2.markets[this.lpMarketAppId]
     this.pool = this.algofiClient.amm.v1.pools[this.poolAppId]
+    await this.pool.loadState()
   }
 
   // QUOTES

@@ -70,9 +70,9 @@ export enum Network {
 }
 
 export function getNetworkName(network: Network) {
-  if (network = Network.MAINNET) {
+  if (network == Network.MAINNET) {
     return "mainnet"
-  } else if (network = Network.TESTNET) {
+  } else if (network == Network.TESTNET) {
     return "testnet"
   } else {
     throw "bad network"

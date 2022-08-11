@@ -7,6 +7,9 @@ import { Network } from "../globals"
 
 export default class LendingPoolInterfaceConfig {
   public appId: number
+  public asset1Id: number
+  public asset2Id: number
+  public lpAssetId: number
   public market1AppId: number
   public market2AppId: number
   public lpMarketAppId: number
@@ -15,6 +18,9 @@ export default class LendingPoolInterfaceConfig {
 
   constructor(
     appId: number,
+    asset1Id: number,
+    asset2Id: number,
+    lpAssetId: number,
     market1AppId: number,
     market2AppId: number,
     lpMarketAppId: number,
@@ -22,6 +28,9 @@ export default class LendingPoolInterfaceConfig {
     opFarmAppId: number
   ) {
     this.appId = appId
+    this.asset1Id = asset1Id
+    this.asset2Id = asset2Id
+    this.lpAssetId = lpAssetId
     this.market1AppId = market1AppId
     this.market2AppId = market2AppId
     this.lpMarketAppId = lpMarketAppId
@@ -32,10 +41,10 @@ export default class LendingPoolInterfaceConfig {
 
 export const LendingPoolInterfaceConfigs = {
   [Network.MAINNET]: [
-    new LendingPoolInterfaceConfig(1, 2, 3, 4, 5, 6), // bUSDC / bSTBL2
+    new LendingPoolInterfaceConfig(1, 0, 0, 0, 2, 3, 4, 5, 6), // bUSDC / bSTBL2
   ],
   [Network.TESTNET]: [
-    new LendingPoolInterfaceConfig(104532133, 104207076, 104213311, 104238373, 104228342, 104240608), // bUSDC / bSTBL2
+    new LendingPoolInterfaceConfig(104532133, 104194013, 104210500, 104228491, 104207076, 104213311, 104238373, 104228342, 104240608), // bUSDC / bSTBL2
   ],
 }
 

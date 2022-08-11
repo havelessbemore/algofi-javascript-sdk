@@ -35,12 +35,12 @@ export default class AMMClient {
   }
 
   async loadState() {
-    // pre-load known pools // TODO might not want to hit this every time
     request
       .get(getAnalyticsEndpoint(this.network) + "/pools?network=" + getNetworkName(this.network))
       .then(resp => {
-         if (resp.status == 200) {
-           for (const poolInfo of resp.body) {
+        if (resp.status == 200) {
+          for (const poolInfo of resp.body) {
+            if (!(poolInfo.appId in this.pools)) {
               let config = new PoolConfig(poolInfo.app_id, poolInfo.asset1_id, poolInfo.asset2_id, poolInfo.lp_asset_id, PoolType[poolInfo.type as keyof typeof PoolType])
               // pools
               this.pools[config.appId] = new Pool(this.algod, this, config)
@@ -63,6 +63,7 @@ export default class AMMClient {
               this.poolMap[config.asset1Id][config.asset2Id][config.poolType] = this.pools[config.appId]
               // lpPoolMap
               this.lpPoolMap[config.lpAssetId] = this.pools[config.appId]
+            }
            }
          } else {
            console.log("Bad Response")
