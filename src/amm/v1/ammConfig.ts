@@ -1,3 +1,18 @@
+// IMPORTS
+
+// global
+import { Network } from "../../globals"
+
+// local
+import {
+  MAINNET_APPROVAL_PROGRAM_LOW_FEE_CONSTANT_PRODUCT,
+  MAINNET_APPROVAL_PROGRAM_HIGH_FEE_CONSTANT_PRODUCT,
+  MAINNET_CLEAR_STATE_PROGRAM,
+  TESTNET_APPROVAL_PROGRAM_LOW_FEE_CONSTANT_PRODUCT,
+  TESTNET_APPROVAL_PROGRAM_HIGH_FEE_CONSTANT_PRODUCT,
+  TESTNET_CLEAR_STATE_PROGRAM
+} from "./approvalPrograms"
+
 // ENUMS
 
 export enum PoolType {
@@ -9,7 +24,7 @@ export enum PoolType {
 
 // SWAP FEES
 
-export function getSwapFee(poolType: PoolType) {
+export function getSwapFee(poolType: PoolType): number {
   if (poolType == PoolType.LOW_FEE) {
     return 0.0025
   } else if (poolType == PoolType.HIGH_FEE) {
@@ -17,6 +32,42 @@ export function getSwapFee(poolType: PoolType) {
   } else {
     return 0.0005
   }
+}
+
+// VALIDATOR INDECIES
+
+export function getValidatorIndex(poolType: PoolType): number {
+  if (poolType == PoolType.LOW_FEE) {
+    return 0
+  } else if (poolType == PoolType.HIGH_FEE) {
+    return 1
+  } else {
+    throw new Error("bad pool type")
+  }
+}
+
+// APPROVAL PROGRAMS
+
+export function getPoolApprovalProgram(network: Network, poolType: PoolType): Uint8Array {
+  if (poolType == PoolType.LOW_FEE) {
+    return (network == Network.MAINNET) ?
+      MAINNET_APPROVAL_PROGRAM_LOW_FEE_CONSTANT_PRODUCT :
+      TESTNET_APPROVAL_PROGRAM_LOW_FEE_CONSTANT_PRODUCT
+  } else if (poolType == PoolType.HIGH_FEE) {
+    return (network == Network.MAINNET) ?
+      MAINNET_APPROVAL_PROGRAM_HIGH_FEE_CONSTANT_PRODUCT :
+      TESTNET_APPROVAL_PROGRAM_HIGH_FEE_CONSTANT_PRODUCT
+  } else {
+    throw new Error("bad pool type")
+  }
+}
+
+// CLEAR STATE PROGRAMS
+
+export function getPoolClearStateProgram(network: Network): Uint8Array {
+  return (network == Network.MAINNET) ?
+    MAINNET_CLEAR_STATE_PROGRAM :
+    TESTNET_CLEAR_STATE_PROGRAM
 }
 
 // STRING CONSTANTS
@@ -39,6 +90,8 @@ export const POOL_STRINGS = {
   swap_exact_for: "sef",
   swap_for_exact: "sfe",
   redeem_swap_residual: "rsr",
+  registered_pool_id: "p",
+  initialize_pool: "ip",
   
   // nano
   initial_amplification_factor: "iaf",
