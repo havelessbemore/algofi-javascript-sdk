@@ -202,7 +202,7 @@ export default class LendingPoolInterface {
 
   getZapQuote(asset1Amount: number, asset2Amount: number): PoolQuote {
     let bAsset1Amount = this.market1.underlyingToBAsset(this.algofiClient.assetData.getAsset(asset1Amount, this.market1.underlyingAssetId)).amount
-    let bAsset2Amount = this.market1.underlyingToBAsset(this.algofiClient.assetData.getAsset(asset2Amount, this.market2.underlyingAssetId)).amount
+    let bAsset2Amount = this.market2.underlyingToBAsset(this.algofiClient.assetData.getAsset(asset2Amount, this.market2.underlyingAssetId)).amount
     let quote = this.pool.getZapQuote(bAsset1Amount, bAsset2Amount)
 
     return new PoolQuote(
