@@ -19,6 +19,12 @@ import BaseStakingClient from "./staking/baseStakingClient"
 // governance
 import BaseGovernanceClient from "./governance/baseGovernanceClient"
 
+// amm
+import BaseAMMClient from "./amm/baseAMMClient"
+
+// interfaces
+import InterfaceClient from "./interfaces/interfaceClient"
+
 // INTERFACE
 
 export default class AlgofiClient {
@@ -35,8 +41,14 @@ export default class AlgofiClient {
   // governance
   public governance: BaseGovernanceClient
 
+  // amm
+  public amm: BaseAMMClient
+
   // asset data
   public assetData: AssetDataClient
+
+  // interfaces
+  public interfaces: InterfaceClient
 
   /**
    * Constructor for the algofi client class
@@ -58,9 +70,15 @@ export default class AlgofiClient {
 
     // governance
     this.governance = new BaseGovernanceClient(this)
-    
+
+    // amm
+    this.amm = new BaseAMMClient(this)
+
     // assetData
     this.assetData = new AssetDataClient(this)
+    
+    // interfaces
+    this.interfaces = new InterfaceClient(this)
   }
 
   /**
@@ -79,11 +97,17 @@ export default class AlgofiClient {
     // governance
     let loadGovernancePromise = this.governance.loadState()
 
+    // amm
+    let loadAMMPromise = this.amm.loadState()
+
     // wait for all to complete
-    await Promise.all([loadLendingPromise, loadStakingPromise, loadGovernancePromise, assetDataPromise])
+    await Promise.all([loadLendingPromise, loadStakingPromise, loadGovernancePromise, loadAMMPromise, assetDataPromise])
 
     // load asset data lending state (lending load must complete first)
     await this.assetData.loadLendingAssetState()
+
+    // load interfaces (interfaces should have no local state and should purely load off of other algofi client data)
+    await this.interfaces.loadState()
   }
 
   /**

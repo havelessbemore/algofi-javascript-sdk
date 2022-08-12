@@ -9,6 +9,7 @@ export default class AssetConfig {
   public name: string
   public assetId: number
   public decimals: number
+  public defaultPrice: number
 
   /**
    * Constructor for the asset config class.
@@ -17,58 +18,60 @@ export default class AssetConfig {
    * @param assetId - asset id
    * @param decimals - asset decimals
    */
-  constructor(name: string, assetId: number, decimals: number) {
+  constructor(name: string, assetId: number, decimals: number, defaultPrice: number) {
     this.name = name
     this.assetId = assetId
     this.decimals = decimals
+    this.defaultPrice = defaultPrice
   }
 }
 
 export const AssetConfigs = {
   [Network.MAINNET]: {
-    1: new AssetConfig("ALGO", 1, 6),
-    818179690: new AssetConfig("AF-BANK-ALGO-STANDARD", 818179690, 6),
-    31566704: new AssetConfig("USDC", 31566704, 6),
-    818182311: new AssetConfig("AF-BANK-USDC-STANDARD", 818182311, 6),
-    386192725: new AssetConfig("goBTC", 386192725, 8),
-    818184214: new AssetConfig("AF-BANK-GOBTC-STANDARD", 818184214, 6),
-    386195940: new AssetConfig("goETH", 386195940, 8),
-    818188553: new AssetConfig("AF-BANK-GOETH-STANDARD", 818188553, 6),
-    312769: new AssetConfig("USDT", 312769, 6),
-    818190568: new AssetConfig("AF-BANK-USDT-STANDARD", 818190568, 6),
+    1: new AssetConfig("ALGO", 1, 6, undefined),
+    818179690: new AssetConfig("AF-BANK-ALGO-STANDARD", 818179690, 6, undefined),
+    31566704: new AssetConfig("USDC", 31566704, 6, undefined),
+    818182311: new AssetConfig("AF-BANK-USDC-STANDARD", 818182311, 6, undefined),
+    386192725: new AssetConfig("goBTC", 386192725, 8, undefined),
+    818184214: new AssetConfig("AF-BANK-GOBTC-STANDARD", 818184214, 6, undefined),
+    386195940: new AssetConfig("goETH", 386195940, 8, undefined),
+    818188553: new AssetConfig("AF-BANK-GOETH-STANDARD", 818188553, 6, undefined),
+    312769: new AssetConfig("USDT", 312769, 6, undefined),
+    818190568: new AssetConfig("AF-BANK-USDT-STANDARD", 818190568, 6, undefined),
     // v1 staking assets
-    465865291 : new AssetConfig("STBL", 465865291, 6),
-    470842789 : new AssetConfig("DEFLY", 470842789, 6),
-    283820866 : new AssetConfig("XET", 283820866, 9),
-    287867876 : new AssetConfig("OPUL", 287867876, 10),
-    444035862 : new AssetConfig("ZONE", 444035862, 6),
-    467020179 : new AssetConfig("TM-STBL-USDC-v1-LP", 467020179, 6),
-    552737686 : new AssetConfig("TM-STBL-USDC-v1.1-LP", 552737686, 6),
-    607645566 : new AssetConfig("AF-STBL-ALGO-0.25%-LP", 607645566, 6),
-    609172718 : new AssetConfig("AF-STBL-USDC-0.25%-LP", 609172718, 6),
-    658337286 : new AssetConfig("AF-STBL-USDC-NANO-LP", 658337286, 6),
-    659678778 : new AssetConfig("AF-USDC-USDT-NANO-LP", 659678778, 6),
-    659677515 : new AssetConfig("AF-STBL-USDT-NANO-LP", 659677515, 6),
-    635256863 : new AssetConfig("AF-STBL-XET-0.75%-LP", 635256863, 6),
-    647801343 : new AssetConfig("AF-STBL-ZONE-0.75%-LP", 647801343, 6),
-    624956449 : new AssetConfig("AF-STBL-DEFLY-0.75%-LP", 624956449, 6),
-    635846733 : new AssetConfig("AF-STBL-goBTC-0.25%-LP", 635846733, 6),
-    635854339 : new AssetConfig("AF-STBL-goETH-0.25%-LP", 635854339, 6),
-    637802380 : new AssetConfig("AF-STBL-OPUL-0.75%-LP", 637802380, 6),
+    465865291 : new AssetConfig("STBL", 465865291, 6, undefined),
+    470842789 : new AssetConfig("DEFLY", 470842789, 6, undefined),
+    283820866 : new AssetConfig("XET", 283820866, 9, undefined),
+    287867876 : new AssetConfig("OPUL", 287867876, 10, undefined),
+    444035862 : new AssetConfig("ZONE", 444035862, 6, undefined),
+    467020179 : new AssetConfig("TM-STBL-USDC-v1-LP", 467020179, 6, 1.0),
+    552737686 : new AssetConfig("TM-STBL-USDC-v1.1-LP", 552737686, 6, 1.0),
+    607645566 : new AssetConfig("AF-STBL-ALGO-0.25%-LP", 607645566, 6, undefined),
+    609172718 : new AssetConfig("AF-STBL-USDC-0.25%-LP", 609172718, 6, undefined),
+    658337286 : new AssetConfig("AF-STBL-USDC-NANO-LP", 658337286, 6, undefined),
+    659678778 : new AssetConfig("AF-USDC-USDT-NANO-LP", 659678778, 6, undefined),
+    659677515 : new AssetConfig("AF-STBL-USDT-NANO-LP", 659677515, 6, undefined),
+    635256863 : new AssetConfig("AF-STBL-XET-0.75%-LP", 635256863, 6, undefined),
+    647801343 : new AssetConfig("AF-STBL-ZONE-0.75%-LP", 647801343, 6, undefined),
+    624956449 : new AssetConfig("AF-STBL-DEFLY-0.75%-LP", 624956449, 6, undefined),
+    635846733 : new AssetConfig("AF-STBL-goBTC-0.25%-LP", 635846733, 6, undefined),
+    635854339 : new AssetConfig("AF-STBL-goETH-0.25%-LP", 635854339, 6, undefined),
+    637802380 : new AssetConfig("AF-STBL-OPUL-0.75%-LP", 637802380, 6, undefined),
   },
-  [Network.MAINNET_CLONE3]: {
-    1: new AssetConfig("ALGO", 1, 6),
-    812910520: new AssetConfig("AF-BANK-ALGO-STANDARD", 812910520, 6),
-    812915205: new AssetConfig("USDC", 812915205, 6),
-    812916935: new AssetConfig("AF-BANK-USDC-STANDARD", 812916935, 6),
-    812930638: new AssetConfig("USDT", 812930638, 6),
-    812931295: new AssetConfig("AF-BANK-USDT-STANDARD", 812931295, 6),
-    812919854: new AssetConfig("goBTC", 812919854, 8),
-    812920370: new AssetConfig("AF-BANK-GOBTC-STANDARD", 812920370, 6),
-    812922836: new AssetConfig("goETH", 812922836, 8),
-    812924856: new AssetConfig("AF-BANK-GOETH-STANDARD", 812924856, 6),
-    812932283: new AssetConfig("STBL2", 812932283, 6),
-    812936076: new AssetConfig("AF-BANK-STBL-STBL2", 812936076, 6),
-    812928844: new AssetConfig("AF-BANK-BANK-STANDARD", 812928844, 6),
+  [Network.TESTNET]: {
+    1: new AssetConfig("ALGO", 1, 6, undefined),
+    104193939: new AssetConfig("AF-BANK-ALGO-STANDARD", 104193939, 6, undefined),
+    104194013: new AssetConfig("USDC", 104194013, 6, undefined),
+    104207173: new AssetConfig("AF-BANK-USDC-STANDARD", 104207173, 6, undefined),
+    104207287: new AssetConfig("goBTC", 104207287, 8, undefined),
+    104207503: new AssetConfig("AF-BANK-GOBTC-STANDARD", 104207503, 6, undefined),
+    104207533: new AssetConfig("goETH", 104207533, 8, undefined),
+    104207983: new AssetConfig("AF-BANK-GOETH-STANDARD", 104207983, 6, undefined),
+    104208050: new AssetConfig("USDT", 104208050, 6, undefined),
+    104222974: new AssetConfig("AF-BANK-USDT-STANDARD", 104222974, 6, undefined),
+    104210500: new AssetConfig("STBL2", 104210500, 6, undefined),
+    104217422: new AssetConfig("AF-BANK-STBL2-STABLE", 104217422, 6, undefined),
+    104228491: new AssetConfig("AF-bUSDC-bSTBL2-NANO-LP", 104228491, 6, undefined),
+    104238470: new AssetConfig("AF-BANK-AF-bUSDC-bSTBL2-NANO-LP-LP", 104238470, 6, undefined),
   }
 }

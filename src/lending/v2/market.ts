@@ -16,6 +16,7 @@ import algosdk, {
 import {
   FIXED_3_SCALE_FACTOR,
   FIXED_6_SCALE_FACTOR,
+  FIXED_18_SCALE_FACTOR,
   ALGO_ASSET_ID,
   SECONDS_PER_YEAR,
   PERMISSIONLESS_SENDER_LOGIC_SIG,
@@ -26,6 +27,7 @@ import { decodeBytes, parseAddressBytes } from "../../utils"
 import { getApplicationGlobalState, getLocalStates, getAccountBalances } from "../../stateUtils"
 import { getParams, getPaymentTxn } from "../../transactionUtils"
 import AlgofiUser from "../../algofiUser"
+import { roundUp, roundDown } from "../../utils"
 
 // assetData
 import AssetAmount from "../../assetData/assetAmount"
@@ -54,6 +56,7 @@ export class MarketRewardsProgram {
   public issued: number
   public claimed: number
   public index: bigint
+  public projectedIndex: bigint
 
   /**
    * Constructs a market rewards program class
@@ -80,6 +83,14 @@ export class MarketRewardsProgram {
       )
     )
     this.index = bytesToBigInt(rawRewardsIndexBytes)
+
+    if (market.marketType == MarketType.VAULT || market.marketType == MarketType.LP) {
+     this.projectedIndex = this.index + ((market.activeBAssetCollateral > 0) ?
+      BigInt((Math.floor((Date.now() / 1000)) - market.rewardsLatestTime) * this.rewardsPerSecond) * FIXED_18_SCALE_FACTOR / BigInt(market.activeBAssetCollateral) : BigInt(0))
+    } else {
+     this.projectedIndex = this.index + ((market.borrowShareCirculation > 0) ?
+      BigInt((Math.floor((Date.now() / 1000)) - market.rewardsLatestTime) * this.rewardsPerSecond) * FIXED_18_SCALE_FACTOR / BigInt(market.borrowShareCirculation) : BigInt(0))
+    }
   }
 
   getAnnualRewards(): AssetAmount {
@@ -87,14 +98,14 @@ export class MarketRewardsProgram {
   }
 
   getSupplyRewardsAPR(): number {
-    if (this.assetID == 0 || this.market.marketType != MarketType.VAULT) {
+    if (this.assetID == 0 || (this.market.marketType != MarketType.VAULT && this.market.marketType != MarketType.LP)) {
       return 0
     }
     return this.getAnnualRewards().toUSD() / this.market.getTotalSupplied().toUSD()
   }
 
   getBorrowRewardsAPR(): number {
-    if (this.assetID == 0 || this.market.marketType == MarketType.VAULT) {
+    if (this.assetID == 0 || (this.market.marketType == MarketType.VAULT || this.market.marketType == MarketType.LP)) {
       return 0
     }
     return this.getAnnualRewards().toUSD() / this.market.getTotalBorrowed().toUSD()
@@ -162,6 +173,8 @@ export default class Market {
   public supplyAPR: number
   public borrowAPR: number
 
+  // rewards
+  public rewardsLatestTime: number
   public rewardsPrograms = []
   public rewardsEscrowAccount: string
 
@@ -231,6 +244,7 @@ export default class Market {
 
     // interest
     this.latestTime = state[MARKET_STRINGS.latest_time]
+    this.rewardsLatestTime = state[MARKET_STRINGS.rewards_latest_time]
     this.borrowIndex = state[MARKET_STRINGS.borrow_index]
     this.impliedBorrowIndex = state[MARKET_STRINGS.implied_borrow_index]
 
@@ -250,45 +264,6 @@ export default class Market {
   // GETTERS
 
   /**
-   * Gets the underlying supplied for a market.
-   * 
-   * @returns the underlying supplied for a market.
-   */
-  getUnderlyingSupplied(): number {
-    if (this.marketType == MarketType.STBL) {
-      return this.underlyingCash
-    } else {
-      return this.underlyingBorrowed + this.underlyingCash - this.underlyingReserves
-    }
-  }
-
-  // GETTERS (post asset data load)
-
-  getTotalSupplied(): AssetAmount {
-    return this.assetDataClient.getAsset(this.getUnderlyingSupplied(), this.underlyingAssetId)
-  }
-
-  getTotalBorrowed(): AssetAmount {
-    return this.assetDataClient.getAsset(this.underlyingBorrowed, this.underlyingAssetId)
-  }
-
-  getSupplyRewardsAPR(): number {
-    let supplyRewardsAPR = 0
-    for (const rewardsProgram of this.rewardsPrograms) {
-      supplyRewardsAPR += rewardsProgram.getSupplyRewardsAPR()
-    }
-    return supplyRewardsAPR
-  }
-
-  getBorrowRewardsAPR(): number {
-    let borrowRewardsAPR = 0
-    for (const rewardsProgram of this.rewardsPrograms) {
-      borrowRewardsAPR += rewardsProgram.getBorrowRewardsAPR()
-    }
-    return borrowRewardsAPR
-  }
-
-  /**
    * Gets supply and borrow aprs for a market.
    * 
    * @param totalSupplied - the total supplied for the market
@@ -296,6 +271,10 @@ export default class Market {
    * @returns a list containing both the supply and borrow apr.
    */
   getAPRs(totalSupplied: number, totalBorrowed: number): [number, number] {
+    if (this.marketType == MarketType.STBL) {
+      return [this.baseInterestRate / FIXED_6_SCALE_FACTOR, this.baseInterestRate / FIXED_6_SCALE_FACTOR]
+    }
+    
     let borrowUtilization = totalBorrowed / totalSupplied || 0
     let borrowAPR = this.baseInterestRate / FIXED_6_SCALE_FACTOR
     borrowAPR += (borrowUtilization * this.baseInterestSlope) / FIXED_6_SCALE_FACTOR
@@ -308,6 +287,59 @@ export default class Market {
     let supplyAPR = borrowAPR * borrowUtilization * (1 - this.reserveFactor / FIXED_3_SCALE_FACTOR)
     return [supplyAPR, borrowAPR]
   }
+
+    /**
+   * Gets the underlying supplied for a market.
+   * 
+   * @param isProjected - bool if the underlying supply is projected based on deltaT
+   * @returns the underlying supplied for a market.
+   */
+    getUnderlyingSupplied(isProjected: boolean = false): number {
+      if (this.marketType == MarketType.STBL) {
+        return this.underlyingCash
+      } else {
+        if (isProjected) {
+          let [_, borrowAPR] = this.getAPRs(this.getUnderlyingSupplied(), this.underlyingBorrowed);
+          const currentTime = Math.floor(Date.now() / 1000);
+          const deltaT = currentTime - this.latestTime;
+          const interestTick = Math.floor((deltaT * borrowAPR * 1e6 * 1e6) / SECONDS_PER_YEAR);
+          const nextBorrowIndexTerm = Math.floor((this.borrowIndex * interestTick) / 1e12);
+          const newBorrowIndex = this.borrowIndex + nextBorrowIndexTerm;
+          const underlyingBorrowWithInterest = Math.floor((this.underlyingBorrowed * newBorrowIndex) / this.impliedBorrowIndex);
+          const underlyingInterestToReserve = Math.floor(((underlyingBorrowWithInterest - this.underlyingBorrowed) * this.reserveFactor) / 1e3);
+          const newUnderlyingSupplied = this.underlyingCash + underlyingBorrowWithInterest - (this.underlyingReserves + underlyingInterestToReserve);
+          return newUnderlyingSupplied;
+        } else {
+          return this.underlyingBorrowed + this.underlyingCash - this.underlyingReserves
+        }
+      }
+    }
+  
+    // GETTERS (post asset data load)
+  
+    getTotalSupplied(): AssetAmount {
+      return this.assetDataClient.getAsset(this.getUnderlyingSupplied(), this.underlyingAssetId)
+    }
+  
+    getTotalBorrowed(): AssetAmount {
+      return this.assetDataClient.getAsset(this.underlyingBorrowed, this.underlyingAssetId)
+    }
+  
+    getSupplyRewardsAPR(): number {
+      let supplyRewardsAPR = 0
+      for (const rewardsProgram of this.rewardsPrograms) {
+        supplyRewardsAPR += rewardsProgram.getSupplyRewardsAPR()
+      }
+      return supplyRewardsAPR
+    }
+  
+    getBorrowRewardsAPR(): number {
+      let borrowRewardsAPR = 0
+      for (const rewardsProgram of this.rewardsPrograms) {
+        borrowRewardsAPR += rewardsProgram.getBorrowRewardsAPR()
+      }
+      return borrowRewardsAPR
+    }
 
   // CONVERSIONS
   
@@ -334,8 +366,10 @@ export default class Market {
    * @returns the amount of the underlying that is represented by the amount of
    * borrow shares that we passed in.
    */
-  borrowSharesToUnderlying(amount: number): AssetAmount {
-    let rawUnderlyingAmount = Math.floor((this.borrowShareCirculation != 0) ? (amount * this.underlyingBorrowed) / this.borrowShareCirculation : 0)
+  borrowSharesToUnderlying(amount: number, roundResultUp: boolean = false): AssetAmount {
+    let rawUnderlyingAmount = (roundResultUp) ?
+      Math.ceil((this.borrowShareCirculation != 0) ? (amount * this.underlyingBorrowed) / this.borrowShareCirculation : 0) :
+      Math.floor((this.borrowShareCirculation != 0) ? (amount * this.underlyingBorrowed) / this.borrowShareCirculation : 0)
     return this.assetDataClient.getAsset(rawUnderlyingAmount, this.underlyingAssetId)
   }
 
@@ -343,20 +377,29 @@ export default class Market {
    * Converts the underlying asset to b assets.
    * 
    * @param amount - the amount of underlying we want to convert
+   * @param isProjected - bool if user wishes to project the b asset to underlying exchange
    * @returns the corresponding amount of the b asset for the underlying that we
    * passed in.
    */
-  underlyingToBAsset(underlyingAmount: AssetAmount): AssetAmount {
-    return this.assetDataClient.getAsset(
-      Math.floor((underlyingAmount.amount * this.bAssetCirculation) / this.getUnderlyingSupplied()),
-      this.bAssetId
-    )
+  underlyingToBAsset(underlyingAmount: AssetAmount, isProjected: boolean = false): AssetAmount {    
+    if (isProjected) {
+      const newUnderlyingSupplied = this.getUnderlyingSupplied(isProjected=true);
+      return this.assetDataClient.getAsset(
+        Math.floor((underlyingAmount.amount * this.bAssetCirculation) / newUnderlyingSupplied),
+        this.bAssetId
+      )
+    } else {
+      return this.assetDataClient.getAsset(
+        Math.floor((underlyingAmount.amount * this.bAssetCirculation) / this.getUnderlyingSupplied()),
+        this.bAssetId
+      )
+    }
   }
 
   // QUOTES
   
   getMaximumWithdrawAmount(user: AlgofiUser, borrowUtilLimit: number=0.9): AssetAmount {
-    let userExcessScaledCollateral = user.lending.v2.netScaledCollateral - user.lending.v2.netScaledBorrow / borrowUtilLimit
+    let userExcessScaledCollateral = user.lending.v2.netScaledCollateral - roundUp(user.lending.v2.netScaledBorrow / borrowUtilLimit, 3)
     let maximumWithdrawUSD = userExcessScaledCollateral * FIXED_3_SCALE_FACTOR / this.collateralFactor
     let maximumWithdrawUnderlying = this.assetDataClient.getAssetFromUSDAmount(maximumWithdrawUSD, this.underlyingAssetId)
     let maximumMarketWithdrawUnderlying = Math.min(
@@ -367,11 +410,11 @@ export default class Market {
     if (user.lending.v2.netScaledBorrow == 0) {
       maximumMarketWithdrawUnderlying = user.lending.v2.userMarketStates?.[this.appId]?.suppliedAmount.amount || 0
     }
-    return this.assetDataClient.getAsset(maximumMarketWithdrawUnderlying * 10, this.underlyingAssetId)
+    return this.assetDataClient.getAsset(maximumMarketWithdrawUnderlying, this.underlyingAssetId)
   }
   
   getMaximumWithdrawBAsset(user: AlgofiUser, borrowUtilLimit: number=0.9): AssetAmount {
-    let userExcessScaledCollateral = user.lending.v2.netScaledCollateral - user.lending.v2.netScaledBorrow / borrowUtilLimit
+    let userExcessScaledCollateral = user.lending.v2.netScaledCollateral - roundUp(user.lending.v2.netScaledBorrow / borrowUtilLimit, 3)
     let maximumWithdrawUSD = userExcessScaledCollateral * FIXED_3_SCALE_FACTOR / this.collateralFactor
     let maximumWithdrawBAsset = this.assetDataClient.getAssetFromUSDAmount(maximumWithdrawUSD, this.bAssetId)
     let maximumMarketWithdrawBAsset = Math.min(
@@ -398,17 +441,20 @@ export default class Market {
     let newUserScaledCollateral = user.lending.v2.netScaledCollateral + (collateralDelta.toUSD() * this.collateralFactor / FIXED_3_SCALE_FACTOR)
     let newUserScaledBorrow = (user.lending.v2.netScaledBorrow || 0) + (borrowDelta.toUSD() * this.borrowFactor / FIXED_3_SCALE_FACTOR)
     // special handling for initial borrow
-    if (borrowDelta.amount > 0 && user.lending.v2.userMarketStates[this.appId]?.borrowedAmount.amount || 0 == 0) {
+    if ((borrowDelta.amount > 0) && ((user.lending.v2.userMarketStates[this.appId]?.borrowedAmount.amount || 0) == 0)) {
       newUserScaledBorrow += 0.001
     }
     // special handling for final repay
-    if (borrowDelta.amount + user.lending.v2.userMarketStates[this.appId]?.borrowedAmount.amount || 0 <= 0) {
+    if ((borrowDelta.amount + user.lending.v2.userMarketStates[this.appId]?.borrowedAmount.amount || 0) <= 0) {
       newUserScaledBorrow -= 0.001
     }
-    if (newUserScaledBorrow > 0) {
-      return newUserScaledBorrow / newUserScaledCollateral
-    } else {
+    
+    if (newUserScaledBorrow <= 0) {
       return 0
+    } else if (newUserScaledCollateral <= 0) {
+      return Infinity
+    } else {
+      return newUserScaledBorrow / newUserScaledCollateral
     }
   }
 
@@ -702,6 +748,8 @@ export default class Market {
   async getBorrowTxns(user: AlgofiUser, underlyingAmount: AssetAmount): Promise<Transaction[]> {
     if (this.marketType == MarketType.VAULT) {
       throw "Borrow action not supported by vault market"
+    } else if (this.marketType == MarketType.LP) {
+      throw "Borrow action not supported by lp market"
     }
 
     const params = await getParams(this.algod)
@@ -741,6 +789,8 @@ export default class Market {
   ): Promise<Transaction[]> {
     if (this.marketType == MarketType.VAULT) {
       throw "Repay borrow action not supported by vault market"
+    } else if (this.marketType == MarketType.LP) {
+      throw "Repay borrow action not supported by lp market"
     }
 
     let repayAmount = underlyingAmount.amount

@@ -17,6 +17,10 @@ import AssetAmount from "../../assetData/assetAmount"
 import { MarketType, MARKET_STRINGS } from "./lendingConfig"
 import Market from "./market"
 
+// CONSTANTS
+
+const ROUND_UP: boolean = true
+
 // HELPER CLASSES
 
 export class UserMarketRewardsState {
@@ -55,14 +59,14 @@ export class UserMarketRewardsState {
     
     let userTotal = 0
     let globalTotal = 0
-    if (market.marketType == MarketType.VAULT) {
+    if (market.marketType == MarketType.VAULT || market.marketType == MarketType.LP) {
       userTotal = bAssetCollateral
       globalTotal = market.bAssetCirculation
     } else {
       userTotal = borrowShares
       globalTotal = market.borrowShareCirculation
     }
-    this.realUnclaimed += Number((market.rewardsPrograms[programIndex].index - this.latestIndex) * BigInt(userTotal) / FIXED_18_SCALE_FACTOR)
+    this.realUnclaimed += Number((market.rewardsPrograms[programIndex].projectedIndex - this.latestIndex) * BigInt(userTotal) / FIXED_18_SCALE_FACTOR)
     
     // calculate rewards per year at current reate
     this.rewardsPerYear = market.rewardsPrograms[programIndex].rewardsPerSecond *(365*24*60*60) * userTotal / globalTotal
@@ -90,7 +94,7 @@ export default class UserMarketState {
     this.bAssetCollateral = marketState?.[MARKET_STRINGS.user_active_b_asset_collateral] || 0
     this.borrowShares = marketState?.[MARKET_STRINGS.user_borrow_shares] || 0
     this.suppliedAmount = market.bAssetToUnderlying(this.bAssetCollateral)
-    this.borrowedAmount = market.borrowSharesToUnderlying(this.borrowShares)
+    this.borrowedAmount = market.borrowSharesToUnderlying(this.borrowShares, ROUND_UP)
     
     this.rewardsProgramStates = []
     this.rewardsProgramStates.push(new UserMarketRewardsState(marketState, market, this.bAssetCollateral, this.borrowShares, 0))

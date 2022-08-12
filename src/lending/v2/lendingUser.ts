@@ -137,7 +137,7 @@ export default class User {
               value.rewardsProgramStates[i].realUnclaimed + (this.netUnclaimedRewards[assetId] || 0)
             this.netRewardsPerYear[assetId] =
               value.rewardsProgramStates[i].rewardsPerYear + (this.netRewardsPerYear[assetId] || 0)
-            if (market.marketType == MarketType.VAULT) {
+            if (market.marketType == MarketType.VAULT ||  market.marketType == MarketType.LP) {
               this.netSupplyRewardsPerYear += this.lendingClient.algofiClient.assetData.getAsset(
                 value.rewardsProgramStates[i].rewardsPerYear, assetId).toUSD()
             } else {

@@ -58,6 +58,7 @@ export default class Staking {
   public rewardsSecondaryAssetId: number
   public rewardsSecondaryRatio: number
   
+  public projectedRewardsCoefficient: number
 
   /**
    * Constructor for the staking object.
@@ -86,6 +87,8 @@ export default class Staking {
     const managerGlobalState = await getApplicationGlobalState(this.algod, this.managerAppId)
     const marketGlobalState = await getApplicationGlobalState(this.algod, this.marketAppId)
 
+    this.latestTime = managerGlobalState[STAKING_STRINGS.latest_rewards_time]
+
     this.oracleAppId = marketGlobalState[STAKING_STRINGS.oracle_app_id]
 
     this.totalStaked = marketGlobalState[STAKING_STRINGS.total_staked]
@@ -97,6 +100,9 @@ export default class Staking {
     this.rewardsPerSecond = managerGlobalState[STAKING_STRINGS.rewards_per_second]
     this.rewardsSecondaryAssetId = managerGlobalState[STAKING_STRINGS.rewards_secondary_asset_id]
     this.rewardsSecondaryRatio = managerGlobalState[STAKING_STRINGS.rewards_secondary_ratio]
+
+    this.projectedRewardsCoefficient = this.rewardsCoefficient +
+      (Math.floor(Date.now() / 1000) - this.latestTime) * this.rewardsPerSecond * 10**14 / this.totalStaked
   }
 
   // GETTERS (require assetData to be loaded)
@@ -105,11 +111,17 @@ export default class Staking {
   }
 
   getRewardsAPR(): number {
+    if (this.rewardsAssetId == 0) {
+      return 0
+    }
     const annualRewards = this.assetDataClient.getAsset(this.rewardsPerSecond * SECONDS_PER_YEAR, this.rewardsAssetId)
     return annualRewards.toUSD() / (this.getTotalStaked().toUSD() || 1)
   }
 
   getSecondaryRewardsAPR(): number {
+    if (this.rewardsSecondaryAssetId == 0) {
+      return 0
+    }
     const annualSecondaryRewards = this.assetDataClient.getAsset(Math.floor(this.rewardsPerSecond * SECONDS_PER_YEAR * this.rewardsSecondaryRatio / 1000), this.rewardsSecondaryAssetId)
     return annualSecondaryRewards.toUSD() / (this.getTotalStaked().toUSD() || 1)
   }

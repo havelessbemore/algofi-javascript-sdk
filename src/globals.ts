@@ -52,10 +52,29 @@ export const PERMISSIONLESS_SENDER_LOGIC_SIG = new LogicSigAccount(
 export const TEXT_ENCODER = new TextEncoder()
 export const TEXT_DECODER = new TextDecoder()
 
-export const ANALYTICS_ENDPOINT = "https://api.algofi.org"
+export const MAINNET_ANALYTICS_ENDPOINT = "https://api.algofi.org"
+export const TESTNET_ANALYTICS_ENDPOINT = "https://api-dev.algofi.org"
+export function getAnalyticsEndpoint(network: Network): string {
+  if (network = Network.MAINNET) {
+    return MAINNET_ANALYTICS_ENDPOINT
+  } else {
+    return TESTNET_ANALYTICS_ENDPOINT
+  }
+}
+
 // ENUMS
 
 export enum Network {
   MAINNET = 0,
-  MAINNET_CLONE3 = 4,
+  TESTNET = 1,
+}
+
+export function getNetworkName(network: Network) {
+  if (network == Network.MAINNET) {
+    return "mainnet"
+  } else if (network == Network.TESTNET) {
+    return "testnet"
+  } else {
+    throw "bad network"
+  }
 }

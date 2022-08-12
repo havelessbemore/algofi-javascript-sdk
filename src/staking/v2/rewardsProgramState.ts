@@ -4,7 +4,10 @@
 import { bytesToBigInt } from "algosdk"
 
 // global
-import { SECONDS_PER_YEAR } from "../../globals"
+import {
+  FIXED_18_SCALE_FACTOR,
+  SECONDS_PER_YEAR
+} from "../../globals"
 
 // local
 import { STAKING_STRINGS } from "./stakingConfig"
@@ -19,6 +22,8 @@ export default class RewardsProgramState {
   rewardsCoefficient: bigint
   rewardsIssued: number
   rewardsPayed: number
+
+  projectedRewardsCoefficient: bigint
 
   /**
    * Constructor for rewards program state
@@ -46,6 +51,13 @@ export default class RewardsProgramState {
       const bytesVer = new Uint8Array(Buffer.from(nonFormattedRewardsCoefficient, "base64"))
       const bigInt = bytesToBigInt(bytesVer)
       this.rewardsCoefficient = bigInt
+    }
+
+    if (staking.scaledTotalStaked > 0) {
+      this.projectedRewardsCoefficient = this.rewardsCoefficient +
+        BigInt((Math.floor(Date.now() / 1000) - staking.latestTime) * this.rewardsPerSecond) * FIXED_18_SCALE_FACTOR / BigInt(staking.scaledTotalStaked)
+    } else {
+      this.projectedRewardsCoefficient = this.rewardsCoefficient
     }
   }
 
@@ -98,11 +110,11 @@ export class UserRewardsProgramState {
     }
 
     // calc user unrealized rewards (global coefficient on rewards program - user rewards coefficient on rewards program) * userTotalScaledStaked
-    const globalCoefficient = staking.rewardsProgramStates[this.rewardsProgramIndex].rewardsCoefficient
+    const globalCoefficient = staking.rewardsProgramStates[this.rewardsProgramIndex].projectedRewardsCoefficient
     const userCoefficient = this.userRewardsCoefficient
 
     this.userUnrealizedRewards = Number(
-      (globalCoefficient - userCoefficient) * BigInt(userScaledTotalStaked) + BigInt(this.userUnclaimedRewards)
+      ((globalCoefficient - userCoefficient) * BigInt(userScaledTotalStaked) / FIXED_18_SCALE_FACTOR) + BigInt(this.userUnclaimedRewards)
     )
   }
 }
