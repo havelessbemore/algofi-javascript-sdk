@@ -169,10 +169,6 @@ export default class Market {
   public borrowIndex: number
   public impliedBorrowIndex: number
 
-  // calculated values
-  public supplyAPR: number
-  public borrowAPR: number
-
   // rewards
   public rewardsLatestTime: number
   public rewardsPrograms = []
@@ -248,11 +244,6 @@ export default class Market {
     this.borrowIndex = state[MARKET_STRINGS.borrow_index]
     this.impliedBorrowIndex = state[MARKET_STRINGS.implied_borrow_index]
 
-    // calculated values
-    let [supplyAPR, borrowAPR] = this.getAPRs(this.getUnderlyingSupplied(), this.underlyingBorrowed)
-    this.supplyAPR = supplyAPR
-    this.borrowAPR = borrowAPR
-
     // rewards
     this.rewardsPrograms = []
     for (var idx = 0; idx < 2; idx++) {
@@ -263,18 +254,15 @@ export default class Market {
 
   // GETTERS
 
-  /**
-   * Gets supply and borrow aprs for a market.
-   * 
-   * @param totalSupplied - the total supplied for the market
-   * @param totalBorrowed - the total borrowed for the market
-   * @returns a list containing both the supply and borrow apr.
-   */
-  getAPRs(totalSupplied: number, totalBorrowed: number): [number, number] {
+  getBorrowAPR(totalSupplied: number=this.getUnderlyingSupplied(), totalBorrowed: number=this.underlyingBorrowed): number {
     if (this.marketType == MarketType.STBL) {
-      return [this.baseInterestRate / FIXED_6_SCALE_FACTOR, this.baseInterestRate / FIXED_6_SCALE_FACTOR]
+      return this.baseInterestRate / FIXED_6_SCALE_FACTOR
     }
     
+    if (this.marketType == MarketType.LP) {
+      return 0
+    }
+
     let borrowUtilization = totalBorrowed / totalSupplied || 0
     let borrowAPR = this.baseInterestRate / FIXED_6_SCALE_FACTOR
     borrowAPR += (borrowUtilization * this.baseInterestSlope) / FIXED_6_SCALE_FACTOR
@@ -284,8 +272,33 @@ export default class Market {
         Math.pow(borrowUtilization - this.targetUtilizationRatio / FIXED_6_SCALE_FACTOR, 2)
     }
 
+    return borrowAPR
+  }
+
+  async getSupplyAPR(totalSupplied: number=this.getUnderlyingSupplied(), totalBorrowed: number=this.underlyingBorrowed): Promise<number> {
+    let borrowAPR = this.getBorrowAPR(totalSupplied, totalBorrowed)
+    
+    if (this.marketType == MarketType.STBL) {
+      return borrowAPR
+    }
+    
+    if (this.marketType == MarketType.LP) {
+      if (this.lendingClient.algofiClient.interfaces.hasLendingPoolForLP(this.underlyingAssetId)) {
+        let lendingPool = await this.lendingClient.algofiClient.interfaces.getLendingPoolFromLP(this.underlyingAssetId)
+        return await lendingPool.getAPR()
+      } else {
+        if (this.lendingClient.algofiClient.amm.v1.hasPoolForLPAsset(this.underlyingAssetId)) {
+          let pool = await this.lendingClient.algofiClient.amm.v1.getPoolByAppId(this.underlyingAssetId)
+          return pool.getAPR()
+        } else {
+          return 0
+        }
+      }
+    }
+
+    let borrowUtilization = totalBorrowed / totalSupplied || 0
     let supplyAPR = borrowAPR * borrowUtilization * (1 - this.reserveFactor / FIXED_3_SCALE_FACTOR)
-    return [supplyAPR, borrowAPR]
+    return supplyAPR
   }
 
     /**
@@ -299,10 +312,9 @@ export default class Market {
         return this.underlyingCash
       } else {
         if (isProjected) {
-          let [_, borrowAPR] = this.getAPRs(this.getUnderlyingSupplied(), this.underlyingBorrowed);
           const currentTime = Math.floor(Date.now() / 1000);
           const deltaT = currentTime - this.latestTime;
-          const interestTick = Math.floor((deltaT * borrowAPR * 1e6 * 1e6) / SECONDS_PER_YEAR);
+          const interestTick = Math.floor((deltaT * this.getBorrowAPR() * 1e6 * 1e6) / SECONDS_PER_YEAR);
           const nextBorrowIndexTerm = Math.floor((this.borrowIndex * interestTick) / 1e12);
           const newBorrowIndex = this.borrowIndex + nextBorrowIndexTerm;
           const underlyingBorrowWithInterest = Math.floor((this.underlyingBorrowed * newBorrowIndex) / this.impliedBorrowIndex);

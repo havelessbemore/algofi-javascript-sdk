@@ -43,7 +43,7 @@ export default class AMMClient {
             if (!(poolInfo.appId in this.pools)) {
               let config = new PoolConfig(poolInfo.app_id, poolInfo.asset1_id, poolInfo.asset2_id, poolInfo.lp_asset_id, PoolType[poolInfo.type as keyof typeof PoolType])
               // pools
-              this.pools[config.appId] = new Pool(this.algod, this, config)
+              this.pools[config.appId] = new Pool(this.algod, this, config, poolInfo.tvl, poolInfo.apr)
               // assetPoolMap
               if (!(config.asset1Id in this.assetPoolMap)) {
                 this.assetPoolMap[config.asset1Id] = []
@@ -74,7 +74,7 @@ export default class AMMClient {
       });
   }
   
-  async getPool(assetAId: number, assetBId: number, poolType: PoolType) {
+  async getPool(assetAId: number, assetBId: number, poolType: PoolType): Promise<Pool> {
     if (assetAId == assetBId) {
       throw new Error("Asset IDs must differ")
     }
@@ -82,9 +82,6 @@ export default class AMMClient {
     // normalize asset order
     let asset1Id = (assetAId < assetBId) ? assetAId : assetBId
     let asset2Id = (assetAId < assetBId) ? assetBId : assetAId
-    
-    console.log("LOOK FOR POOL", asset1Id, asset2Id, poolType)
-    console.log(this.poolMap)
     
     if (this.poolMap?.[asset1Id]?.[asset2Id]?.[poolType]) {
       await this.poolMap[asset1Id][asset2Id][poolType].loadState()
@@ -96,6 +93,46 @@ export default class AMMClient {
     }
 
     let pool = new Pool(this.algod, this, new PoolConfig(0, asset1Id, asset2Id, 0, poolType))
+    await pool.loadState()
+    return pool
+  }
+  
+  hasPoolForLPAsset(lpAssetId: number): boolean {
+    return (lpAssetId in this.lpPoolMap)
+  }
+  
+  async getPoolByLPAsset(lpAssetId: number): Promise<Pool> {
+    if (!(lpAssetId in this.lpPoolMap)) {
+      throw new Error("Pool not found")
+    }
+
+    let pool = this.lpPoolMap[lpAssetId]
+    await pool.loadState()
+    return pool
+  }
+  
+  hasPoolsForAsset(assetId: number): boolean {
+    return (assetId in this.assetPoolMap)
+  }
+  
+  getPoolsByAsset(assetId: number): Pool[] {
+    if (!(assetId in this.assetPoolMap)) {
+      return []
+    }
+
+    return this.assetPoolMap[assetId]
+  }
+  
+  hasPoolForAppId(appId: number): boolean {
+    return (appId in this.pools)
+  }
+  
+  async getPoolByAppId(appId: number): Promise<Pool> {
+    if (!(appId in this.pools)) {
+      throw new Error("Pool not found")
+    }
+
+    let pool =  this.pools[appId]
     await pool.loadState()
     return pool
   }
