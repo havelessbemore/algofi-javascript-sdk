@@ -109,6 +109,9 @@ export default class Pool {
   public balance2: number
   public lpCirculation: number
 
+  public tvl: number
+  public apr: number
+
   // nano
   public initialAmplificationFactor: number
   public futureAmplificationFactor: number
@@ -126,7 +129,7 @@ export default class Pool {
   //
   public swapFee: number
 
-  constructor(algod: Algodv2, ammClient: AMMClient, poolConfig: PoolConfig) {
+  constructor(algod: Algodv2, ammClient: AMMClient, poolConfig: PoolConfig, tvl: number=0, apr: number=0) {
     this.algod = algod
     this.ammClient = ammClient
     this.assetDataClient = ammClient.algofiClient.assetData
@@ -134,6 +137,8 @@ export default class Pool {
     this.asset1Id = poolConfig.asset1Id
     this.asset2Id = poolConfig.asset2Id
     this.poolType = poolConfig.poolType
+    this.tvl = tvl
+    this.apr = apr
   }
 
   async loadState() {
@@ -186,11 +191,21 @@ export default class Pool {
     this.swapFee = getSwapFee(this.poolType)
   }
   
-  isCreated(): boolean {
-    return this.appId != 0
+  // GETTERS
+  
+  getTVL(): number {
+    return this.tvl
+  }
+
+  getAPR(): number {
+    return this.apr
   }
   
   // HELPER FUNCTIONS
+  
+  isCreated(): boolean {
+    return this.appId != 0
+  }
   
   getAmplificationFactor(): number {
     let now = Math.floor(Date.now() / 1000)
@@ -383,7 +398,9 @@ export default class Pool {
     }
   }
   
-  getZapQuote(asset1Amount: number, asset2Amount:number) {
+  getZapQuote(assetAID: number, assetAAmount: number, assetBAmount: number=0) {
+    let asset1Amount = (assetAID == this.asset1Id) ? assetAAmount : assetBAmount
+    let asset2Amount = (assetAID == this.asset1Id) ? assetBAmount : assetAAmount
     if (asset1Amount == 0 && asset2Amount == 0) {
       return new PoolQuote(PoolQuoteType.ZAP, 0, 0, 0, 0)
     }
@@ -409,7 +426,7 @@ export default class Pool {
       let swapInAmt = this.binarySearch(0, asset1Amount, objective)
       let swapQuote = this.getSwapExactForQuote(this.asset1Id, swapInAmt)
       let swapOutAmt = swapQuote.asset2Delta
-      let poolQuote = this.getPoolQuote(asset1Amount - swapInAmt, asset2Amount + swapOutAmt)
+      let poolQuote = this.getPoolQuote(asset1Amount - swapInAmt, asset2Amount + Math.floor(swapOutAmt * 0.999))
       poolQuote.quoteType = PoolQuoteType.ZAP
       poolQuote.zapAsset1Swap = -1 * swapInAmt
       poolQuote.zapAsset2Swap = swapOutAmt
@@ -423,7 +440,7 @@ export default class Pool {
       let swapInAmt = this.binarySearch(0, asset2Amount, objective)
       let swapQuote = this.getSwapExactForQuote(this.asset2Id, swapInAmt)
       let swapOutAmt = swapQuote.asset1Delta
-      let poolQuote = this.getPoolQuote(asset1Amount + Math.floor(swapOutAmt * 0.99), asset2Amount - swapInAmt)
+      let poolQuote = this.getPoolQuote(asset1Amount + Math.floor(swapOutAmt * 0.999), asset2Amount - swapInAmt)
       poolQuote.quoteType = PoolQuoteType.ZAP
       poolQuote.zapAsset2Swap = -1 * swapInAmt
       poolQuote.zapAsset1Swap = swapOutAmt
