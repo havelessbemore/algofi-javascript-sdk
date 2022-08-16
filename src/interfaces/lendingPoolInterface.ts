@@ -87,8 +87,17 @@ export default class LendingPoolInterface {
     this.market1 = this.algofiClient.lending.v2.markets[this.market1AppId]
     this.market2 = this.algofiClient.lending.v2.markets[this.market2AppId]
     this.lpMarket = this.algofiClient.lending.v2.markets[this.lpMarketAppId]
-    this.pool = this.algofiClient.amm.v1.pools[this.poolAppId]
-    await this.pool.loadState()
+    this.pool = await this.algofiClient.amm.v1.getPoolByLPAsset(this.lpMarket.underlyingAssetId)
+  }
+  
+  // GETTERS
+
+  getTVL(): number {
+    return this.pool.getTVL()
+  }
+  
+  async getAPR(): Promise<number> {
+    return (await this.pool.getAPR()) + (((await this.market1.getSupplyAPR()) + (await this.market2.getSupplyAPR())) / 2)
   }
 
   // QUOTES
@@ -137,11 +146,13 @@ export default class LendingPoolInterface {
   getBurnQuote(amount: number): PoolQuote {
     let lpsBurned = amount
     let poolBurnQuote = this.pool.getBurnQuote(amount)
+    console.log(poolBurnQuote)
     let bAsset1BurnedAmount = poolBurnQuote.asset1Delta
     let bAsset2BurnedAmount = poolBurnQuote.asset2Delta
     let numIter = poolBurnQuote.iterations
     let asset1BurnedAmount = this.market1.bAssetToUnderlying(bAsset1BurnedAmount).amount
     let asset2BurnedAmount = this.market2.bAssetToUnderlying(bAsset2BurnedAmount).amount
+    console.log(asset1BurnedAmount, asset2BurnedAmount)
     return new PoolQuote(PoolQuoteType.BURN, asset1BurnedAmount, asset2BurnedAmount, -1 * lpsBurned, numIter)
   }
 
@@ -201,10 +212,12 @@ export default class LendingPoolInterface {
     return new PoolQuote(PoolQuoteType.SWAP_FOR_EXACT, asset1SwapAmount, asset2SwapAmount, 0, numIter)
   }
 
-  getZapQuote(asset1Amount: number, asset2Amount: number): PoolQuote {
+  getZapQuote(assetAID: number, assetAAmount: number, assetBAmount: number=0): PoolQuote {
+    let asset1Amount = (assetAID == this.market1.underlyingAssetId) ? assetAAmount : assetBAmount
+    let asset2Amount = (assetAID == this.market1.underlyingAssetId) ? assetBAmount : assetAAmount
     let bAsset1Amount = this.market1.underlyingToBAsset(this.algofiClient.assetData.getAsset(asset1Amount, this.market1.underlyingAssetId)).amount
     let bAsset2Amount = this.market2.underlyingToBAsset(this.algofiClient.assetData.getAsset(asset2Amount, this.market2.underlyingAssetId)).amount
-    let quote = this.pool.getZapQuote(bAsset1Amount, bAsset2Amount)
+    let quote = this.pool.getZapQuote(this.market1.bAssetId, bAsset1Amount, bAsset2Amount)
 
     return new PoolQuote(
       PoolQuoteType.ZAP,
