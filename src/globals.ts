@@ -52,7 +52,7 @@ export const PERMISSIONLESS_SENDER_LOGIC_SIG = new LogicSigAccount(
 export const TEXT_ENCODER = new TextEncoder()
 export const TEXT_DECODER = new TextDecoder()
 
-export const MAINNET_ANALYTICS_ENDPOINT = "https://api.algofi.org"
+export const MAINNET_ANALYTICS_ENDPOINT = "https://api-dev.algofi.org"
 export const TESTNET_ANALYTICS_ENDPOINT = "https://api-dev.algofi.org"
 export function getAnalyticsEndpoint(network: Network): string {
   if (network = Network.MAINNET) {

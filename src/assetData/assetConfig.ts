@@ -38,6 +38,11 @@ export const AssetConfigs = {
     818188553: new AssetConfig("AF-BANK-GOETH-STANDARD", 818188553, 6, undefined),
     312769: new AssetConfig("USDT", 312769, 6, undefined),
     818190568: new AssetConfig("AF-BANK-USDT-STANDARD", 818190568, 6, undefined),
+    841126810: new AssetConfig("STBL2", 841126810, 6, undefined),
+    841157954: new AssetConfig("AF-BANK_STBL2-STABLE", 841157954, 6, undefined),
+    // LP collateral
+    841171328: new AssetConfig("AF-NANO-POOL-AF-BANK-AF-BANK", 841171328, 6, undefined), // bUSDC bSTBL2 LP
+    841462373: new AssetConfig("AF-BANK-AF-POOL-LP", 841462373, 6, undefined), // bank bUSDC bSTBL2 LP
     // v1 staking assets
     465865291 : new AssetConfig("STBL", 465865291, 6, undefined),
     470842789 : new AssetConfig("DEFLY", 470842789, 6, undefined),

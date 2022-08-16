@@ -393,7 +393,7 @@ export default class Market {
    * @returns the corresponding amount of the b asset for the underlying that we
    * passed in.
    */
-  underlyingToBAsset(underlyingAmount: AssetAmount, isProjected: boolean = false): AssetAmount {    
+  underlyingToBAsset(underlyingAmount: AssetAmount, isProjected: boolean = false): AssetAmount {
     if (isProjected) {
       const newUnderlyingSupplied = this.getUnderlyingSupplied(isProjected=true);
       return this.assetDataClient.getAsset(
