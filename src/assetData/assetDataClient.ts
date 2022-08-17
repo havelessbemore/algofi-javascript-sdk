@@ -42,6 +42,7 @@ export default class AssetDataClient {
       this.assets[assetConfig.assetId] = new AssetData(
         assetConfig.assetId,
         assetConfig.name,
+        assetConfig.unitName,
         assetConfig.decimals,
         assetConfig.defaultPrice
       )
@@ -53,7 +54,7 @@ export default class AssetDataClient {
       .then(resp => {
          if (resp.status == 200) {
            for (const assetInfo of resp.body) {
-             this.assets[assetInfo.asset_id] = new AssetData(assetInfo.asset_id, assetInfo.name, assetInfo.decimals, assetInfo.price)
+             this.assets[assetInfo.asset_id] = new AssetData(assetInfo.asset_id, assetInfo.name, assetInfo.unit_name, assetInfo.decimals, assetInfo.price)
            }
          } else {
            console.log("Bad Response")
@@ -69,7 +70,7 @@ export default class AssetDataClient {
       .then(resp => {
          if (resp.status == 200) {
            for (const assetInfo of resp.body) {
-             this.assets[assetInfo.asset_id] = new AssetData(assetInfo.asset_id, assetInfo.name, assetInfo.decimals, assetInfo.price)
+             this.assets[assetInfo.asset_id] = new AssetData(assetInfo.asset_id, assetInfo.name, assetInfo.unit_name, assetInfo.decimals, assetInfo.price)
            }
          } else {
            console.log("Bad Response")
@@ -78,6 +79,7 @@ export default class AssetDataClient {
       .catch(err => {
         console.log(err.message)
       });
+    console.log("DONE")
   }
 
   async loadLendingAssetState() {
@@ -88,6 +90,7 @@ export default class AssetDataClient {
       this.assets[underlyingAssetConfig.assetId] = new AssetData(
         underlyingAssetConfig.assetId,
         underlyingAssetConfig.name,
+        underlyingAssetConfig.unitName,
         underlyingAssetConfig.decimals,
         market.oracle.price
       )
@@ -97,6 +100,7 @@ export default class AssetDataClient {
         this.assets[bAssetConfig.assetId] = new AssetData(
           bAssetConfig.assetId,
           bAssetConfig.name,
+          bAssetConfig.unitName,
           bAssetConfig.decimals,
           market.bAssetToUnderlying(10**bAssetConfig.decimals).toUSD()
         )
