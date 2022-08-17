@@ -43,7 +43,7 @@ export const AssetConfigs = {
     841126810: new AssetConfig("STBL2", "STBL2", 841126810, 6, undefined),
     841157954: new AssetConfig("AF-BANK_STBL2-STABLE", "AF-BANK", 841157954, 6, undefined),
     // LP collateral
-    841171328: new AssetConfig("AF-NANO-POOL-AF-BANK-AF-BANK", "AF-POOL", 841171328, 6, undefined), // bUSDC bSTBL2 LP
+    841171328: new AssetConfig("AF-USDC-STBL2-NANO-LP", "AF-POOL", 841171328, 6, undefined), // bUSDC bSTBL2 LP
     841462373: new AssetConfig("AF-BANK-AF-POOL-LP", "AF-BANK", 841462373, 6, undefined), // bank bUSDC bSTBL2 LP
     // v1 staking assets
     465865291 : new AssetConfig("STBL", "STBL", 465865291, 6, undefined),
