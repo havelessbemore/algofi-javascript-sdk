@@ -146,13 +146,11 @@ export default class LendingPoolInterface {
   getBurnQuote(amount: number): PoolQuote {
     let lpsBurned = amount
     let poolBurnQuote = this.pool.getBurnQuote(amount)
-    console.log(poolBurnQuote)
     let bAsset1BurnedAmount = poolBurnQuote.asset1Delta
     let bAsset2BurnedAmount = poolBurnQuote.asset2Delta
     let numIter = poolBurnQuote.iterations
     let asset1BurnedAmount = this.market1.bAssetToUnderlying(bAsset1BurnedAmount).amount
     let asset2BurnedAmount = this.market2.bAssetToUnderlying(bAsset2BurnedAmount).amount
-    console.log(asset1BurnedAmount, asset2BurnedAmount)
     return new PoolQuote(PoolQuoteType.BURN, asset1BurnedAmount, asset2BurnedAmount, -1 * lpsBurned, numIter)
   }
 
