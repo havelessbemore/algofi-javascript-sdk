@@ -126,8 +126,8 @@ export default class User {
         if (value.borrowShares != 0) { // round up unless exactly 0
           this.netScaledBorrow += Number(((value.borrowedAmount.toUSD() * market.borrowFactor) / FIXED_3_SCALE_FACTOR).toFixed(3)) + 0.001
         }
-        dollarTotaledSupplyAPR += value.suppliedAmount.toUSD() * market.supplyAPR
-        dollarTotaledBorrowAPR += value.borrowedAmount.toUSD() * market.borrowAPR
+        dollarTotaledSupplyAPR += value.suppliedAmount.toUSD() * (await market.getSupplyAPR())
+        dollarTotaledBorrowAPR += value.borrowedAmount.toUSD() * market.getBorrowAPR()
         
         // rewards
         for (var i = 0; i < 2; i++) {
