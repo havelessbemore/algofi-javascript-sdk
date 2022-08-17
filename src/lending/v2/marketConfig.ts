@@ -37,6 +37,8 @@ export const MarketConfigs = {
     new MarketConfig(818183964, 386192725, 818184214, MarketType.STANDARD), // goBTC
     new MarketConfig(818188286, 386195940, 818188553, MarketType.STANDARD), // goETH
     new MarketConfig(818190205, 312769, 818190568, MarketType.STANDARD), // USDT
+    new MarketConfig(841145020, 841126810, 841157954, MarketType.STBL), // STBL2
+    new MarketConfig(841194726, 841171328, 841462373, MarketType.LP), // bUSDC-bSTBL2 LP
   ],
   [Network.TESTNET]: [
     new MarketConfig(104193717, 1, 104193939, MarketType.STANDARD), // ALGO
