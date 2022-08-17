@@ -79,7 +79,6 @@ export default class AssetDataClient {
       .catch(err => {
         console.log(err.message)
       });
-    console.log("DONE")
   }
 
   async loadLendingAssetState() {
