@@ -46,6 +46,8 @@ import LendingPoolInterfaceConfig, { LENDING_POOL_INTERFACE_STRINGS } from "./le
 
 // CONSTANTS
 
+const IS_PROJECTED: boolean = true
+
 // HELPER CLASSES
 
 // INTERFACE
@@ -213,8 +215,8 @@ export default class LendingPoolInterface {
   getZapQuote(assetAID: number, assetAAmount: number, assetBAmount: number=0): PoolQuote {
     let asset1Amount = (assetAID == this.market1.underlyingAssetId) ? assetAAmount : assetBAmount
     let asset2Amount = (assetAID == this.market1.underlyingAssetId) ? assetBAmount : assetAAmount
-    let bAsset1Amount = this.market1.underlyingToBAsset(this.algofiClient.assetData.getAsset(asset1Amount, this.market1.underlyingAssetId)).amount
-    let bAsset2Amount = this.market2.underlyingToBAsset(this.algofiClient.assetData.getAsset(asset2Amount, this.market2.underlyingAssetId)).amount
+    let bAsset1Amount = this.market1.underlyingToBAsset(this.algofiClient.assetData.getAsset(asset1Amount, this.market1.underlyingAssetId), IS_PROJECTED).amount
+    let bAsset2Amount = this.market2.underlyingToBAsset(this.algofiClient.assetData.getAsset(asset2Amount, this.market2.underlyingAssetId), IS_PROJECTED).amount
     let quote = this.pool.getZapQuote(this.market1.bAssetId, bAsset1Amount, bAsset2Amount)
 
     return new PoolQuote(
