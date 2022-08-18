@@ -622,7 +622,7 @@ export default class LendingPoolInterface {
     maxSlippage: number = 0.005,
     addToUserCollateral: boolean = true
   ): Promise<Transaction[]> {
-    let swapQuote = new PoolQuote(PoolQuoteType.SWAP_EXACT_FOR, quote.zapAsset1Swap, quote.zapAsset2Swap, 0, Math.ceil(quote.iterations / 2)) 
+    let swapQuote = new PoolQuote(PoolQuoteType.SWAP_FOR_EXACT, quote.zapAsset1Swap, quote.zapAsset2Swap, 0, Math.ceil(quote.iterations / 2))
     let swapTxns = await this.getSwapTxns(user, swapQuote, maxSlippage)
    
     let poolQuote = new PoolQuote(PoolQuoteType.POOL, quote.asset1Delta, quote.asset2Delta, quote.lpDelta, Math.floor(quote.iterations / 2))

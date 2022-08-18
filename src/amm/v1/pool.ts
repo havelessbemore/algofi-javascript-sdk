@@ -399,8 +399,8 @@ export default class Pool {
   }
   
   getZapQuote(assetAID: number, assetAAmount: number, assetBAmount: number=0) {
-    let asset1Amount = (assetAID == this.asset1Id) ? assetAAmount : assetBAmount
-    let asset2Amount = (assetAID == this.asset1Id) ? assetBAmount : assetAAmount
+    let asset1Amount = Math.floor(((assetAID == this.asset1Id) ? assetAAmount : assetBAmount) * 0.995)
+    let asset2Amount = Math.floor(((assetAID == this.asset1Id) ? assetBAmount : assetAAmount) * 0.995)
     if (asset1Amount == 0 && asset2Amount == 0) {
       return new PoolQuote(PoolQuoteType.ZAP, 0, 0, 0, 0)
     }
@@ -419,30 +419,34 @@ export default class Pool {
     
     // calculate swap amounts
     if (asset1ImpliedLPTokens > asset2ImpliedLPTokens) {
-      let objective = function (dx) {
-        let dy = this.getSwapExactForQuote(this.asset1Id, dx).asset2Delta
-        return  (asset2Amount + dy) / (this.balance2 - dy) - (asset1Amount - dx) / (this.balance1 + dx) // new ratio must equal new input ratio
+      let objective = function (dy) {
+        let dx = this.getSwapForExactQuote(this.asset2Id, dy).asset1delta
+        return (asset2Amount + dy) / (this.balance2 - dy) - (asset1Amount - dx) / (this.balance1 + dx) // new ratio must equal new input ratio
       }.bind(this)
-      let swapInAmt = this.binarySearch(0, asset1Amount, objective)
-      let swapQuote = this.getSwapExactForQuote(this.asset1Id, swapInAmt)
-      let swapOutAmt = swapQuote.asset2Delta
-      let poolQuote = this.getPoolQuote(asset1Amount - swapInAmt, asset2Amount + Math.floor(swapOutAmt * 0.999))
+      let swapOutAmt = this.binarySearch(0, asset1Amount, objective)
+      let swapQuote = this.getSwapForExactQuote(this.asset2Id, swapOutAmt)
+      let swapInAmt = swapQuote.asset1Delta
+      let asset1PoolQuote = this.getPoolQuote(this.asset1Id, asset1Amount - (-1 * swapInAmt) - 10)
+      let asset2PoolQuote = this.getPoolQuote(this.asset2Id, asset2Amount + swapOutAmt - 10)
+      let poolQuote = (asset1PoolQuote.lpDelta < asset2PoolQuote.lpDelta) ? asset1PoolQuote : asset2PoolQuote
       poolQuote.quoteType = PoolQuoteType.ZAP
-      poolQuote.zapAsset1Swap = -1 * swapInAmt
+      poolQuote.zapAsset1Swap = swapInAmt
       poolQuote.zapAsset2Swap = swapOutAmt
       poolQuote.iterations += swapQuote.iterations
       return poolQuote
     } else {
-      let objective = function (dy) {
-        let dx = this.getSwapExactForQuote(this.asset2Id, dy).asset1Delta
+      let objective = function (dx) {
+        let dy = this.getSwapForExactQuote(this.asset1Id, dx).asset2delta
         return (asset1Amount + dx) / (this.balance1 - dx) - (asset2Amount - dy) / (this.balance2 + dy) // new ratio must equal new input ratio
       }.bind(this)
-      let swapInAmt = this.binarySearch(0, asset2Amount, objective)
-      let swapQuote = this.getSwapExactForQuote(this.asset2Id, swapInAmt)
-      let swapOutAmt = swapQuote.asset1Delta
-      let poolQuote = this.getPoolQuote(asset1Amount + Math.floor(swapOutAmt * 0.999), asset2Amount - swapInAmt)
+      let swapOutAmt = this.binarySearch(0, asset2Amount, objective)
+      let swapQuote = this.getSwapForExactQuote(this.asset1Id, swapOutAmt)
+      let swapInAmt = swapQuote.asset2Delta
+      let asset1PoolQuote = this.getPoolQuote(this.asset1Id, asset1Amount + swapOutAmt - 10)
+      let asset2PoolQuote = this.getPoolQuote(this.asset2Id, asset2Amount - (-1 * swapInAmt) - 10)
+      let poolQuote = (asset1PoolQuote.lpDelta < asset2PoolQuote.lpDelta) ? asset1PoolQuote : asset2PoolQuote
       poolQuote.quoteType = PoolQuoteType.ZAP
-      poolQuote.zapAsset2Swap = -1 * swapInAmt
+      poolQuote.zapAsset2Swap = swapInAmt
       poolQuote.zapAsset1Swap = swapOutAmt
       poolQuote.iterations += swapQuote.iterations
       return poolQuote
