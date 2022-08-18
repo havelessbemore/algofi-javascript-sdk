@@ -407,23 +407,14 @@ export default class Pool {
     
     let asset1ImpliedLPTokens = Math.floor(asset1Amount * this.lpCirculation / this.balance1)
     let asset2ImpliedLPTokens = Math.floor(asset2Amount * this.lpCirculation / this.balance2)
-    
-    let excessAsset1Amount = 0
-    let excessAsset2Amount = 0
-    
-    if (asset1ImpliedLPTokens > asset2ImpliedLPTokens) { // asset2 constrained
-      excessAsset1Amount = asset1Amount - Math.floor(asset2ImpliedLPTokens * this.balance1 / this.lpCirculation)
-    } else { // asset1 constrained
-      excessAsset2Amount = asset2Amount - Math.floor(asset1ImpliedLPTokens * this.balance2 / this.lpCirculation)
-    }
-    
+
     // calculate swap amounts
     if (asset1ImpliedLPTokens > asset2ImpliedLPTokens) {
       let objective = function (dy) {
-        let dx = this.getSwapForExactQuote(this.asset2Id, dy).asset1delta
+        let dx = -1 * this.getSwapForExactQuote(this.asset2Id, dy).asset1Delta
         return (asset2Amount + dy) / (this.balance2 - dy) - (asset1Amount - dx) / (this.balance1 + dx) // new ratio must equal new input ratio
       }.bind(this)
-      let swapOutAmt = this.binarySearch(0, asset1Amount, objective)
+      let swapOutAmt = this.binarySearch(0, Math.min(asset1Amount, this.balance1), objective)
       let swapQuote = this.getSwapForExactQuote(this.asset2Id, swapOutAmt)
       let swapInAmt = swapQuote.asset1Delta
       let asset1PoolQuote = this.getPoolQuote(this.asset1Id, asset1Amount - (-1 * swapInAmt) - 10)
@@ -436,10 +427,10 @@ export default class Pool {
       return poolQuote
     } else {
       let objective = function (dx) {
-        let dy = this.getSwapForExactQuote(this.asset1Id, dx).asset2delta
+        let dy = -1 * this.getSwapForExactQuote(this.asset1Id, dx).asset2Delta
         return (asset1Amount + dx) / (this.balance1 - dx) - (asset2Amount - dy) / (this.balance2 + dy) // new ratio must equal new input ratio
       }.bind(this)
-      let swapOutAmt = this.binarySearch(0, asset2Amount, objective)
+      let swapOutAmt = this.binarySearch(0, Math.min(asset2Amount, this.balance2), objective)
       let swapQuote = this.getSwapForExactQuote(this.asset1Id, swapOutAmt)
       let swapInAmt = swapQuote.asset2Delta
       let asset1PoolQuote = this.getPoolQuote(this.asset1Id, asset1Amount + swapOutAmt - 10)
