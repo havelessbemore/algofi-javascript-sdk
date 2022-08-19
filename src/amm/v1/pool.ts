@@ -68,6 +68,7 @@ export class PoolQuote {
   public iterations: number
   public zapAsset1Swap: number
   public zapAsset2Swap: number
+  public zapBonus: number
   
   constructor(
     quoteType: PoolQuoteType,
@@ -76,7 +77,8 @@ export class PoolQuote {
     lpDelta: number,
     iterations: number,
     zapAsset1Swap: number = 0,
-    zapAsset2Swap: number = 0
+    zapAsset2Swap: number = 0,
+    zapBonus: number = 0
   ) {
     this.quoteType = quoteType
     this.asset1Delta = asset1Delta
@@ -85,6 +87,7 @@ export class PoolQuote {
     this.iterations = iterations
     this.zapAsset1Swap = zapAsset1Swap
     this.zapAsset2Swap = zapAsset2Swap
+    this.zapBonus = zapBonus
   }
 }
 
@@ -424,6 +427,9 @@ export default class Pool {
       poolQuote.zapAsset1Swap = swapInAmt
       poolQuote.zapAsset2Swap = swapOutAmt
       poolQuote.iterations += swapQuote.iterations
+      let initialLPPrice = (this.balance1 + this.balance2) / this.lpCirculation
+      let actualLPPrice = (asset1Amount + asset2Amount) / poolQuote.lpDelta
+      poolQuote.zapBonus = (initialLPPrice - actualLPPrice) / initialLPPrice
       return poolQuote
     } else {
       let objective = function (dx) {
@@ -440,6 +446,9 @@ export default class Pool {
       poolQuote.zapAsset2Swap = swapInAmt
       poolQuote.zapAsset1Swap = swapOutAmt
       poolQuote.iterations += swapQuote.iterations
+      let initialLPPrice = (this.balance1 + this.balance2) / this.lpCirculation
+      let actualLPPrice = (asset1Amount + asset2Amount) / poolQuote.lpDelta
+      poolQuote.zapBonus = (initialLPPrice - actualLPPrice) / initialLPPrice
       return poolQuote
     }
   }
