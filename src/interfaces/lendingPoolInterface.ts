@@ -227,6 +227,7 @@ export default class LendingPoolInterface {
       quote.iterations,
       this.market1.bAssetToUnderlying(quote.zapAsset1Swap).amount,
       this.market2.bAssetToUnderlying(quote.zapAsset2Swap).amount,
+      quote.zapBonus
     )
   }
 

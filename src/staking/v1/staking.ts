@@ -389,7 +389,7 @@ export default class Staking {
         appArgs: [enc.encode(STAKING_STRINGS.claim_rewards)],
         accounts: [user.staking.v1.userStakingStates[this.managerAppId].storageAddress],
         suggestedParams: params,
-        foreignAssets: [this.rewardsAssetId, this.rewardsSecondaryAssetId],
+        foreignAssets: (this.rewardsAssetId != 1) ? [this.rewardsAssetId] : [this.rewardsSecondaryAssetId],
         rekeyTo: undefined
       })
     )
