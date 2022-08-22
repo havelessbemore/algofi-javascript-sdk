@@ -488,7 +488,7 @@ export default class Pool {
           encodeUint64(getValidatorIndex(this.poolType))
         ],
         accounts: undefined,
-        foreignApps: [this.ammClient.managerAppId],
+        foreignApps: [this.managerAppId],
         foreignAssets: undefined,
         rekeyTo: undefined
       })
@@ -508,7 +508,7 @@ export default class Pool {
     const transactions = []
 
     // fund manager
-    transactions.push(getPaymentTxn(params, user.address, getApplicationAddress(this.ammClient.managerAppId), ALGO_ASSET_ID, 400000))
+    transactions.push(getPaymentTxn(params, user.address, getApplicationAddress(this.managerAppId), ALGO_ASSET_ID, 400000))
 
     // fund logic sig
     transactions.push(getPaymentTxn(params, user.address, this.logicSig.address(), ALGO_ASSET_ID, 450000))
@@ -518,7 +518,7 @@ export default class Pool {
     transactions.push(
       algosdk.makeApplicationOptInTxnFromObject({
         from: this.logicSig.address(),
-        appIndex: this.ammClient.managerAppId,
+        appIndex: this.managerAppId,
         suggestedParams: params,
         appArgs: [
           encodeUint64(this.asset1Id),
@@ -545,7 +545,7 @@ export default class Pool {
         suggestedParams: params,
         appArgs: [TEXT_ENCODER.encode(POOL_STRINGS.initialize_pool)],
         accounts: undefined,
-        foreignApps: [this.ammClient.managerAppId],
+        foreignApps: [this.managerAppId],
         foreignAssets: this.asset1Id === 1 ? [this.asset2Id] : [this.asset1Id, this.asset2Id],
         rekeyTo: undefined
       })
@@ -567,9 +567,9 @@ export default class Pool {
       transactions.push(getPaymentTxn(params, user.address, user.address, this.lpAssetId, 0))
     }
     
-    transactions.push(getPaymentTxn(params, user.address, user.address, this.asset1Id, -1 * quote.asset1Delta))
+    transactions.push(getPaymentTxn(params, user.address, this.address, this.asset1Id, -1 * quote.asset1Delta))
     
-    transactions.push(getPaymentTxn(params, user.address, user.address, this.asset2Id, -1 * quote.asset2Delta))
+    transactions.push(getPaymentTxn(params, user.address, this.address, this.asset2Id, -1 * quote.asset2Delta))
     
     params.fee = 3000 + 1000 * quote.iterations
     transactions.push(
@@ -582,7 +582,7 @@ export default class Pool {
           encodeUint64(maximumSlippage)
         ],
         accounts: undefined,
-        foreignApps: [this.ammClient.managerAppId],
+        foreignApps: [this.managerAppId],
         foreignAssets: [this.lpAssetId],
         rekeyTo: undefined
       })
@@ -598,7 +598,7 @@ export default class Pool {
           TEXT_ENCODER.encode(POOL_STRINGS.redeem_pool_asset1_residual),
         ],
         accounts: undefined,
-        foreignApps: [this.ammClient.managerAppId],
+        foreignApps: [this.managerAppId],
         foreignAssets: undefined,
         rekeyTo: undefined
       })
@@ -650,7 +650,7 @@ export default class Pool {
           TEXT_ENCODER.encode(POOL_STRINGS.burn_asset1_out),
         ],
         accounts: undefined,
-        foreignApps: [this.ammClient.managerAppId],
+        foreignApps: [this.managerAppId],
         foreignAssets: undefined,
         rekeyTo: undefined
       })
@@ -699,7 +699,7 @@ export default class Pool {
       transactions.push(getPaymentTxn(params, user.address, user.address, outputAssetId, 0))
     }
     
-    transactions.push(getPaymentTxn(params, user.address, user.address, inputAssetId, -1 * inputAmount))
+    transactions.push(getPaymentTxn(params, user.address, this.address, inputAssetId, -1 * inputAmount))
     
     params.fee = 2000 + 1000 * quote.iterations
     transactions.push(
@@ -714,7 +714,7 @@ export default class Pool {
           encodeUint64(minOutputAmount)
         ],
         accounts: undefined,
-        foreignApps: [this.ammClient.managerAppId],
+        foreignApps: [this.managerAppId],
         foreignAssets: [outputAssetId],
         rekeyTo: undefined
       })
@@ -747,7 +747,13 @@ export default class Pool {
     maxSlippage: number = 0.005,
     addToUserCollateral: boolean = true
   ): Promise<Transaction[]> {
-    let swapQuote = new PoolQuote(PoolQuoteType.SWAP_EXACT_FOR, quote.zapAsset1Swap, quote.zapAsset2Swap, 0, Math.ceil(quote.iterations / 2)) 
+    let swapQuote = new PoolQuote(
+      PoolQuoteType.SWAP_FOR_EXACT,
+      quote.zapAsset1Swap,
+      quote.zapAsset2Swap,
+      0,
+      Math.ceil(quote.iterations / 2)
+    ) 
     let swapTxns = await this.getSwapTxns(user, swapQuote, maxSlippage)
    
     let poolQuote = new PoolQuote(PoolQuoteType.POOL, quote.asset1Delta, quote.asset2Delta, quote.lpDelta, Math.floor(quote.iterations / 2))
