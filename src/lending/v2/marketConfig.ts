@@ -39,6 +39,8 @@ export const MarketConfigs = {
     new MarketConfig(818190205, 312769, 818190568, MarketType.STANDARD), // USDT
     new MarketConfig(841145020, 841126810, 841157954, MarketType.STBL), // STBL2
     new MarketConfig(841194726, 841171328, 841462373, MarketType.LP), // bUSDC-bSTBL2 LP
+    new MarketConfig(849556509, 842179393, 849576890, MarketType.STANDARD), // wETH
+    new MarketConfig(849556807, 846904356, 849581529, MarketType.STANDARD), // wUSDC
   ],
   [Network.TESTNET]: [
     new MarketConfig(104193717, 1, 104193939, MarketType.STANDARD), // ALGO
