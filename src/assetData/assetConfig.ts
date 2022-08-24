@@ -42,6 +42,11 @@ export const AssetConfigs = {
     818190568: new AssetConfig("AF-BANK-USDT-STANDARD", "AF-BANK", 818190568, 6, undefined),
     841126810: new AssetConfig("STBL2", "STBL2", 841126810, 6, undefined),
     841157954: new AssetConfig("AF-BANK_STBL2-STABLE", "AF-BANK", 841157954, 6, undefined),
+    842179393: new AssetConfig("wETH", "wETH", 842179393, 8, undefined),
+    849576890: new AssetConfig("AF-BANK-WETH-STANDARD", "AF-BANK", 849576890, 6, undefined),
+    846904356: new AssetConfig("wUSDC", "wUSDC", 846904356, 6, undefined),
+    849581529: new AssetConfig("AF-BANK-wUSDC-STANDARD", "AF-BANK", 849581529, 6, undefined),
+
     // LP collateral
     841171328: new AssetConfig("AF-USDC-STBL2-NANO-LP", "AF-POOL", 841171328, 6, undefined), // bUSDC bSTBL2 LP
     841462373: new AssetConfig("AF-BANK-AF-POOL-LP", "AF-BANK", 841462373, 6, undefined), // bank bUSDC bSTBL2 LP
