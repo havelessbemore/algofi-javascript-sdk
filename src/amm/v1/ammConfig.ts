@@ -19,13 +19,14 @@ export enum PoolType {
   LOW_FEE = 0,
   HIGH_FEE = 1,
   NANO = 2,
-  MOVING_RATIO_NANO = 3
+  MOVING_RATIO_NANO = 3,
+  LOW_FEE_LENDING = 4
 }
 
 // SWAP FEES
 
 export function getSwapFee(poolType: PoolType): number {
-  if (poolType == PoolType.LOW_FEE) {
+  if (poolType == PoolType.LOW_FEE || poolType == PoolType.LOW_FEE_LENDING) {
     return 0.0025
   } else if (poolType == PoolType.HIGH_FEE) {
     return 0.0075
@@ -37,7 +38,7 @@ export function getSwapFee(poolType: PoolType): number {
 // VALIDATOR INDECIES
 
 export function getValidatorIndex(poolType: PoolType): number {
-  if (poolType == PoolType.LOW_FEE) {
+  if (poolType == PoolType.LOW_FEE || poolType == PoolType.LOW_FEE_LENDING) {
     return 0
   } else if (poolType == PoolType.HIGH_FEE) {
     return 1

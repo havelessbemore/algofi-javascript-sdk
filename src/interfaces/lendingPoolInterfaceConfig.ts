@@ -42,6 +42,7 @@ export default class LendingPoolInterfaceConfig {
 export const LendingPoolInterfaceConfigs = {
   [Network.MAINNET]: [
     new LendingPoolInterfaceConfig(841198034, 31566704, 841126810, 841171328, 818182048, 841145020, 841194726, 841170409, 841189050), // bUSDC / bSTBL2
+    new LendingPoolInterfaceConfig(855733857, 1, 841126810, 855717054, 818179346, 841145020, 855731374, 855716333, 841189050), // bALGO / bSTBL2
   ],
   [Network.TESTNET]: [
     new LendingPoolInterfaceConfig(104532133, 104194013, 104210500, 104228491, 104207076, 104213311, 104238373, 104228342, 104240608), // bUSDC / bSTBL2

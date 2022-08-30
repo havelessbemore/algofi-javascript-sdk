@@ -461,8 +461,8 @@ export default class Pool {
     if (this.isCreated()) {
       throw new Error("Pool already active cannot generate create pool txn")
     }
-    if (this.poolType === PoolType.NANO || this.poolType == PoolType.MOVING_RATIO_NANO) {
-      throw new Error("Nanoswap pool cannot generate create pool txn")
+    if (this.poolType === PoolType.NANO || this.poolType == PoolType.MOVING_RATIO_NANO || this.poolType == PoolType.LOW_FEE_LENDING) {
+      throw new Error("Nanoswap or Lending pool cannot generate create pool txn")
     }
     const params  = await getParams(this.algod)
     const transactions = []
