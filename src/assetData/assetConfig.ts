@@ -53,6 +53,7 @@ export const AssetConfigs = {
     841171328: new AssetConfig("AF-USDC-STBL2-NANO-LP", "AF-POOL", 841171328, 6, undefined), // bUSDC bSTBL2 LP
     841462373: new AssetConfig("AF-BANK-AF-POOL-LP", "AF-BANK", 841462373, 6, undefined), // bank bUSDC bSTBL2 LP
     855717054: new AssetConfig("AF-ALGO-STBL2-0.25%-LP", "AF-POOL", 855717054, 6, undefined), // bALGO bSTBL2 LP
+    856217307: new AssetConfig("AF-BANK-AF-POOL-LP", "AF-POOL", 856217307, 6, undefined), // bank bALGO bSTBL2 LP
 
     // v1 staking assets
     465865291 : new AssetConfig("STBL", "STBL", 465865291, 6, undefined),
