@@ -39,7 +39,7 @@ export const MarketConfigs = {
     new MarketConfig(818190205, 312769, 818190568, MarketType.STANDARD), // USDT
     new MarketConfig(841145020, 841126810, 841157954, MarketType.STBL), // STBL2
     new MarketConfig(841194726, 841171328, 841462373, MarketType.LP), // bUSDC-bSTBL2 LP
-    new MarketConfig(855731374, 855717054, 841462373, MarketType.LP), // bALGO-bSTBL2 LP
+    new MarketConfig(856183130, 855717054, 856217307, MarketType.LP), // bALGO-bSTBL2 LP
 
     // DEPRECATED
     // new MarketConfig(849556509, 842179393, 849576890, MarketType.STANDARD), // wETH
