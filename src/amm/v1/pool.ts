@@ -417,7 +417,7 @@ export default class Pool {
         let dx = -1 * this.getSwapForExactQuote(this.asset2Id, dy).asset1Delta
         return (asset2Amount + dy) / (this.balance2 - dy) - (asset1Amount - dx) / (this.balance1 + dx) // new ratio must equal new input ratio
       }.bind(this)
-      let swapOutAmt = this.binarySearch(0, Math.min(asset1Amount, this.balance1), objective)
+      let swapOutAmt = this.binarySearch(0, Math.min(Math.floor(asset1Amount*this.balance2/this.balance1), this.balance2), objective)
       let swapQuote = this.getSwapForExactQuote(this.asset2Id, swapOutAmt)
       let swapInAmt = swapQuote.asset1Delta
       let asset1PoolQuote = this.getPoolQuote(this.asset1Id, asset1Amount - (-1 * swapInAmt) - 10)
@@ -427,16 +427,18 @@ export default class Pool {
       poolQuote.zapAsset1Swap = swapInAmt
       poolQuote.zapAsset2Swap = swapOutAmt
       poolQuote.iterations += swapQuote.iterations
-      let initialLPPrice = (this.balance1 + this.balance2) / this.lpCirculation
-      let actualLPPrice = (asset1Amount + asset2Amount) / poolQuote.lpDelta
-      poolQuote.zapBonus = (initialLPPrice - actualLPPrice) / initialLPPrice
+      if (this.poolType === PoolType.NANO || this.poolType == PoolType.MOVING_RATIO_NANO) {
+        let initialLPPrice = (this.balance1 + this.balance2) / this.lpCirculation
+        let actualLPPrice = (asset1Amount + asset2Amount) / poolQuote.lpDelta
+        poolQuote.zapBonus = (initialLPPrice - actualLPPrice) / initialLPPrice
+      }
       return poolQuote
     } else {
       let objective = function (dx) {
         let dy = -1 * this.getSwapForExactQuote(this.asset1Id, dx).asset2Delta
         return (asset1Amount + dx) / (this.balance1 - dx) - (asset2Amount - dy) / (this.balance2 + dy) // new ratio must equal new input ratio
       }.bind(this)
-      let swapOutAmt = this.binarySearch(0, Math.min(asset2Amount, this.balance2), objective)
+      let swapOutAmt = this.binarySearch(0, Math.min(Math.floor(asset2Amount*this.balance1/this.balance2), this.balance1), objective)
       let swapQuote = this.getSwapForExactQuote(this.asset1Id, swapOutAmt)
       let swapInAmt = swapQuote.asset2Delta
       let asset1PoolQuote = this.getPoolQuote(this.asset1Id, asset1Amount + swapOutAmt - 10)
@@ -446,9 +448,11 @@ export default class Pool {
       poolQuote.zapAsset2Swap = swapInAmt
       poolQuote.zapAsset1Swap = swapOutAmt
       poolQuote.iterations += swapQuote.iterations
-      let initialLPPrice = (this.balance1 + this.balance2) / this.lpCirculation
-      let actualLPPrice = (asset1Amount + asset2Amount) / poolQuote.lpDelta
-      poolQuote.zapBonus = (initialLPPrice - actualLPPrice) / initialLPPrice
+      if (this.poolType === PoolType.NANO || this.poolType == PoolType.MOVING_RATIO_NANO) {
+        let initialLPPrice = (this.balance1 + this.balance2) / this.lpCirculation
+        let actualLPPrice = (asset1Amount + asset2Amount) / poolQuote.lpDelta
+        poolQuote.zapBonus = (initialLPPrice - actualLPPrice) / initialLPPrice
+      }
       return poolQuote
     }
   }
@@ -461,8 +465,8 @@ export default class Pool {
     if (this.isCreated()) {
       throw new Error("Pool already active cannot generate create pool txn")
     }
-    if (this.poolType === PoolType.NANO || this.poolType == PoolType.MOVING_RATIO_NANO) {
-      throw new Error("Nanoswap pool cannot generate create pool txn")
+    if (this.poolType === PoolType.NANO || this.poolType == PoolType.MOVING_RATIO_NANO || this.poolType == PoolType.LOW_FEE_LENDING) {
+      throw new Error("Nanoswap or Lending pool cannot generate create pool txn")
     }
     const params  = await getParams(this.algod)
     const transactions = []
