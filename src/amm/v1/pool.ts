@@ -642,7 +642,7 @@ export default class Pool {
       transactions.push(getPaymentTxn(params, user.address, user.address, this.asset2Id, 0))
     }
     
-    transactions.push(getPaymentTxn(params, user.address, user.address, this.lpAssetId, -1 * quote.lpDelta))
+    transactions.push(getPaymentTxn(params, user.address, this.address, this.lpAssetId, -1 * quote.lpDelta))
     
     params.fee = 2000 + 1000 * quote.iterations
     transactions.push(
