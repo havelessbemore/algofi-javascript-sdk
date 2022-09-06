@@ -655,7 +655,7 @@ export default class Pool {
         ],
         accounts: undefined,
         foreignApps: [this.managerAppId],
-        foreignAssets: undefined,
+        foreignAssets: [this.asset1Id],
         rekeyTo: undefined
       })
     )
