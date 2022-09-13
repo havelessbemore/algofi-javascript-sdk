@@ -35,7 +35,7 @@ export default class AMMClient {
   }
 
   async loadState() {
-    request
+    await request
       .get(getAnalyticsEndpoint(this.network) + "/pools?network=" + getNetworkName(this.network))
       .then(resp => {
         if (resp.status == 200) {
