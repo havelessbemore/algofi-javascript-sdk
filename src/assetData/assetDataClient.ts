@@ -35,22 +35,24 @@ export default class AssetDataClient {
 
   async loadState() {
     // load configured assets
-    for (const [assetId, assetConfig] of Object.entries(this.assetConfigs)) {
-      if (assetConfig.assetId in this.assets) { // do not overwrite already loaded data
-        continue
+    for (const assetConfig of Object.values(this.assetConfigs)) {
+      if (!(assetConfig.assetId in this.assets)) { // do not overwrite already loaded data
+        this.assets[assetConfig.assetId] = new AssetData(
+          assetConfig.assetId,
+          assetConfig.name,
+          assetConfig.unitName,
+          assetConfig.decimals,
+          assetConfig.defaultPrice
+        )
       }
-      this.assets[assetConfig.assetId] = new AssetData(
-        assetConfig.assetId,
-        assetConfig.name,
-        assetConfig.unitName,
-        assetConfig.decimals,
-        assetConfig.defaultPrice
-      )
     }
 
+    const endpoint = getAnalyticsEndpoint(this.network)
+    const network = getNetworkName(this.network)
+
     // load prices from amm analytics
-    request
-      .get(getAnalyticsEndpoint(this.network) + "/assets?network=" + getNetworkName(this.network))
+    const assetsPromise = request
+      .get(endpoint + "/assets?network=" + network)
       .then(resp => {
          if (resp.status == 200) {
            for (const assetInfo of resp.body) {
@@ -62,11 +64,11 @@ export default class AssetDataClient {
       })
       .catch(err => {
         console.log(err.message)
-      });
+      })
 
     // load lp prices from amm analytics
-    request
-      .get(getAnalyticsEndpoint(this.network) + "/ammLPTokens?network=" + getNetworkName(this.network))
+    const lpTokensPromise = request
+      .get(endpoint + "/ammLPTokens?network=" + network)
       .then(resp => {
          if (resp.status == 200) {
            for (const assetInfo of resp.body) {
@@ -78,7 +80,9 @@ export default class AssetDataClient {
       })
       .catch(err => {
         console.log(err.message)
-      });
+      })
+    
+    await Promise.all([assetsPromise, lpTokensPromise])
   }
 
   async loadLendingAssetState() {
